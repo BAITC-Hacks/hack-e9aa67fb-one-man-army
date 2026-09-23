@@ -62,7 +62,7 @@ have"), quoted via `docs/requirements.md`:
 | R-06 | HR view: lagging skills, no-step list, participation | `lib/domain/hr.ts`, `app/hr/page.tsx` | `tests/hr.test.ts` | ✅ |
 | R-07 | "No recommended step" with a reason code | `lib/domain/recommend.ts` (`NoStepReason`) | `tests/engine.test.ts` (fixture F-05) | ✅ |
 | R-08 | Beats single-factor baselines on trap profiles | `lib/rules/scoring.ts`, fixtures `data/fixtures/trap-F01..F05` | `tests/engine.test.ts` (F-01..F-05 assertions) | ✅ |
-| R-09 | Import new profiles/history via UI **and** CLI | `lib/data/import.ts` (validation, upsert, atomic overlay write) | none yet | ⚠️ partial — core import logic exists; no route, UI page or CLI wires it up yet, so a judge cannot invoke it. See [Known limitations](#19-known-limitations) |
+| R-09 | Import new profiles/history via UI (HR-only) | `lib/data/import.ts`, `app/api/hr/import/route.ts`, `app/hr/import/page.tsx` | `tests/import.test.ts` | ✅ — HR-only, per-row validated, 5 MB/file cap, atomic overlay write, audited, no restart. See [Known limitations](#19-known-limitations) for the skills.json role_profiles gap |
 | R-10 | Latency: UI ≤ 2 s, AI ≤ 10 s with 8 s fallback | `lib/ai/explain.ts` (`AbortSignal` timeout → template) | `tests/explain.test.ts` | ⚠️ partial — timeout/fallback exists; no dedicated timing benchmark test |
 | R-11 | Explainability: visible trace + progress formula | `components/TraceView.tsx`, `lib/rules/engine.ts` | `tests/engine.test.ts`; visible in UI | ✅ |
 | R-15 / R-16 | Employee/HR role separation, fails closed, no cross-employee data | `lib/auth/session.ts`, route guards | `tests/authz.test.ts` | ✅ |
@@ -86,8 +86,9 @@ first, then follow these steps.
 3. The recommendation panel shows **1–3 cards**. **Expected:** each card has an
    expandable trace with **≥ 3 distinct factor kinds** (e.g. grade,
    skill_gap, next_level_requirement, participation_history), each with a
-   concrete number, plus a rule pass/fail list and the score. The top pick is a
-   System Design event, not the lowest raw skill on the profile.
+   concrete number, plus a rule pass/fail list and the score. On the seeded
+   data the top pick is **"Architecture Review Mentoring"** (System Design,
+   critical for Senior), not the lowest raw skill on the profile.
 4. Click **Complete** on that recommendation. **Expected:** a before → after
    panel shows System Design moving via `min(level + gain, max_level)`, the
    trajectory gap shrinks, and the recommendation list refreshes.
@@ -100,11 +101,18 @@ first, then follow these steps.
    recommendation on each fixture differs from both the "lowest skill" and
    "largest raw gap" baselines — the failure mode the case brief names
    explicitly.
-7. **Jury profile upload:** the case brief states the jury uploads test
-   profiles at the defense in the dataset's own JSON/CSV shape. This import
-   path (`lib/data/import.ts`, `app/hr/import`, `app/api/hr/import`,
-   `pnpm data:import`) is **planned in `docs/plan.md` (task T5) but not yet
-   built** — see [Known limitations](#19-known-limitations) for the workaround.
+7. **Jury profile upload (R-09):** log out, log in as **HR** → open
+   `/hr/import` → upload `data/fixtures/trap-F01.json` in the **employees**
+   field and `data/fixtures/trap-F01.csv` in the **activity_history** field →
+   submit. **Expected:** a per-row report (accepted/updated counts, and any
+   row error as `{file, row, field, message}`); this fixture has zero errors.
+   Log out and log in as employee **T9001** (the id the fixture uses).
+   **Expected:** the profile and its recommendations appear immediately —
+   no restart, because the import invalidates the in-memory dataset cache.
+   Limits: HR-only (fails closed for anyone else), 5 MB per file, every row
+   schema- and reference-validated (unknown employee/event/skill ids and bad
+   id formats are rejected row-by-row, valid rows still import), and the
+   action is recorded in the audit log.
 
 ## 6. Architecture
 
@@ -301,16 +309,15 @@ dataset — was written during the competition; commit history is the evidence.
 
 ## 19. Known limitations
 
-- **R-09, jury profile upload is not usable end-to-end yet.**
-  `lib/data/import.ts` implements the validation/upsert logic, but
-  `app/api/hr/import`, `app/hr/import`, and `scripts/import.mjs` (referenced by
-  the `pnpm data:import` script in `package.json`) do not exist yet in this
-  repository, so there is no route, page or CLI a judge can actually run. The
-  documented workaround: set `DATASET_DIR` to a folder
-  containing the jury's `employees.json`/`activity_history.csv` in the same
-  schema as `data/seed/`, and restart the app — `lib/data/load.ts` resolves
-  `DATASET_DIR` before falling back to the committed seed. This requires a
-  restart, unlike the planned live-upload UI in `docs/plan.md` (task T5).
+- **R-09, uploaded `skills.json` `role_profiles` are not yet applied by the
+  loader.** `importFiles()` (`lib/data/import.ts`) validates and stores
+  uploaded `skills` and `role_profiles` rows in the overlay, but
+  `lib/data/load.ts`'s merge only reads back `employees`, `history`, `events`
+  and `skills` from the overlay — a newly uploaded `role_profiles` row is
+  accepted (and shows in the report) but not yet consulted when evaluating
+  eligibility. Uploading `employees`/`activity_history`/`events`/`skills`
+  against existing role profiles (the documented main-scenario path) works
+  end to end with no restart.
 - **R-10 has no dedicated latency benchmark test.** The 8-second AI timeout and
   deterministic-template fallback exist and are covered by
   `tests/explain.test.ts`, but p95 response time is not separately measured.
@@ -332,7 +339,7 @@ dataset — was written during the competition; commit history is the evidence.
 
 | Step | Trigger | Change |
 | --- | --- | --- |
-| Build the import path (T5 in `docs/plan.md`) | any real upload need | `lib/data/import.ts` + `app/api/hr/import`, already scoped in `docs/architecture.md` §1 |
+| Apply uploaded `role_profiles` | jury wants to upload new role/grade requirements, not just profiles | extend `ImportsOverlay` and its merge in `lib/data/load.ts` to include `role_profiles` (schema and write path already exist in `lib/data/import.ts`) |
 | Postgres | > 200 employees or concurrent writes | swap `lib/store/jsonl.ts`, keep `getDataset()`'s interface |
 | Real identity | production pilot at Halyk | replace the demo login picker with SSO behind the same `lib/auth/session.ts` contract |
 | Manager consent flow | production pilot | the permission matrix is already documented in `docs/domain.md`; add the consent toggle and a manager route |
@@ -362,6 +369,6 @@ each of these is a contained change.
 nvm use && pnpm install --frozen-lockfile && pnpm build && pnpm start
 ```
 
-**Известное ограничение.** Загрузка тестовых профилей жюри через интерфейс
-(R-09) пока не реализована; временное решение — переменная `DATASET_DIR`. Тексты
-на kk/ru — пока заглушки (копия en).
+**Известное ограничение.** Загрузка тестовых профилей жюри через `/hr/import`
+(R-09, только для роли HR) работает; загруженные `role_profiles` пока не
+применяются загрузчиком. Тексты на kk/ru — пока заглушки (копия en).
