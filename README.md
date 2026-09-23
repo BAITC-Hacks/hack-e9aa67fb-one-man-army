@@ -348,7 +348,7 @@ pnpm dev
 
 Then follow [§5](#5-main-user-scenario--procedure-for-checking-it).
 
-![Employee E0028 profile: trajectory, top recommendation with grounded rationale, and grade-transition path](docs/assets/employee-e0028.png)
+![Employee E0137 profile: trajectory, top recommendation with grounded rationale, and grade-transition path](docs/assets/employee-e0137.png)
 
 ![HR dashboard: lagging skills, no-step list with reason codes, participation by event](docs/assets/hr-dashboard.png)
 

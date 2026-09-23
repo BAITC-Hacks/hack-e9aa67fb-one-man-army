@@ -91,7 +91,7 @@ export const eligibilityRules: Rule<EligFacts>[] = [
   },
   {
     id: "not-dismissed",
-    description: "The employee dismissed this recommendation ('not interested').",
+    description: "The employee has not dismissed this event ('not useful for me').",
     evaluate: ({ facts }) =>
       facts.dismissedEventIds.includes(facts.event.event_id) ? { status: "fail", detail: "dismissed by employee" } : { status: "pass" },
   },
