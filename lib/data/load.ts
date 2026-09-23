@@ -1,91 +1,23 @@
 /**
- * Minimal real dataset loader (Batch 0).
+ * Dataset loader (docs/architecture.md §1).
  *
- * T1 hardens this (extracts `lib/data/schemas.ts` + `lib/data/csv.ts`, adds the
- * `imports.json` / `completions.jsonl` / `dismissals.jsonl` overlay merge from
- * docs/architecture.md §1). For now this file only needs to load and cache a
- * real dataset so other Batch 1 tasks can develop against real shapes instead
- * of guessing.
- *
- * Resolution order (docs/architecture.md §1, §8): `DATASET_DIR` env var, then
- * `docs/task/career_quest_dataset/` if present, then the committed
- * `data/seed/` (synthetic, same schema).
+ * Resolution order: `DATASET_DIR` env var, then `docs/task/career_quest_dataset/`
+ * if present, then the committed `data/seed/` (synthetic, same schema). Then it
+ * merges overlays from the file store (`lib/store/jsonl.ts`, under `DATA_DIR`):
+ * `imports.json` (upsert employees by id, history by record_id, events/skills
+ * replace-by-id) -> `completions.jsonl` (in-app completions appended as history
+ * rows) -> `dismissals.jsonl` (a per-employee set). `invalidateDataset()` must be
+ * called after any mutation so the next read picks it up.
  */
 import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
-import { z } from "zod";
-
-export const Grade = z.enum(["Junior", "Middle", "Senior", "Lead"]);
-export type Grade = z.infer<typeof Grade>;
-
-const SkillLevels = z.record(z.string(), z.number());
-
-export const Skill = z.object({
-  skill_id: z.string(),
-  name: z.string(),
-  type: z.enum(["hard", "soft"]),
-  category: z.string(),
-  description: z.string(),
-});
-export type Skill = z.infer<typeof Skill>;
-
-export const RoleProfile = z.object({
-  role: z.string(),
-  grade: Grade,
-  required_skills: SkillLevels,
-  critical_skills: z.array(z.string()),
-});
-export type RoleProfile = z.infer<typeof RoleProfile>;
-
-export const Employee = z.object({
-  employee_id: z.string(),
-  full_name: z.string(),
-  department: z.string(),
-  role: z.string(),
-  grade: Grade,
-  manager_id: z.string().nullable(),
-  hire_date: z.string(),
-  tenure_months: z.number(),
-  work_format: z.enum(["office", "hybrid", "remote"]),
-  preferred_language: z.enum(["kk", "ru", "en"]),
-  career_goal: z.object({ target_role: z.string(), target_grade: Grade }).nullable(),
-  skills: SkillLevels,
-  last_review_date: z.string(),
-});
-export type Employee = z.infer<typeof Employee>;
-
-export const EventSchema = z.object({
-  event_id: z.string(),
-  title: z.string(),
-  description: z.string(),
-  type: z.string(),
-  format: z.enum(["online", "offline", "self_paced"]),
-  duration_hours: z.number(),
-  mandatory: z.boolean(),
-  target_roles: z.array(z.string()),
-  target_grades: z.array(Grade),
-  develops_skills: z.array(
-    z.object({ skill_id: z.string(), gain: z.number().int().min(0), max_level: z.number().int().min(0).max(5) }),
-  ),
-  prerequisites: SkillLevels,
-  upcoming_sessions: z.array(z.string()),
-});
-export type Event = z.infer<typeof EventSchema>;
-
-export const HistoryRow = z.object({
-  record_id: z.string(),
-  employee_id: z.string(),
-  event_id: z.string(),
-  date: z.string(),
-  due_date: z.string().optional(),
-  status: z.enum(["completed", "in_progress", "dropped", "no_show", "declined", "overdue"]),
-  completion_pct: z.coerce.number().min(0).max(100),
-  score: z.coerce.number().optional(),
-  feedback_rating: z.coerce.number().int().min(1).max(5).optional(),
-  assigned_by: z.enum(["self", "manager", "hr"]),
-});
-export type HistoryRow = z.infer<typeof HistoryRow>;
+import type { z } from "zod";
+import { readJson, readJsonl } from "../store/jsonl";
+import { parseCsv, emptyToUndefined } from "./csv";
+import { DismissalRow, Employee, EventSchema, HistoryRow, RoleProfile, Skill, SkillsFile } from "./schemas";
+import type { Event } from "./schemas";
+export type { Grade, Employee, Event, HistoryRow, RoleProfile, Skill } from "./schemas";
 
 export interface Dataset {
   asOfDate: string;
@@ -94,6 +26,12 @@ export interface Dataset {
   employees: Employee[];
   events: Event[];
   history: HistoryRow[];
+  /**
+   * employee_id -> dismissed event_ids (the `dismissals.jsonl` overlay).
+   * Optional so a hand-built test `Dataset` (as used by other Batch 1 tasks)
+   * does not have to supply it; readers should do `ds.dismissals?.[id] ?? []`.
+   */
+  dismissals?: Record<string, string[]>;
 }
 
 function resolveDatasetDir(): string {
@@ -122,51 +60,6 @@ async function readTextFile(path: string): Promise<string> {
   }
 }
 
-/** A ~40-line RFC-4180-ish CSV parser: header row, quoted fields, no dependency. */
-export function parseCsv(text: string): Record<string, string>[] {
-  const rows: string[][] = [];
-  let field = "";
-  let row: string[] = [];
-  let inQuotes = false;
-  for (let i = 0; i < text.length; i++) {
-    const ch = text[i];
-    if (inQuotes) {
-      if (ch === '"') {
-        if (text[i + 1] === '"') {
-          field += '"';
-          i++;
-        } else inQuotes = false;
-      } else field += ch;
-    } else if (ch === '"') {
-      inQuotes = true;
-    } else if (ch === ",") {
-      row.push(field);
-      field = "";
-    } else if (ch === "\n" || ch === "\r") {
-      if (ch === "\r" && text[i + 1] === "\n") i++;
-      row.push(field);
-      field = "";
-      if (row.length > 1 || row[0] !== "") rows.push(row);
-      row = [];
-    } else {
-      field += ch;
-    }
-  }
-  if (field.length > 0 || row.length > 0) {
-    row.push(field);
-    rows.push(row);
-  }
-  const header = rows[0];
-  if (!header) return [];
-  return rows.slice(1).map((cells) => {
-    const record: Record<string, string> = {};
-    header.forEach((key, idx) => {
-      record[key] = cells[idx] ?? "";
-    });
-    return record;
-  });
-}
-
 /** Accepts either `{meta, <key>: [...]}` or a bare array. */
 function unwrap(raw: unknown, key: string): unknown[] {
   if (Array.isArray(raw)) return raw;
@@ -177,17 +70,6 @@ function unwrap(raw: unknown, key: string): unknown[] {
   return [];
 }
 
-/**
- * CSV cells are always strings, even when empty. An empty cell must become
- * `undefined` before validation, or `z.coerce.number()` on an optional column
- * turns "" into 0 - which then fails a `min(1)` and rejects the whole row.
- */
-function emptyToUndefined(row: Record<string, string>): Record<string, string | undefined> {
-  const out: Record<string, string | undefined> = {};
-  for (const [key, value] of Object.entries(row)) out[key] = value === "" ? undefined : value;
-  return out;
-}
-
 /** Validates rows one by one so a single bad row never rejects the file. */
 function parseEach<T extends z.ZodType>(schema: T, rows: unknown[]): z.infer<T>[] {
   const out: z.infer<T>[] = [];
@@ -196,6 +78,23 @@ function parseEach<T extends z.ZodType>(schema: T, rows: unknown[]): z.infer<T>[
     if (result.success) out.push(result.data);
   }
   return out;
+}
+
+function byId<T extends { employee_id?: string; event_id?: string; skill_id?: string; record_id?: string }>(
+  rows: T[],
+  idOf: (row: T) => string,
+): Map<string, T> {
+  const map = new Map<string, T>();
+  for (const row of rows) map.set(idOf(row), row);
+  return map;
+}
+
+/** The shape `import.ts` (T5) writes to `imports.json`. Optional at this stage. */
+interface ImportsOverlay {
+  employees?: unknown[];
+  history?: unknown[];
+  events?: unknown[];
+  skills?: unknown[];
 }
 
 let cached: Dataset | null = null;
@@ -209,26 +108,65 @@ export async function getDataset(): Promise<Dataset> {
   const eventsRaw = await readJsonFile(join(dir, "events.json"));
   const historyText = await readTextFile(join(dir, "activity_history.csv"));
 
+  const skillsFile = SkillsFile.safeParse(skillsRaw);
   const asOfDate =
-    skillsRaw &&
-    typeof skillsRaw === "object" &&
-    "meta" in skillsRaw &&
-    skillsRaw.meta &&
-    typeof skillsRaw.meta === "object" &&
-    "as_of_date" in skillsRaw.meta &&
-    typeof (skillsRaw.meta as Record<string, unknown>).as_of_date === "string"
-      ? ((skillsRaw.meta as Record<string, unknown>).as_of_date as string)
+    skillsFile.success && skillsFile.data.meta?.as_of_date
+      ? skillsFile.data.meta.as_of_date
       : (process.env.AS_OF_DATE ?? new Date().toISOString().slice(0, 10));
 
-  const dataset: Dataset = {
-    asOfDate,
-    skills: parseEach(Skill, unwrap(skillsRaw, "skills")),
-    roleProfiles: parseEach(RoleProfile, unwrap(skillsRaw, "role_profiles")),
-    employees: parseEach(Employee, unwrap(employeesRaw, "employees")),
-    events: parseEach(EventSchema, unwrap(eventsRaw, "events")),
-    history: parseEach(HistoryRow, parseCsv(historyText).map(emptyToUndefined)),
-  };
+  let skills = parseEach(Skill, unwrap(skillsRaw, "skills"));
+  let roleProfiles = parseEach(RoleProfile, unwrap(skillsRaw, "role_profiles"));
+  let employees = parseEach(Employee, unwrap(employeesRaw, "employees"));
+  let events = parseEach(EventSchema, unwrap(eventsRaw, "events"));
+  let history = parseEach(HistoryRow, parseCsv(historyText).map(emptyToUndefined));
 
+  // --- overlay: imports.json (upsert employees by id, history by record_id,
+  //     events/skills replace-by-id). Optional: absent until T5 lands. ---
+  const importsOverlay = await readJson<ImportsOverlay | null>("imports.json", null);
+  if (importsOverlay) {
+    if (importsOverlay.employees) {
+      const merged = byId(employees, (e) => e.employee_id);
+      for (const row of parseEach(Employee, importsOverlay.employees)) merged.set(row.employee_id, row);
+      employees = [...merged.values()];
+    }
+    if (importsOverlay.history) {
+      const merged = byId(history, (h) => h.record_id);
+      for (const row of parseEach(HistoryRow, importsOverlay.history)) merged.set(row.record_id, row);
+      history = [...merged.values()];
+    }
+    if (importsOverlay.events) {
+      const merged = byId(events, (e) => e.event_id);
+      for (const row of parseEach(EventSchema, importsOverlay.events)) merged.set(row.event_id, row);
+      events = [...merged.values()];
+    }
+    if (importsOverlay.skills) {
+      const merged = byId(skills, (s) => s.skill_id);
+      for (const row of parseEach(Skill, importsOverlay.skills)) merged.set(row.skill_id, row);
+      skills = [...merged.values()];
+    }
+  }
+
+  // --- overlay: completions.jsonl (in-app completions, appended as history
+  //     rows: status completed, assigned_by self, date as_of_date). ---
+  const completions = await readJsonl<unknown>("completions.jsonl");
+  if (completions.length > 0) {
+    const merged = byId(history, (h) => h.record_id);
+    for (const row of parseEach(HistoryRow, completions)) merged.set(row.record_id, row);
+    history = [...merged.values()];
+  }
+
+  // --- overlay: dismissals.jsonl (a per-employee set). ---
+  const dismissalRows = await readJsonl<unknown>("dismissals.jsonl");
+  const dismissals: Record<string, string[]> = {};
+  for (const raw of dismissalRows) {
+    const parsed = DismissalRow.safeParse(raw);
+    if (!parsed.success) continue;
+    const list = dismissals[parsed.data.employee_id] ?? [];
+    if (!list.includes(parsed.data.event_id)) list.push(parsed.data.event_id);
+    dismissals[parsed.data.employee_id] = list;
+  }
+
+  const dataset: Dataset = { asOfDate, skills, roleProfiles, employees, events, history, dismissals };
   cached = dataset;
   return dataset;
 }
