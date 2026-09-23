@@ -10,7 +10,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
+    "start": "SESSION_SECRET=\"${SESSION_SECRET:-demo-session-secret-insecure-change-me}\" next start",
     "lint": "biome lint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",

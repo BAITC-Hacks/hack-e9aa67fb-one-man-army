@@ -26,12 +26,17 @@ WORKDIR /app
 # and Docker sets HOSTNAME to the container id, which resolves to the container's
 # own IP. The server would then listen ONLY on that address, so nothing inside
 # the container could reach it on localhost and the HEALTHCHECK could never pass.
+# SESSION_SECRET here is a DEMO-ONLY placeholder, not a real secret - it lets
+# the image run standalone (no compose file) since NODE_ENV=production
+# refuses to sign session cookies without one (lib/auth/session.ts). Override
+# with a real value (`docker run -e SESSION_SECRET=...`) for any non-demo use.
 ENV NODE_ENV=production \
     NEXT_TELEMETRY_DISABLED=1 \
     PORT=3000 \
     MODEL_REF=mock:demo \
     DATA_DIR=/app/data \
-    HOSTNAME=0.0.0.0
+    HOSTNAME=0.0.0.0 \
+    SESSION_SECRET=demo-session-secret-insecure-change-me
 
 RUN useradd --create-home --shell /bin/bash app
 COPY --from=build --chown=app:app /app/.next/standalone ./

@@ -10,6 +10,10 @@ services:
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
       DEFAULT_LOCALE: ${DEFAULT_LOCALE:-ru}
+      # DEMO ONLY - not a real secret. NODE_ENV=production refuses to sign
+      # session cookies without one (lib/auth/session.ts); override with a
+      # real value for any non-demo deployment.
+      SESSION_SECRET: ${SESSION_SECRET:-demo-session-secret-insecure-change-me}
     volumes:
       - demo-data:/app/data
     healthcheck:
