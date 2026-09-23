@@ -58,18 +58,20 @@ async function logout(page: Page) {
   await expect(page).toHaveURL(/\/login$/);
 }
 
-test("golden path: E0028 assessment, top recommendation, complete, HR view", async ({ page }) => {
-  await loginAsEmployee(page, "E0028");
+test("golden path: E0137 assessment, top recommendation, complete, HR view", async ({ page }) => {
+  await loginAsEmployee(page, "E0137");
 
-  // Step 2: System Design assessed 2 -> effective 3, on the profile's own gap table
-  // (kit values: docs/task/career_quest_dataset/employees.json E0028).
+  // Step 2: System Design assessed 2, effective 2 (critical gap), on the
+  // profile's own gap table (kit values: docs/task/career_quest_dataset/
+  // employees.json E0137). This is the row the top recommendation closes.
   const gapsSection = page.locator("section", { has: page.getByRole("heading", { name: "Skill gaps toward the target" }) });
   const sdRow = gapsSection.getByRole("row", { name: /System Design/ });
   await expect(sdRow).toBeVisible();
   await expect(sdRow.locator("td").nth(1)).toHaveText("2"); // assessed
-  await expect(sdRow.locator("td").nth(2)).toHaveText("3"); // effective
+  await expect(sdRow.locator("td").nth(2)).toHaveText("2"); // effective, before completion
 
-  // Step 3: 1-3 recommendation cards.
+  // Step 3: 1-3 recommendation cards (E0137 has 3: a critical-gap closer,
+  // a self-paced cert, and a format-switch alternative - docs/review-final-2.md #3).
   const recsSection = page.locator("section", { has: page.getByRole("heading", { name: "Recommended next steps" }) });
   const cards = recsSection.locator("> ul > li");
   const countBefore = await cards.count();
@@ -89,12 +91,23 @@ test("golden path: E0028 assessment, top recommendation, complete, HR view", asy
   await expect(topCard.locator("ul li").first()).toBeVisible(); // rule pass/fail list
   await expect(topCard.getByText("Demo model (offline, not a live AI)")).toBeVisible();
 
-  // Step 4: Complete -> observable change: the completed step leaves the
-  // list and the list refreshes with what remains (not a hard-coded next
-  // title, since which event ranks next depends on the scoring engine).
+  // Step 4: Complete -> observable change: the completed step's heading
+  // leaves the list, and the list either shrinks or refreshes with a
+  // different top card (which event ranks next depends on the scoring
+  // engine, so this does not assert a hard-coded next title).
   await topCard.getByRole("button", { name: "Mark complete" }).click();
   await expect(recsSection.getByRole("heading", { name: topTitle! })).toHaveCount(0);
-  await expect(cards).toHaveCount(Math.max(countBefore - 1, 0));
+  const countAfter = await cards.count();
+  if (countAfter === countBefore) {
+    const newTopTitle = await cards.first().getByRole("heading").textContent();
+    expect(newTopTitle).not.toBe(topTitle);
+  } else {
+    expect(countAfter).toBe(Math.max(countBefore - 1, 0));
+  }
+
+  // Step 4b: the closed gap's row changes - System Design effective moves
+  // from 2 to 3 (still below the required 4, but the completion registered).
+  await expect(sdRow.locator("td").nth(2)).toHaveText("3");
 
   // Step 5: log out, log in as HR, three panels.
   await logout(page);
