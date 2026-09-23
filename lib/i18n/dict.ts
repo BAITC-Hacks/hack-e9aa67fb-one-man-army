@@ -231,6 +231,7 @@ const en = {
   "recs.blockedReason.useful-gain": "No further gain available",
   "recs.blockedReason.not-dismissed": "Dismissed by you",
   "recs.blockedReason.score-threshold": "Low fit",
+  "recs.blockedReason.no-gap": "Doesn't close a gap for you right now",
   "recs.blockedCount": "{label} ({count})",
 } satisfies Record<string, string>;
 
@@ -461,6 +462,7 @@ const ru: Dict = {
   "recs.blockedReason.useful-gain": "Дальнейший прирост недоступен",
   "recs.blockedReason.not-dismissed": "Отклонено вами",
   "recs.blockedReason.score-threshold": "Низкое соответствие",
+  "recs.blockedReason.no-gap": "Сейчас не закрывает ваших пробелов",
   "recs.blockedCount": "{label} ({count})",
 };
 
@@ -689,6 +691,7 @@ const kk: Dict = {
   "recs.blockedReason.useful-gain": "Одан әрі өсім жоқ",
   "recs.blockedReason.not-dismissed": "Сіз бас тарттыңыз",
   "recs.blockedReason.score-threshold": "Сәйкестігі төмен",
+  "recs.blockedReason.no-gap": "Қазір сіздің олқылықтарыңызды жаппайды",
   "recs.blockedCount": "{label} ({count})",
 };
 
