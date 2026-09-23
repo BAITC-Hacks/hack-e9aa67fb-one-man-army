@@ -14,7 +14,12 @@ SERVER_PID=""
 failures=0
 
 cleanup() {
-  [[ -n "$SERVER_PID" ]] && kill "$SERVER_PID" 2>/dev/null
+  if [[ -n "$SERVER_PID" ]]; then
+    # `pnpm start` spawns next-server as a child; stop the whole tree so the
+    # port is free for the next run.
+    pkill -P "$SERVER_PID" 2>/dev/null
+    kill "$SERVER_PID" 2>/dev/null
+  fi
   rm -rf "$WORK"
 }
 trap cleanup EXIT
