@@ -247,6 +247,43 @@ describe("no-step classification on the career-quest kit (docs/domain.md §3)", 
     expect(dropped?.failedRule).toBe("score-threshold");
   });
 
+  it("lowFit: LOW_FIT employees with a gap-closing eligible candidate get exactly one lowFit recommendation, noStep null", async () => {
+    const ds = await getDataset();
+    let lowFitCount = 0;
+    let noStepLowFitRemaining = 0;
+    for (const emp of ds.employees) {
+      const result = recommend(emp.employee_id, ds);
+      const lowFitRecs = result.recommendations.filter((r) => r.lowFit);
+      if (lowFitRecs.length > 0) {
+        lowFitCount += 1;
+        // Exactly one recommendation, and it is the lowFit one.
+        expect(result.recommendations.length).toBe(1);
+        expect(result.recommendations[0]?.lowFit).toBe(true);
+        expect(result.recommendations[0]?.score).toBeLessThanOrEqual(0);
+        expect(result.noStep).toBeNull();
+      }
+      if (result.noStep === "LOW_FIT") noStepLowFitRemaining += 1;
+    }
+    // Report the post-change distribution (kit has 200 employees): most of
+    // the ~36 former LOW_FIT cases now resolve to a single lowFit rec; any
+    // still under noStep=LOW_FIT have no candidate that actually closes a
+    // real gap (only eligible-but-irrelevant candidates), unaffected by
+    // this change.
+    expect(lowFitCount).toBeGreaterThan(0);
+    expect(lowFitCount + noStepLowFitRemaining).toBeGreaterThan(0);
+  });
+
+  it("nobody gets a lowFit recommendation alongside or instead of a normal (non-empty, non-lowFit) recommendation set", async () => {
+    const ds = await getDataset();
+    for (const emp of ds.employees) {
+      const result = recommend(emp.employee_id, ds);
+      const hasNormalRec = result.recommendations.some((r) => !r.lowFit);
+      const hasLowFitRec = result.recommendations.some((r) => r.lowFit);
+      expect(hasNormalRec && hasLowFitRec).toBe(false);
+      if (hasNormalRec) expect(result.recommendations.every((r) => !r.lowFit)).toBe(true);
+    }
+  });
+
   it("ALL_DONE, not DATA_INCOMPLETE: every event that could close a real gap was already completed", async () => {
     const ds = await getDataset();
     const result = recommend("E0093", ds);

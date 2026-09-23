@@ -254,6 +254,14 @@ const en = {
   "recs.blockedReason.score-threshold": "Low fit",
   "recs.blockedReason.no-gap": "Doesn't close a gap for you right now",
   "recs.blockedCount": "{label} ({count})",
+
+  "recs.lowFitPill": "Low fit",
+  "recs.lowFitCaution":
+    "This still closes a real skill gap, but it scored low overall - take it only if the format suits you. It's voluntary.",
+  "rationale.lowFitCautionCount":
+    "You skipped {count} similar session(s) before; take this one only if the format suits you - it's voluntary.",
+  "rationale.lowFitCautionGeneric":
+    "This step closes a real gap but scored low overall; take it only if the format suits you - it's voluntary.",
 } satisfies Record<string, string>;
 
 type Dict = { [K in keyof typeof en]: string };
@@ -506,6 +514,14 @@ const ru: Dict = {
   "recs.blockedReason.score-threshold": "Низкое соответствие",
   "recs.blockedReason.no-gap": "Сейчас не закрывает ваших пробелов",
   "recs.blockedCount": "{label} ({count})",
+
+  "recs.lowFitPill": "Низкое соответствие",
+  "recs.lowFitCaution":
+    "Это всё ещё закрывает реальный пробел в навыках, но общая оценка низкая - выбирайте, только если формат вам подходит. Это добровольно.",
+  "rationale.lowFitCautionCount":
+    "Ранее вы пропустили {count} похожих занятий; выбирайте этот шаг, только если формат вам подходит - это добровольно.",
+  "rationale.lowFitCautionGeneric":
+    "Этот шаг закрывает реальный пробел, но общая оценка низкая; выбирайте его, только если формат вам подходит - это добровольно.",
 };
 
 const kk: Dict = {
@@ -756,6 +772,14 @@ const kk: Dict = {
   "recs.blockedReason.score-threshold": "Сәйкестігі төмен",
   "recs.blockedReason.no-gap": "Қазір сіздің олқылықтарыңызды жаппайды",
   "recs.blockedCount": "{label} ({count})",
+
+  "recs.lowFitPill": "Сәйкестігі төмен",
+  "recs.lowFitCaution":
+    "Бұл әлі де нақты дағды олқылығын жабады, бірақ жалпы бағасы төмен - форматы өзіңізге қолайлы болса ғана таңдаңыз. Бұл ерікті.",
+  "rationale.lowFitCautionCount":
+    "Бұған дейін сіз {count} ұқсас сессияны өткізіп алдыңыз; форматы өзіңізге қолайлы болса ғана осы қадамды таңдаңыз - бұл ерікті.",
+  "rationale.lowFitCautionGeneric":
+    "Бұл қадам нақты олқылықты жабады, бірақ жалпы бағасы төмен; форматы өзіңізге қолайлы болса ғана таңдаңыз - бұл ерікті.",
 };
 
 export const dict: Record<Locale, Record<string, string>> = {

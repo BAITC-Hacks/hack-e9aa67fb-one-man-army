@@ -98,13 +98,26 @@ export function RecCard({
   return (
     <li
       className={`rounded-[var(--radius-lg)] border bg-[var(--color-surface)] p-4 shadow-[var(--shadow-card)] ${
-        topPick ? "border-[var(--color-gold)] border-2" : "border-[var(--color-line)]"
+        rec.lowFit
+          ? "border-[var(--color-line)]"
+          : topPick
+            ? "border-[var(--color-gold)] border-2"
+            : "border-[var(--color-line)]"
       }`}
     >
-      {topPick && (
-        <span className="mb-2 inline-flex items-center gap-1 rounded-[var(--radius-pill)] bg-[var(--color-gold)] px-2.5 py-1 text-xs font-semibold text-[var(--color-gold-ink)]">
-          {t(locale, "recs.bestNextStep")}
+      {rec.lowFit ? (
+        <span className="mb-2 inline-flex items-center gap-1 rounded-[var(--radius-pill)] bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-800">
+          {t(locale, "recs.lowFitPill")}
         </span>
+      ) : (
+        topPick && (
+          <span className="mb-2 inline-flex items-center gap-1 rounded-[var(--radius-pill)] bg-[var(--color-gold)] px-2.5 py-1 text-xs font-semibold text-[var(--color-gold-ink)]">
+            {t(locale, "recs.bestNextStep")}
+          </span>
+        )
+      )}
+      {rec.lowFit && (
+        <p className="mb-2 text-sm text-amber-800">{t(locale, "recs.lowFitCaution")}</p>
       )}
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>

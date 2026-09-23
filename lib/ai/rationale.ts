@@ -111,6 +111,23 @@ export function buildWhyLines(locale: Locale, title: string, factors: Factor[]):
   return lines.slice(0, 5);
 }
 
+/**
+ * The first line for a `lowFit` recommendation: an honest, neutrally-worded
+ * reason it scored low (mirrors F5/F6's own skip count when one fired),
+ * making clear the step is still optional. Prepended to `buildWhyLines`'
+ * factor-kind lines by the caller, so a lowFit explanation still cites >= 3
+ * factor kinds.
+ */
+export function buildLowFitCaution(locale: Locale, factors: Factor[]): string {
+  const f5 = factors.find((f) => f.code === "F5" && typeof f.raw === "number" && f.raw !== 0);
+  const f6 = factors.find((f) => f.code === "F6" && typeof f.raw === "number" && f.raw < 0);
+  const skipped = f5?.values.negativeRecords ?? f6?.values.skipped;
+  if (typeof skipped === "number" && skipped > 0) {
+    return tf(locale, "rationale.lowFitCautionCount", { count: skipped });
+  }
+  return t(locale, "rationale.lowFitCautionGeneric");
+}
+
 export function buildExpectedProgress(
   locale: Locale,
   title: string,

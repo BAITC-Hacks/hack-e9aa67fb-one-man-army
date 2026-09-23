@@ -93,6 +93,11 @@ export const Recommendation = z.object({
     z.object({ skill_id: z.string(), name: z.string().optional(), from: z.number(), to: z.number(), max_level: z.number() }),
   ),
   rules: z.array(RuleTraceEntry),
+  /** Additive, optional, backward compatible: set when this is the single
+   * best-scoring eligible/gap-closing candidate returned in place of a
+   * LOW_FIT noStep (every eligible candidate scored <= 0). Old consumers
+   * that never set it still validate. */
+  lowFit: z.boolean().optional(),
 });
 export type Recommendation = z.infer<typeof Recommendation>;
 

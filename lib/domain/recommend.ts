@@ -216,7 +216,7 @@ export function recommend(empId: string, ds: Dataset): RecommendationResult {
     if (onlySkill) claimedSingleSkills.add(onlySkill);
   }
 
-  const recommendations: Recommendation[] = picked.map((s) => ({
+  const toRecommendation = (s: (typeof relevantCandidates)[number], lowFit?: boolean): Recommendation => ({
     event_id: s.event.event_id,
     title: s.event.title,
     type: s.event.type,
@@ -235,12 +235,50 @@ export function recommend(empId: string, ds: Dataset): RecommendationResult {
         max_level: d.max_level,
       })),
     rules: s.rules,
-  }));
+    ...(lowFit ? { lowFit: true as const } : {}),
+  });
 
-  const noStep: NoStepReason | null =
+  let recommendations: Recommendation[] = picked.map((s) => toRecommendation(s));
+
+  let noStep: NoStepReason | null =
     recommendations.length > 0
       ? null
       : classifyNoStep(emp, ds, traj.gaps.length === 0, traj.target.source, blocked, gapSkillIds, scored.length > 0);
+
+  // Operator decision (2026-09-23): an employee whose every eligible,
+  // gap-closing candidate scores <= 0 (the LOW_FIT case) gets exactly one
+  // recommendation - the best of those low-scoring candidates - flagged
+  // lowFit, instead of an empty list. Mandatory/ineligible/no-gap
+  // classification is untouched; only candidates that already passed
+  // eligibility AND close a real gap qualify.
+  if (recommendations.length === 0 && noStep === "LOW_FIT") {
+    const lowFitCandidates = scored.filter((s) => {
+      if (s.score > 0) return false; // already covered by the normal path
+      return s.event.develops_skills.some((d) => {
+        if (!relevantGapSkillIds.has(d.skill_id)) return false;
+        return usefulGain(effective[d.skill_id] ?? 0, d.gain, d.max_level) > 0;
+      });
+    });
+    if (lowFitCandidates.length > 0) {
+      lowFitCandidates.sort((a, b) => {
+        if (b.score !== a.score) return b.score - a.score;
+        const f1a = a.factors.find((f) => f.code === "F1")?.raw ?? 0;
+        const f1b = b.factors.find((f) => f.code === "F1")?.raw ?? 0;
+        if (f1b !== f1a) return f1b - f1a;
+        if (a.event.duration_hours !== b.event.duration_hours) return a.event.duration_hours - b.event.duration_hours;
+        return a.event.event_id.localeCompare(b.event.event_id);
+      });
+      const [best] = lowFitCandidates;
+      if (best) {
+        recommendations = [toRecommendation(best, true)];
+        noStep = null;
+        const bestIndex = blocked.findIndex(
+          (b) => b.event_id === best.event.event_id && b.failedRule === "score-threshold",
+        );
+        if (bestIndex >= 0) blocked.splice(bestIndex, 1);
+      }
+    }
+  }
 
   return { employee_id: empId, scoringVersion: SCORING_CONFIG.version, asOf, recommendations, noStep, blocked };
 }
