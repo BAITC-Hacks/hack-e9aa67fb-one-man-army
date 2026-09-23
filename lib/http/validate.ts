@@ -6,6 +6,7 @@
  * messages and stack traces never reach a client.
  */
 import type { z } from "zod";
+import { crossOriginViolation } from "./origin";
 
 export interface ApiError {
   error: { code: string; message: string; details?: unknown };
@@ -71,6 +72,11 @@ export function withErrorHandling<TArgs extends unknown[]>(
   handler: (request: Request, ...args: TArgs) => Promise<Response>,
 ): (request: Request, ...args: TArgs) => Promise<Response> {
   return async (request, ...args) => {
+    // CSRF guard (T16): fail closed on a cross-origin state-changing request,
+    // before the handler reads a cookie or a body.
+    if (crossOriginViolation(request)) {
+      return errorResponse("CROSS_ORIGIN_FORBIDDEN", "Cross-origin request rejected", 403);
+    }
     try {
       return await handler(request, ...args);
     } catch (error) {

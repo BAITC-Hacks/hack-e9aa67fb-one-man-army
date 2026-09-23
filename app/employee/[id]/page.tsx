@@ -8,6 +8,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getSession } from "@/lib/auth/session";
+import { auditHrProfileView } from "@/lib/audit/hr-access";
 import { getDataset } from "@/lib/data/load";
 import { trajectory } from "@/lib/domain/trajectory";
 import { recommend } from "@/lib/domain/recommend";
@@ -114,6 +115,19 @@ export default async function EmployeePage({ params }: { params: Promise<{ id: s
   if (!employee) {
     return (
       <StatePage locale={locale} title={t(locale, "error.notFound.title")} body={t(locale, "error.notFound.body")} />
+    );
+  }
+
+  // T5: an HR read of an individual profile is audited before any data is
+  // rendered; if the audit write fails the view is denied (fail closed).
+  if (session.role === "hr" && (await auditHrProfileView(id, "page")) === null) {
+    return (
+      <StatePage
+        locale={locale}
+        title={t(locale, "error.unavailable.title")}
+        body={t(locale, "error.unavailable.body")}
+        showRetry
+      />
     );
   }
 
