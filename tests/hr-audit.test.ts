@@ -78,3 +78,39 @@ describe("hr audit: individual profile page (T5)", () => {
     expect(recordAudit).not.toHaveBeenCalled();
   });
 });
+
+describe("hr audit: aggregates route (R-16c)", () => {
+  function cookieHeader(value: string): HeadersInit {
+    return { cookie: `cq_session=${encodeURIComponent(value)}` };
+  }
+
+  beforeEach(() => {
+    recordAudit.mockReset();
+  });
+
+  it("hr.aggregates_view_is_audited: a successful HR read records actor, subject and purpose before data returns", async () => {
+    const { GET: aggregatesGet } = await import("@/app/api/hr/aggregates/route");
+    recordAudit.mockResolvedValue({ id: "aud_agg" });
+    const cookie = encodeSession({ role: "hr", id: "HR01" });
+    const response = await aggregatesGet(
+      new Request("http://localhost/api/hr/aggregates", { headers: cookieHeader(cookie) }),
+    );
+    expect(response.status).toBe(200);
+    expect(recordAudit).toHaveBeenCalledTimes(1);
+    const draft = recordAudit.mock.calls[0]?.[0];
+    expect(draft.actor).toMatchObject({ id: "HR01", role: "hr" });
+    expect(draft.subject).toEqual({ type: "hr-aggregates", id: "hr-aggregates" });
+    expect(draft.action).toBe("hr.aggregates.view");
+  });
+
+  it("hr.aggregates_audit_write_failure_denies_view: a failing audit write denies the response instead of returning data", async () => {
+    const { GET: aggregatesGet } = await import("@/app/api/hr/aggregates/route");
+    recordAudit.mockRejectedValue(new Error("disk full"));
+    const cookie = encodeSession({ role: "hr", id: "HR01" });
+    const response = await aggregatesGet(
+      new Request("http://localhost/api/hr/aggregates", { headers: cookieHeader(cookie) }),
+    );
+    expect(response.status).not.toBe(200);
+    expect(recordAudit).toHaveBeenCalledTimes(1);
+  });
+});

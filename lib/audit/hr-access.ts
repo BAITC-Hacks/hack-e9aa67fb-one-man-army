@@ -33,3 +33,21 @@ export async function auditHrProfileView(
     return null;
   }
 }
+
+/**
+ * Records an HR session viewing the aggregate analytics view (docs/threat-model.md
+ * T5). Unlike `auditHrProfileView`, this throws on audit-write failure rather
+ * than returning null: callers (the aggregates route) must let the throw
+ * propagate and deny the view (fail closed), same denial outcome, different
+ * mechanics because the caller here is a route, not a page render.
+ */
+export async function auditHrAggregatesView(actorId: string): Promise<void> {
+  await recordAudit({
+    actor: { id: actorId, role: "hr", label: "HR" },
+    action: "hr.aggregates.view",
+    subject: { type: "hr-aggregates", id: "hr-aggregates" },
+    outcome: "allowed",
+    reason: `Purpose: workforce analytics. HR (${actorId}) viewed aggregate development analytics.`,
+    evidence: [],
+  });
+}

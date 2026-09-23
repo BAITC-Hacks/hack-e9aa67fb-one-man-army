@@ -16,7 +16,8 @@ import { resolveModel } from "./provider";
 import { groundingCheck } from "./grounding";
 import { templateExplanation } from "./template";
 
-const EXPLAIN_TIMEOUT_MS = 8000;
+/** Exported so tests can assert the default stays within the R-10 10s budget. */
+export const EXPLAIN_TIMEOUT_MS = 8000;
 
 /** Schema-shaped model output. `event_id` and `source` are filled in here, never by the model. */
 const ExplainOutput = z.object({
@@ -58,11 +59,15 @@ async function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
 /**
  * @param model Optional model override, used by tests to inject scripted or
  * hostile output without touching `MODEL_REF`. Production callers omit it.
+ * @param timeoutMs Optional timeout override (default `EXPLAIN_TIMEOUT_MS`),
+ * used by latency tests to exercise the fallback without waiting the full
+ * production timeout. Production callers omit it.
  */
 export async function explain(
   rec: Recommendation,
   locale: Locale,
   model?: LanguageModelV4,
+  timeoutMs: number = EXPLAIN_TIMEOUT_MS,
 ): Promise<Explanation> {
   try {
     const resolved = model ?? resolveModel();
@@ -73,7 +78,7 @@ export async function explain(
         instructions: buildInstructions(locale),
         prompt: buildPrompt(rec, locale),
       }),
-      EXPLAIN_TIMEOUT_MS,
+      timeoutMs,
     );
 
     const text = [result.data.headline, ...result.data.why, result.data.expected_progress].join("\n");
