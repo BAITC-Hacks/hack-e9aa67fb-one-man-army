@@ -147,7 +147,7 @@ classification:
 |---|---|---|
 | `AT_TOP_NO_GAP` | Lead, no goal, all current requirements met | career conversation, goal setting |
 | `NO_GAP_TO_NEXT` | meets next-grade requirements already | promotion-readiness review (human) |
-| `LOW_FIT` | a gap-closing event passed every eligibility gate, but its score is at or below the minimum (0) — typically a heavy participation-history penalty (F5). Distinct from "no candidate exists": one exists but currently scores too low to recommend | review the participation penalty with the employee; a format switch may help |
+| `LOW_FIT` | **Not produced as a no-step reason in the current implementation.** When every eligible, gap-closing candidate scores ≤ 0 (typically a heavy participation-history penalty, F5), the engine surfaces the single best-scoring one as a recommendation with a "Low fit" pill and an honest caution in its rationale, instead of an empty no-step result (`lib/domain/recommend.ts`, `Recommendation.lowFit`). The enum value is kept for schema compatibility only. On the 200-employee seed, 3 employees fall into this case | review the participation penalty with the employee; a format switch may help |
 | `PREREQ_BLOCKED` | gaps exist, but every gap-relevant event needs a prerequisite the employee lacks | foundation event missing from catalogue |
 | `NO_SESSION` | gap-relevant events exist, none scheduled | schedule a session |
 | `CATALOGUE_GAP` | a skill with a real gap has no event that develops it for this role | build or buy content |

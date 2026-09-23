@@ -30,7 +30,11 @@ The contracts in `lib/contracts.ts` are **frozen after this doc**. Changing them
 | `lib/domain/recommend.ts` | `recommend(empId, ds) → RecommendationResult`. Pipeline: eligibility → score → sort (tie-break: score desc, F1 desc, duration asc, event_id asc) → diversity (no two recs whose useful gain is on the same single skill) → keep score > 0 → top 3, else `[]` + `NoStepReason` | A |
 | `lib/domain/progress.ts` | `completeEvent(empId, eventId, actor) → ProgressResult`. Appends to `completions.jsonl`, invalidates the cache, returns before/after + refreshed recs, `recordAudit` | A |
 | `lib/domain/hr.ts` | `hrAggregates(ds) → HrAggregates`: lagging skills (vs own grade and target), no-step list (sorted by employee_id, never by score), participation by event. **Any cell with n < 5 is suppressed** as `{suppressed:true}` | A |
+| `lib/domain/gradePath.ts` | Deterministic, greedy, critical-gap-first plan of catalogue events closing every gap to the next grade, respecting prerequisites and `max_level` caps; unresolved gaps shown honestly, not hidden. Served by `GET /api/employees/[id]/grade-path`, rendered by `components/GradePath.tsx` | A |
+| `lib/ai/rationale.ts` | Builds the human-readable sentence set from the engine's factor list before the model call (and for the template fallback); consumed by `lib/ai/explain.ts` | B |
 | `lib/auth/session.ts` | `getSession(req)` reads the signed HttpOnly cookie `cq_session` (HMAC-SHA256, `SESSION_SECRET` with a dev default) and returns `{role:"employee", employeeId} \| {role:"hr", id:"HR01"}` or null. Also `requireEmployeeSelf(req, id)` and `requireHr(req)`, which throw 401/403. **Fails closed.** | B |
+| `lib/http/origin.ts` | `crossOriginViolation(req)`, wired into `withErrorHandling`: rejects state-changing requests (POST/PUT/PATCH/DELETE) whose `Origin` does not match the request host. 403 on mismatch | B |
+| `lib/audit/hr-access.ts` | `auditHrProfileView` / `auditHrAggregatesView`: emits `recordAudit` for every HR read of an individual profile or the aggregates view, **before** data is returned; a failed audit write denies the request (fail closed) | B |
 | `lib/ai/explain.ts` | `explain(rec, locale) → Explanation`. `generateStructured` with an 8 s `AbortSignal` timeout → `groundingCheck` → on any failure `templateExplanation`. Never throws | B |
 | `lib/ai/grounding.ts` | `groundingCheck(text, factors)`: every numeric token and every `SK_*` / `EV_*` id in the text must appear in the factor values. ≥ 3 distinct factor kinds are cited | B |
 | `lib/ai/template.ts` | Deterministic kk/ru/en rationale built from `factors[]`. This is also the fallback | B |
@@ -41,9 +45,9 @@ The contracts in `lib/contracts.ts` are **frozen after this doc**. Changing them
 | `app/employee/[id]/page.tsx` | Profile, trajectory gap table (assessed → effective, critical badge, % met), recommendations with an expandable trace + explanation, Complete / Not interested buttons, before → after panel with the formula, "available later" (failed gates with detail) | C |
 | `app/hr/page.tsx` | 3 panels: lagging skills, no-step list (reason code), participation by event | C |
 | `app/hr/import/page.tsx` | Multi-file upload → ImportReport table (row errors, counts) | C |
-| `components/*` | `TraceView`, `GapTable`, `RecCard`, `LangSwitch`, `RoleBar` | C |
-| `scripts/import.mjs` → `pnpm data:import <dir>` | CLI path for R-09 (calls `importFiles`) | A |
+| `components/*` | `TraceView`, `GapTable`, `GradePath`, `RecCard`, `LangSwitch`, `RoleBar`, `KpiTile`, `Legend`, `OnboardingHint`, `Pill`, `ProgressBar` | C |
 | `tests/*.test.ts` | Each owner writes tests for their own modules. `tests/authz.test.ts` → B | A/B/C |
+| `eval/run.mjs` | In-process AI evaluation: imports `lib/ai/explain.ts` / `lib/ai/grounding.ts` / `lib/domain/recommend.ts` directly (no HTTP route to target), offline (`MODEL_REF=mock:demo` forced). Case list: `eval/README.md` | B |
 
 Owners: **A** = data + domain + rules (critical path). **B** = auth + AI + API. **C** = UI + i18n. B and C code against `lib/contracts.ts` and can stub A's functions until they land.
 
@@ -134,7 +138,7 @@ The explanation is fetched separately from the recommendations, so R-10 holds: r
 | `/api/employees/[id]` | GET | self or HR (HR view audited with purpose `profile_view`) | — | `{employee: Employee, trajectory: Trajectory, history: HistoryRow[]}` | 401, 403, 404 |
 | `/api/employees/[id]/recommendations` | GET | self or HR | — | `RecommendationResult` | 401, 403, 404 |
 | `/api/employees/[id]/explanations` | POST | self or HR | `{event_ids: z.array(z.string()).min(1).max(3), locale: Locale}` | `{explanations: Explanation[]}`. **Always 200** (template fallback) | 401, 403, 404, 422 if an event_id is not in the current recs (the model cannot explain what the engine did not pick) |
-| `/api/employees/[id]/complete` | POST | **self only** (HR on behalf: `actor.role=hr`, audited) | `{event_id}` | `ProgressResult` | 401, 403, 404, 409 `NOT_ELIGIBLE` (already completed / mandatory / unknown). Checked again server-side, whatever the client sent |
+| `/api/employees/[id]/complete` | POST | **self only** — `requireEmployeeSelf`; HR sessions are refused 403 before any data is read (HR-on-behalf completion was scoped out, not built) | `{event_id}` | `ProgressResult` | 401, 403, 404, 409 `NOT_ELIGIBLE` (already completed / mandatory / unknown). Checked again server-side, whatever the client sent |
 | `/api/employees/[id]/dismiss` | POST | self only | `{event_id}` | `RecommendationResult` | 401, 403, 404 |
 | `/api/hr/aggregates` | GET | HR | — | `HrAggregates` | 401, 403 |
 | `/api/hr/import` | POST | HR | `multipart/form-data`: any of `employees`, `activity_history`, `events`, `skills` (≤ 5 MB each). Parsed by zod after the file read. This is the one allowed non-JSON body and is documented | `ImportReport` (200 even when there are row errors) | 400 no files / unparsable JSON, 401, 403, 413 |

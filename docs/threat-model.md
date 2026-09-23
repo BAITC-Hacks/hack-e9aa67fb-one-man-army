@@ -37,7 +37,7 @@ Scope: the Next.js app (route handlers plus a file-backed store) running locally
 | T2 | E / I | IDOR: an employee requests `/api/employees/E0042/*` | `authorize(session, action, resource)` in `lib/auth/policy.ts` is one table that mirrors the domain matrix. Default is DENY. It runs **before** any store read. Employee: `params.id === session.actorId`, otherwise 403 with a generic body. No existence oracle: an unknown id also returns 403 for employees. |
 | T3 | E | An employee reaches HR routes, uploads or config | Every `/api/hr/*`, `/api/import`, `/api/config` handler calls `authorize` with role HR. Page routes under `app/hr` repeat the check server-side. The UI hiding a button is not the control. |
 | T4 | I | HR aggregates re-identify individuals (a department with 2 people) | `lib/rules/k-anonymity.ts`: aggregate cells with n < 5 are suppressed as `"<5"` on the server before the response is built. Unit-tested. |
-| T5 | R / I | HR opens an individual profile silently | The HR individual read requires `purpose ∈ {no_step_followup, data_correction}` (zod enum). `recordAudit({actor, action:"hr.view_employee", target, purpose})` runs **before** the data is returned. If the audit write fails, the request fails (fail closed). |
+| T5 | R / I | HR opens an individual profile, or the org aggregates view, silently | **Implemented** (`lib/audit/hr-access.ts`): both `auditHrProfileView` (wired into `app/employee/[id]/page.tsx`, `app/api/employees/[id]/route.ts`) and `auditHrAggregatesView` (wired into `app/hr/page.tsx`, `app/api/hr/aggregates/route.ts`) call `recordAudit` **before** data is returned. If the audit write fails, the request fails with `AUDIT_UNAVAILABLE` 503 (fail closed). |
 | T6 | R | Completions or imports with no trace | `recordAudit` on complete, enrol, decline, consent change, import (counts only) and config publish. The audit log is append-only JSONL and has no delete route. |
 | T7 | D | Upload of a huge file or a zip bomb | Reject when `Content-Length` > 5 MB and cap the streamed read at 5 MB. At most 5,000 employees and 50,000 CSV rows. 413 on excess. JSON/CSV only (check the extension and sniff content). |
 | T8 | T | Malformed or hostile rows corrupt the store | zod schema per row (I-10). Ids match `^[A-Z]{1,2}\d{3,6}$`. Referential checks: `event_id`, `skill_id`, role/grade exist, and history `employee_id` must be in the base data or the same upload, **otherwise the row is rejected**. Skill levels are clamped to the scale. Strings are length-capped (≤ 200). The CSV parser does not evaluate anything. |
@@ -48,9 +48,14 @@ Scope: the Next.js app (route handlers plus a file-backed store) running locally
 | T13 | T | Hallucinated or invented numbers in the explanation | Grounding check in `lib/ai/explain.ts`: every number in the output must appear in `factors[]`, and every eventId must be in the engine set. On failure, fall back to the deterministic template. The trace records the fallback. |
 | T14 | I | Public rankings or engagement leakage to peers | No leaderboard/rank routes. Employee DTOs are built by a whitelist serializer that never includes foreign ids. The HR "no step" list is sorted by id. Declines and no-shows appear only on the employee's own and HR views. |
 | T15 | I | Stack traces or PII in errors and logs | `withErrorHandling` returns a generic message plus a request id. Logs hold ids only, never names or history rows. Security headers come from `securityHeaders()`. |
-| T16 | S | CSRF on state-changing POSTs | SameSite=Strict cookie, POST-only mutations, and an `Origin` header check against `Host` in `withErrorHandling` for non-GET requests. |
+| T16 | S | CSRF on state-changing POSTs | **Implemented** (`lib/http/origin.ts`, `crossOriginViolation`, wired into `withErrorHandling`): SameSite=Strict cookie, POST-only mutations, and an `Origin`/`Sec-Fetch-Site` check against the request host for non-GET requests. Confirmed live: mismatched `Origin` on POST → 403, same-origin/no-`Origin` → 200. |
 | T17 | I | Secrets committed | `.env` is gitignored (verified). `.env.example` has placeholders only (verified). No `NEXT_PUBLIC_*` secret. `SESSION_SECRET` is added to `.env.example` as a placeholder. |
 | T18 | T | Dependency risk (CSV parser, etc.) | Lockfile committed. `pnpm audit --prod` runs in `verify`. Prefer a small in-house RFC 4180 parser over a new package. No markdown-to-HTML rendering of data. No `dangerouslySetInnerHTML`. |
+
+**Implemented:** completion is employee-only. `POST /api/employees/[id]/complete`
+calls `requireEmployeeSelf` and refuses any HR session with 403 before data is
+read (`app/api/employees/[id]/complete/route.ts`); HR-on-behalf completion was
+scoped out and is not built (see README Known limitations).
 
 ## Top 5 risks
 
