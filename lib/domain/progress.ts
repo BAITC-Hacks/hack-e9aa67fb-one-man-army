@@ -2,20 +2,24 @@
  * Filled in by T2. See docs/architecture.md §1: completeEvent(empId, eventId,
  * actor) -> ProgressResult.
  *
- * Growth formula is inlined here (not imported from `lib/domain/growth.ts`,
- * which is T1's file and did not exist yet when this was written): the same
- * `max(level, min(level + gain, max_level))` documented in architecture.md.
- * "Before" / "after" levels use the employee's stored `skills[skill_id]`
- * rather than the full pending-gain "effective" calculation (T1's
- * `effective.ts`), which is the documented Batch-1 simplification for T2.
+ * Before/after levels now use T1's pending-gain "effective" level
+ * (`lib/domain/effective.ts`), not the raw stored `skills[skill_id]`, so a
+ * completion's before/after panel agrees with the trajectory and
+ * recommendations shown elsewhere (both of which already read effective
+ * levels). `applyGrowth` is re-exported from `lib/domain/growth.ts`, the one
+ * place the formula is defined, instead of being duplicated here.
  */
 import type { ProgressResult } from "../contracts";
 import { recordAudit } from "../audit/audit";
 import { appendJsonl } from "../store/jsonl";
 import { getDataset, invalidateDataset } from "../data/load";
 import type { Employee } from "../data/load";
+import { effectiveSkills } from "./effective";
+import { applyGrowth } from "./growth";
 import { trajectory } from "./trajectory";
 import { recommend } from "./recommend";
+
+export { applyGrowth } from "./growth";
 
 export interface ProgressActor {
   role: "employee" | "hr";
@@ -31,11 +35,6 @@ export class ProgressError extends Error {
     super(message);
     this.name = "ProgressError";
   }
-}
-
-/** `max(level, min(level + gain, max_level))` - the only place this formula exists in T2's files. */
-export function applyGrowth(level: number, gain: number, max: number): number {
-  return Math.max(level, Math.min(level + gain, max));
 }
 
 function findEmployee(employees: Employee[], empId: string): Employee | undefined {
@@ -68,9 +67,10 @@ export async function completeEvent(
   }
 
   const trajectoryBefore = trajectory(empBefore, dsBefore);
+  const effectiveBefore = effectiveSkills(empBefore, dsBefore.history, dsBefore.events).effective;
 
   const changes = event.develops_skills.map((entry) => {
-    const before = empBefore.skills[entry.skill_id] ?? 0;
+    const before = effectiveBefore[entry.skill_id] ?? 0;
     const after = applyGrowth(before, entry.gain, entry.max_level);
     return {
       skill_id: entry.skill_id,

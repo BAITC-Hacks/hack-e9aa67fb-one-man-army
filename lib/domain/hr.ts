@@ -4,13 +4,14 @@
  * step, and participation by activity"). Every group cell with n < 5 is
  * suppressed (k-anonymity, docs/threat-model.md T5/T7).
  *
- * "Lagging" and "target" use the employee's stored `skills[skill_id]` level
- * (not T1's pending-gain "effective" level, which lived in a file that did not
- * exist yet when this was written) - documented Batch-1 simplification, same
- * as `lib/domain/progress.ts`.
+ * "Lagging" and "target" use T1's pending-gain "effective" level
+ * (`lib/domain/effective.ts`), not the raw stored `skills[skill_id]`, so a
+ * recent completion that has not been re-assessed yet does not still count as
+ * lagging here - the same number the employee's own trajectory shows.
  */
 import type { Count, Grade, HrAggregates, NoStepReason } from "../contracts";
 import type { Dataset, Employee, RoleProfile } from "../data/load";
+import { effectiveSkills } from "./effective";
 import { recommend } from "./recommend";
 
 const GRADE_ORDER: Grade[] = ["Junior", "Middle", "Senior", "Lead"];
@@ -49,7 +50,7 @@ function laggingSkills(ds: Dataset): HrAggregates["laggingSkills"] {
       let belowTarget = 0;
       let criticalBelowTarget = 0;
       for (const emp of ds.employees) {
-        const level = emp.skills[skill.skill_id] ?? 0;
+        const level = effectiveSkills(emp, ds.history, ds.events).effective[skill.skill_id] ?? 0;
         const ownProfile = findProfile(ds.roleProfiles, emp.role, emp.grade);
         const ownRequired = ownProfile?.required_skills[skill.skill_id];
         if (ownRequired !== undefined && level < ownRequired) belowOwnGrade += 1;
