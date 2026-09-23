@@ -121,7 +121,7 @@ export default function ImportPage() {
           <button
             type="submit"
             disabled={submitting}
-            className="min-h-[44px] rounded-md bg-[var(--color-accent)] px-4 py-2 text-sm font-medium text-white hover:opacity-90 disabled:opacity-60"
+            className="min-h-[44px] rounded-md bg-[var(--color-accent)] px-4 py-2 text-sm font-medium text-white hover:bg-[var(--color-accent-hover)] disabled:opacity-60"
           >
             {submitting ? t(locale, "import.submitting") : t(locale, "import.submit")}
           </button>

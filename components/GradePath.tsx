@@ -7,6 +7,7 @@
 import type { GradePathResult } from "@/lib/domain/gradePath";
 import type { Locale } from "@/lib/i18n/i18n";
 import { t, tf } from "@/lib/i18n/dict";
+import { Pill } from "./Pill";
 
 export function GradePath({
   path,
@@ -51,15 +52,16 @@ export function GradePath({
         {path.gaps.length === 0 ? (
           <p className="mt-1 text-sm text-[var(--color-muted)]">{tf(locale, "gradePath.gaps.empty", { grade })}</p>
         ) : (
-          <ul className="mt-2 space-y-1 text-sm text-[var(--color-ink)]">
+          <ul className="mt-2 divide-y divide-[var(--color-line)] text-sm text-[var(--color-ink)]">
             {path.gaps.map((gap) => (
-              <li key={gap.skill_id}>
-                {gap.name}: {gap.effective} → {gap.required}
-                {gap.critical && (
-                  <span className="ml-2 inline-flex items-center rounded-full bg-[var(--color-accent)]/10 px-2 py-0.5 text-xs font-medium text-[var(--color-accent)]">
-                    {t(locale, "gradePath.critical")}
+              <li key={gap.skill_id} className="flex flex-wrap items-center justify-between gap-2 py-2">
+                <span className="font-medium">{gap.name}</span>
+                <span className="flex items-center gap-2">
+                  <span className="tabular-nums text-[var(--color-muted)]">
+                    {gap.effective} → {gap.required}
                   </span>
-                )}
+                  {gap.critical && <Pill tone="critical">{t(locale, "gradePath.critical")}</Pill>}
+                </span>
               </li>
             ))}
           </ul>
@@ -98,18 +100,20 @@ export function GradePath({
       {stillOpen.length > 0 && (
         <div className="mt-4 rounded-lg border border-[var(--color-line)] bg-[var(--color-canvas)] p-3">
           <h3 className="text-sm font-semibold text-[var(--color-ink)]">{t(locale, "gradePath.stillOpenTitle")}</h3>
-          <ul className="mt-2 space-y-1 text-sm text-[var(--color-ink)]">
+          <ul className="mt-2 divide-y divide-[var(--color-line)] text-sm text-[var(--color-ink)]">
             {stillOpen.map((gap) => {
               const projected = path.projectedLevels[gap.skill_id] ?? gap.effective;
               return (
-                <li key={gap.skill_id}>
-                  {gap.name}
-                  {gap.critical && (
-                    <span className="ml-2 inline-flex items-center rounded-full bg-[var(--color-accent)]/10 px-2 py-0.5 text-xs font-medium text-[var(--color-accent)]">
-                      {t(locale, "gradePath.critical")}
-                    </span>
-                  )}
-                  <span className="block text-xs text-[var(--color-muted)]">
+                <li key={gap.skill_id} className="flex flex-wrap items-center justify-between gap-2 py-2">
+                  <span className="font-medium">
+                    {gap.name}
+                    {gap.critical && (
+                      <span className="ml-2">
+                        <Pill tone="critical">{t(locale, "gradePath.critical")}</Pill>
+                      </span>
+                    )}
+                  </span>
+                  <span className="tabular-nums text-xs text-[var(--color-muted)]">
                     {tf(locale, "gradePath.stillOpenRow", { projected, required: gap.required })}
                   </span>
                 </li>
@@ -122,18 +126,18 @@ export function GradePath({
       {noActivity.length > 0 && (
         <div className="mt-4 rounded-lg border border-[var(--color-line)] bg-[var(--color-canvas)] p-3">
           <h3 className="text-sm font-semibold text-[var(--color-ink)]">{t(locale, "gradePath.unresolvedTitle")}</h3>
-          <ul className="mt-2 space-y-1 text-sm text-[var(--color-ink)]">
+          <ul className="mt-2 divide-y divide-[var(--color-line)] text-sm text-[var(--color-ink)]">
             {noActivity.map((gap) => (
-              <li key={gap.skill_id}>
-                {gap.name}
-                {gap.critical && (
-                  <span className="ml-2 inline-flex items-center rounded-full bg-[var(--color-accent)]/10 px-2 py-0.5 text-xs font-medium text-[var(--color-accent)]">
-                    {t(locale, "gradePath.critical")}
-                  </span>
-                )}
-                <span className="block text-xs text-[var(--color-muted)]">
-                  {t(locale, "gradePath.unresolvedBody")}
+              <li key={gap.skill_id} className="flex flex-wrap items-center justify-between gap-2 py-2">
+                <span className="font-medium">
+                  {gap.name}
+                  {gap.critical && (
+                    <span className="ml-2">
+                      <Pill tone="critical">{t(locale, "gradePath.critical")}</Pill>
+                    </span>
+                  )}
                 </span>
+                <span className="text-xs text-[var(--color-muted)]">{t(locale, "gradePath.unresolvedBody")}</span>
               </li>
             ))}
           </ul>

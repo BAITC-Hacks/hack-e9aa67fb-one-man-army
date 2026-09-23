@@ -33,7 +33,7 @@ export function RoleBar({ locale, identityLabel }: { locale: Locale; identityLab
           type="button"
           onClick={logout}
           disabled={loggingOut}
-          className="min-h-[44px] rounded-md border border-[var(--color-line)] px-3 text-sm font-medium text-[var(--color-ink)] hover:border-[var(--color-accent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
+          className="min-h-[44px] rounded-md border border-[var(--color-line)] px-3 text-sm font-medium text-[var(--color-ink)] hover:border-[var(--color-accent)] hover:bg-[var(--color-canvas)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
         >
           {t(locale, "common.logout")}
         </button>

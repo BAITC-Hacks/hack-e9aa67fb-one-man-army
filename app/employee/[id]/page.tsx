@@ -62,14 +62,14 @@ function StatePage({
         {showRetry && (
           <a
             href="."
-            className="min-h-[44px] rounded-md bg-[var(--color-accent)] px-4 py-2 text-sm font-medium text-white hover:opacity-90"
+            className="min-h-[44px] rounded-md bg-[var(--color-accent)] px-4 py-2 text-sm font-medium text-white hover:bg-[var(--color-accent-hover)]"
           >
             {t(locale, "common.retry")}
           </a>
         )}
         <Link
           href="/login"
-          className="min-h-[44px] rounded-md border border-[var(--color-line)] px-4 py-2 text-sm font-medium text-[var(--color-ink)] hover:border-[var(--color-accent)]"
+          className="min-h-[44px] rounded-md border border-[var(--color-line)] px-4 py-2 text-sm font-medium text-[var(--color-ink)] hover:border-[var(--color-accent)] hover:bg-[var(--color-canvas)]"
         >
           {t(locale, "common.back")}
         </Link>
@@ -246,7 +246,7 @@ export default async function EmployeePage({ params }: { params: Promise<{ id: s
 
           {recs.blocked.length > 0 && (
             <details className="mt-4">
-              <summary className="cursor-pointer text-sm font-semibold text-[var(--color-ink)]">
+              <summary className="cursor-pointer rounded text-sm font-semibold text-[var(--color-ink)] hover:text-[var(--color-accent)]">
                 {t(locale, "recs.availableLaterTitle")}
               </summary>
               <ul className="mt-2 space-y-1 text-sm text-[var(--color-muted)]">

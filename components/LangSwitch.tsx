@@ -32,7 +32,7 @@ export function LangSwitch({ locale }: { locale: Locale }) {
           className={`min-h-[44px] min-w-[44px] rounded-md border px-3 text-sm font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)] ${
             code === locale
               ? "border-[var(--color-accent)] bg-[var(--color-accent)] text-white"
-              : "border-[var(--color-line)] bg-[var(--color-surface)] text-[var(--color-ink)] hover:border-[var(--color-accent)]"
+              : "border-[var(--color-line)] bg-[var(--color-surface)] text-[var(--color-ink)] hover:border-[var(--color-accent)] hover:bg-[var(--color-canvas)]"
           }`}
         >
           {t(locale, `lang.${code}`)}

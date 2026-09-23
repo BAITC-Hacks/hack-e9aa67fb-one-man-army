@@ -192,6 +192,7 @@ const en = {
   "hr.participation.mandatoryYes": "Mandatory",
   "hr.participation.mandatoryNo": "Optional",
   "hr.participation.completionRate": "Completion rate",
+  "hr.participation.completionRateShort": "Compl. %",
   "hr.participation.noRate": "Not enough data",
   "hr.participation.empty": "No activity recorded yet.",
 
@@ -278,11 +279,13 @@ const en = {
   "table.searchPlaceholder.events": "Search events…",
   "table.noMatches": "No matches for your search.",
   "table.resultCount": "{n} results",
+  "table.scrollHint": "Scroll → for more columns",
 
   "hr.suppressedChip": "<5",
   "hr.suppressedTitle": "hidden for privacy",
   "hr.legend.suppressed": "<5 = hidden for privacy",
   "hr.legend.noStepReason": "Label shows a short reason; hover or focus for the full explanation.",
+  "hr.legend.participationStatuses": "Done · In prog. · Overdue · No-show · Dropped · Declined - hover a column heading for the full name.",
 
   "hr.participation.status.completed": "Completed",
   "hr.participation.status.in_progress": "In progress",
@@ -290,6 +293,12 @@ const en = {
   "hr.participation.status.no_show": "No-show",
   "hr.participation.status.dropped": "Dropped",
   "hr.participation.status.declined": "Declined",
+  "hr.participation.status.short.completed": "Done",
+  "hr.participation.status.short.in_progress": "In prog.",
+  "hr.participation.status.short.overdue": "Overdue",
+  "hr.participation.status.short.no_show": "No-show",
+  "hr.participation.status.short.dropped": "Dropped",
+  "hr.participation.status.short.declined": "Declined",
 
   "recs.noStep.short.AT_TOP_NO_GAP": "All done",
   "recs.noStep.short.NO_GAP_TO_NEXT": "No catalogue activity",
@@ -489,6 +498,7 @@ const ru: Dict = {
   "hr.participation.mandatoryYes": "Обязательно",
   "hr.participation.mandatoryNo": "По желанию",
   "hr.participation.completionRate": "Доля завершения",
+  "hr.participation.completionRateShort": "Завершено, %",
   "hr.participation.noRate": "Недостаточно данных",
   "hr.participation.empty": "Активность пока не зафиксирована.",
 
@@ -575,11 +585,13 @@ const ru: Dict = {
   "table.searchPlaceholder.events": "Поиск мероприятий…",
   "table.noMatches": "Нет совпадений по запросу.",
   "table.resultCount": "Результатов: {n}",
+  "table.scrollHint": "Прокрутите → там ещё столбцы",
 
   "hr.suppressedChip": "<5",
   "hr.suppressedTitle": "скрыто для конфиденциальности",
   "hr.legend.suppressed": "<5 = скрыто для конфиденциальности",
   "hr.legend.noStepReason": "Метка показывает краткую причину; полное объяснение - при наведении или фокусе.",
+  "hr.legend.participationStatuses": "Готово · В процессе · Просрочено · Неявка · Прервано · Отклонено - наведите на заголовок столбца, чтобы увидеть полное название.",
 
   "hr.participation.status.completed": "Завершено",
   "hr.participation.status.in_progress": "В процессе",
@@ -587,6 +599,12 @@ const ru: Dict = {
   "hr.participation.status.no_show": "Неявка",
   "hr.participation.status.dropped": "Прервано",
   "hr.participation.status.declined": "Отклонено",
+  "hr.participation.status.short.completed": "Готово",
+  "hr.participation.status.short.in_progress": "В процессе",
+  "hr.participation.status.short.overdue": "Просрочено",
+  "hr.participation.status.short.no_show": "Неявка",
+  "hr.participation.status.short.dropped": "Прервано",
+  "hr.participation.status.short.declined": "Отклонено",
 
   "recs.noStep.short.AT_TOP_NO_GAP": "Всё выполнено",
   "recs.noStep.short.NO_GAP_TO_NEXT": "Нет активности в каталоге",
@@ -784,6 +802,7 @@ const kk: Dict = {
   "hr.participation.mandatoryYes": "Міндетті",
   "hr.participation.mandatoryNo": "Қалауы бойынша",
   "hr.participation.completionRate": "Орындалу үлесі",
+  "hr.participation.completionRateShort": "Орынд., %",
   "hr.participation.noRate": "Деректер жеткіліксіз",
   "hr.participation.empty": "Белсенділік әлі тіркелмеген.",
 
@@ -870,11 +889,13 @@ const kk: Dict = {
   "table.searchPlaceholder.events": "Іс-шараларды іздеу…",
   "table.noMatches": "Сұраныс бойынша сәйкестік жоқ.",
   "table.resultCount": "Нәтижелер: {n}",
+  "table.scrollHint": "Тағы бағандар үшін → айналдырыңыз",
 
   "hr.suppressedChip": "<5",
   "hr.suppressedTitle": "құпиялылық үшін жасырылған",
   "hr.legend.suppressed": "<5 = құпиялылық үшін жасырылған",
   "hr.legend.noStepReason": "Белгіше қысқа себепті көрсетеді; толық түсіндірме үшін үстінен апарыңыз немесе фокус жасаңыз.",
+  "hr.legend.participationStatuses": "Аяқталды · Орындалуда · Мерзімі өтті · Келмеді · Тоқтатылды · Бас тартылды - толық атауы үшін баған тақырыбының үстіне апарыңыз.",
 
   "hr.participation.status.completed": "Аяқталды",
   "hr.participation.status.in_progress": "Орындалуда",
@@ -882,6 +903,12 @@ const kk: Dict = {
   "hr.participation.status.no_show": "Келмеді",
   "hr.participation.status.dropped": "Тоқтатылды",
   "hr.participation.status.declined": "Бас тартылды",
+  "hr.participation.status.short.completed": "Аяқталды",
+  "hr.participation.status.short.in_progress": "Орындалуда",
+  "hr.participation.status.short.overdue": "Мерзімі өтті",
+  "hr.participation.status.short.no_show": "Келмеді",
+  "hr.participation.status.short.dropped": "Тоқтатылды",
+  "hr.participation.status.short.declined": "Бас тартылды",
 
   "recs.noStep.short.AT_TOP_NO_GAP": "Барлығы дайын",
   "recs.noStep.short.NO_GAP_TO_NEXT": "Каталогта белсенділік жоқ",

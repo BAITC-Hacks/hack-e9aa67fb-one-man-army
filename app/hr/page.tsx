@@ -23,7 +23,7 @@ const PARTICIPATION_STATUS_ORDER = ["completed", "in_progress", "overdue", "no_s
 
 function noStepTone(reason: NoStepReason): PillTone {
   if (reason === "AT_TOP_NO_GAP" || reason === "ALL_DONE") return "met";
-  if (reason === "LOW_FIT") return "regular";
+  if (reason === "LOW_FIT" || reason === "PREREQ_BLOCKED") return "regular";
   return "neutral";
 }
 
@@ -56,14 +56,14 @@ function StatePage({ locale, title, body, showRetry }: { locale: Locale; title: 
         {showRetry && (
           <a
             href="."
-            className="min-h-[44px] rounded-md bg-[var(--color-accent)] px-4 py-2 text-sm font-medium text-white hover:opacity-90"
+            className="min-h-[44px] rounded-md bg-[var(--color-accent)] px-4 py-2 text-sm font-medium text-white hover:bg-[var(--color-accent-hover)]"
           >
             {t(locale, "common.retry")}
           </a>
         )}
         <Link
           href="/login"
-          className="min-h-[44px] rounded-md border border-[var(--color-line)] px-4 py-2 text-sm font-medium text-[var(--color-ink)] hover:border-[var(--color-accent)]"
+          className="min-h-[44px] rounded-md border border-[var(--color-line)] px-4 py-2 text-sm font-medium text-[var(--color-ink)] hover:border-[var(--color-accent)] hover:bg-[var(--color-canvas)]"
         >
           {t(locale, "common.back")}
         </Link>
@@ -152,13 +152,27 @@ export default async function HrPage() {
   }));
 
   const participationColumns: DataTableColumn[] = [
-    { key: "event", header: t(locale, "hr.participation.event"), sortable: true, type: "text" },
+    {
+      key: "event",
+      header: t(locale, "hr.participation.event"),
+      sortable: true,
+      type: "text",
+      cellClassName: "max-w-[220px] break-words",
+    },
     { key: "mandatory", header: t(locale, "hr.participation.mandatory"), sortable: true, type: "text" },
-    { key: "completionRate", header: t(locale, "hr.participation.completionRate"), sortable: true, type: "number", suffix: "%" },
+    {
+      key: "completionRate",
+      header: t(locale, "hr.participation.completionRateShort"),
+      headerTitle: t(locale, "hr.participation.completionRate"),
+      sortable: true,
+      type: "number",
+      suffix: "%",
+    },
     ...PARTICIPATION_STATUS_ORDER.map(
       (status): DataTableColumn => ({
         key: status,
-        header: t(locale, `hr.participation.status.${status}`),
+        header: t(locale, `hr.participation.status.short.${status}`),
+        headerTitle: t(locale, `hr.participation.status.${status}`),
         sortable: true,
         type: "count",
       }),
@@ -185,7 +199,7 @@ export default async function HrPage() {
           </div>
           <Link
             href="/hr/import"
-            className="min-h-[44px] rounded-md border border-[var(--color-line)] px-3 py-2 text-sm font-medium text-[var(--color-ink)] hover:border-[var(--color-accent)]"
+            className="min-h-[44px] rounded-md border border-[var(--color-line)] px-3 py-2 text-sm font-medium text-[var(--color-ink)] hover:border-[var(--color-accent)] hover:bg-[var(--color-canvas)]"
           >
             {t(locale, "hr.importLink")}
           </Link>
@@ -270,9 +284,10 @@ export default async function HrPage() {
                 suppressedLabel={t(locale, "hr.suppressedChip")}
                 suppressedTitle={t(locale, "hr.suppressedTitle")}
                 emptyCellText={t(locale, "hr.participation.noRate")}
-                minWidthClassName="min-w-[720px]"
+                scrollHintText={t(locale, "table.scrollHint")}
               />
-              <p className="mt-2 text-xs text-[var(--color-muted)]">{t(locale, "hr.legend.suppressed")}</p>
+              <p className="mt-2 text-xs text-[var(--color-muted)]">{t(locale, "hr.legend.participationStatuses")}</p>
+              <p className="mt-1 text-xs text-[var(--color-muted)]">{t(locale, "hr.legend.suppressed")}</p>
             </div>
           )}
         </section>

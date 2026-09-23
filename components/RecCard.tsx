@@ -151,7 +151,7 @@ export function RecCard({
           type="button"
           onClick={toggleTrace}
           aria-expanded={traceOpen}
-          className="min-h-[44px] rounded-md border border-[var(--color-line)] px-3 text-sm font-medium text-[var(--color-ink)] hover:border-[var(--color-accent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
+          className="min-h-[44px] rounded-md border border-[var(--color-line)] px-3 text-sm font-medium text-[var(--color-ink)] hover:border-[var(--color-accent)] hover:bg-[var(--color-canvas)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
         >
           {traceOpen ? t(locale, "recs.hideWhy") : t(locale, "recs.whyThisStep")}
         </button>
@@ -160,7 +160,7 @@ export function RecCard({
             type="button"
             onClick={complete}
             disabled={completeState === "busy" || completeState === "done"}
-            className="min-h-[44px] rounded-md bg-[var(--color-accent)] px-3 text-sm font-medium text-white hover:opacity-90 disabled:opacity-60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
+            className="min-h-[44px] rounded-md bg-[var(--color-accent)] px-3 text-sm font-medium text-white hover:bg-[var(--color-accent-hover)] disabled:opacity-60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
           >
             {completeState === "busy" ? t(locale, "recs.completing") : t(locale, "recs.completeButton")}
           </button>
@@ -170,7 +170,7 @@ export function RecCard({
             type="button"
             onClick={dismiss}
             disabled={dismissState === "busy" || dismissState === "done"}
-            className="min-h-[44px] rounded-md border border-[var(--color-line)] px-3 text-sm font-medium text-[var(--color-ink)] hover:border-[var(--color-accent)] disabled:opacity-60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
+            className="min-h-[44px] rounded-md border border-[var(--color-line)] px-3 text-sm font-medium text-[var(--color-ink)] hover:border-[var(--color-accent)] hover:bg-[var(--color-canvas)] disabled:opacity-60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
           >
             {dismissState === "busy" ? t(locale, "recs.dismissing") : t(locale, "recs.dismissButton")}
           </button>

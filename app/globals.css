@@ -59,4 +59,20 @@
   ::selection {
     background: color-mix(in srgb, var(--color-accent) 25%, transparent);
   }
+
+  /* Every clickable surface shows a pointer, app-wide - buttons, links,
+     disclosure toggles, and role="button" elements not covered above. */
+  a[href],
+  button:not(:disabled),
+  summary,
+  [role="button"] {
+    cursor: pointer;
+  }
+
+  /* Plain text links (not the button-styled ones, which already carry their
+     own hover background/border) get an underline + accent colour on hover. */
+  main a[href]:not([class*="rounded"]):hover {
+    text-decoration: underline;
+    color: var(--color-accent);
+  }
 }
