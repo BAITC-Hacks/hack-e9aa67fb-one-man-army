@@ -37,6 +37,8 @@ export default defineConfig({
     url: "http://localhost:3000/api/health",
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
-    env: { MODEL_REF: "mock:demo" },
+    // Pin the committed seed so local runs match a judge's clean clone (the
+    // organizer kit, when present locally, would otherwise be preferred).
+    env: { MODEL_REF: "mock:demo", DATASET_DIR: "data/seed", DATA_DIR: "data/e2e-store" },
   },
 });
