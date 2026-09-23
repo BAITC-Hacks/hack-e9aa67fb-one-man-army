@@ -81,9 +81,6 @@ export function AiSuggestions({ employeeId, locale }: { employeeId: string; loca
     <div className="mt-3 rounded-[var(--radius-lg)] border border-dashed border-violet-400 bg-violet-50 p-4 dark:bg-violet-950/20">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <span className="rounded-full bg-violet-600 px-2 py-0.5 text-xs font-medium text-white">
-            {t(locale, "suggest.aiBadge")}
-          </span>
           <p className="font-medium text-[var(--color-ink)]">{t(locale, "suggest.title")}</p>
         </div>
         <span className="rounded-full bg-violet-100 px-2 py-0.5 text-xs uppercase tracking-wide text-violet-700">
@@ -102,9 +99,6 @@ export function AiSuggestions({ employeeId, locale }: { employeeId: string; loca
                 className="rounded-md border border-dashed border-violet-300 bg-white/60 p-3 dark:bg-transparent"
               >
                 <div className="flex items-center gap-2">
-                  <span className="rounded bg-violet-100 px-1.5 py-0.5 text-[10px] font-medium text-violet-700">
-                    {t(locale, "suggest.aiBadge")}
-                  </span>
                   <p className="font-medium text-[var(--color-ink)]">{s.title}</p>
                 </div>
                 <p className="mt-1 text-sm text-[var(--color-muted)]">{s.rationale}</p>

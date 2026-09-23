@@ -62,9 +62,9 @@ highest-scoring remaining card takes the top slot.
 
 **Optional +30s insert (time-permitting, before "Mark complete") — AI
 suggestions for a no-step employee.** Log in
-as **E0065** (`PREREQ_BLOCKED`, no catalogue step). Point at the "AI
-suggestions — not in the catalogue" card: violet dashed border, "AI-generated"
-badge per item, a caution line, and the source badge (`llm`/`mock`/`template`)
+as **E0065** (`PREREQ_BLOCKED`, no catalogue step). Point at the "Other ways to grow:
+AI-generated ideas, not catalogue courses" card: violet dashed border, one
+caution line, and the source badge (`llm`/`mock`/`template`)
 — say plainly this is labelled distinctly from a catalogue recommendation and
 never creates or changes one. Data: `docs/live-runs/suggestions.md`.
 

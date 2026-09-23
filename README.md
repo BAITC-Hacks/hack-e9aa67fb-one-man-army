@@ -319,8 +319,9 @@ The same rule applies: **the model proposes, code decides.**
    `status: "no_reliable_suggestion"` — never a padded list. The deterministic
    template (`lib/ai/suggest-template.ts`) is used only when the model call
    itself fails or is offline, not as a top-up for rejected items.
-4. The card is labelled distinctly as AI output (violet dashed border,
-   "AI-generated" badges per item, a caution line, and the source badge —
+4. The card is labelled distinctly as AI output (violet dashed border, a
+   title saying the ideas are AI-generated and not catalogue courses, one
+   caution line, and the source badge —
    `llm` / `mock` / `template`) so it is never mistaken for a catalogue
    recommendation.
 5. Suggestions never create catalogue events, never change recommendations and
