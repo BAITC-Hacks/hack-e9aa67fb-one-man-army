@@ -110,3 +110,9 @@ changed.
 - `gpt-5-mini` was observed to time out once at this 8s budget; this was not
   investigated further (e.g. across multiple retries) given the time box -
   it is documented as a latency-class mismatch, not chased as a bug.
+
+---
+
+## Later live runs
+
+Repeated, larger live runs are in [`docs/live-runs/`](live-runs/): 50 explanation calls ([`explanations.md`](live-runs/explanations.md)), the eval suite repeated on two models ([`eval.md`](live-runs/eval.md)), and AI suggestions for all 34 employees with no catalogue step ([`suggestions.md`](live-runs/suggestions.md)).
