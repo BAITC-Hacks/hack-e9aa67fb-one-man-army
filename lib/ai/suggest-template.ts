@@ -16,21 +16,19 @@ function prereqTitle(locale: Locale, skillName: string): string {
   return `Close the prerequisite for "${skillName}" first`;
 }
 
-function prereqRationale(locale: Locale, gap: SuggestGapSkill, blocked?: SuggestBlockedEvent): string {
-  const detail = blocked ? blocked.detail : "";
+/** `blocked.missingPrereq` is always set here - callers only reach this for
+ * an "unlockable" event (see lib/domain/suggest.ts), and the real blocker
+ * (its missing prerequisite skill/levels) is what the text must describe,
+ * not the trajectory gap skill the event eventually develops. */
+function prereqRationale(locale: Locale, blocked: SuggestBlockedEvent): string {
+  const prereq = blocked.missingPrereq!;
   if (locale === "ru") {
-    return `Текущий уровень ${gap.effective} из ${gap.required} по «${gap.name}» блокирует обучение${
-      blocked ? ` («${blocked.title}»: ${detail})` : ""
-    }. Обсудите с руководителем короткий путь до нужного уровня.`;
+    return `Текущий уровень ${prereq.effective} из ${prereq.required} по «${prereq.name}» блокирует «${blocked.title}». Обсудите с руководителем короткий путь до нужного уровня.`;
   }
   if (locale === "kk") {
-    return `«${gap.name}» бойынша ағымдағы деңгей ${gap.effective}/${gap.required} оқытуды бөгейді${
-      blocked ? ` («${blocked.title}»: ${detail})` : ""
-    }. Жетекшіңізбен қажетті деңгейге жету жолын талқылаңыз.`;
+    return `«${prereq.name}» бойынша ағымдағы деңгей ${prereq.effective}/${prereq.required} «${blocked.title}» іс-шарасын бөгейді. Жетекшіңізбен қажетті деңгейге жету жолын талқылаңыз.`;
   }
-  return `Current level ${gap.effective} of ${gap.required} on "${gap.name}" is blocking the catalogue event${
-    blocked ? ` ("${blocked.title}": ${detail})` : ""
-  }. Discuss a short path to that level with your manager before it opens up.`;
+  return `Current level ${prereq.effective} of ${prereq.required} on "${prereq.name}" is blocking "${blocked.title}". Discuss a short path to that level with your manager before it opens up.`;
 }
 
 function maintainTitle(locale: Locale, skillName: string): string {
@@ -71,15 +69,19 @@ function requestRationale(locale: Locale, gap: SuggestGapSkill): string {
 export function buildTemplateSuggestions(context: SuggestContext, locale: Locale): Suggestion[] {
   const out: Suggestion[] = [];
   const gap = context.gapSkills[0];
+  // Only an "unlockable" blocked event (role+grade match, blocked solely by
+  // prereqs-met - see lib/domain/suggest.ts) carries `missingPrereq`. If
+  // none exists, PREREQ_BLOCKED falls through to the request_training
+  // fallback below rather than describing an incoherent path.
+  const unlockable = context.blockedEvents.find((b) => b.missingPrereq);
 
-  if (context.noStep === "PREREQ_BLOCKED" && gap) {
-    const blocked = context.blockedEvents[0];
+  if (context.noStep === "PREREQ_BLOCKED" && unlockable) {
     out.push({
       type: "prerequisite_path",
-      skill_id: gap.skill_id,
-      event_ids: blocked ? [blocked.event_id] : undefined,
-      title: prereqTitle(locale, gap.name),
-      rationale: prereqRationale(locale, gap, blocked),
+      skill_id: unlockable.missingPrereq!.skill_id,
+      event_ids: [unlockable.event_id],
+      title: prereqTitle(locale, unlockable.missingPrereq!.name),
+      rationale: prereqRationale(locale, unlockable),
     });
   } else if (context.noStep === "ALL_DONE" && context.masteredSkills[0]) {
     const mastered = context.masteredSkills[0];

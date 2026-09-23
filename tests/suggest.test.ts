@@ -60,10 +60,37 @@ describe("generateSuggestions (mock:demo)", () => {
     expect(result.suggestions.length).toBeGreaterThanOrEqual(1);
     expect(result.suggestions.length).toBeLessThanOrEqual(3);
     const gapIds = new Set(context.gapSkills.map((g) => g.skill_id));
+    const prereqIds = new Set(context.blockedEvents.filter((b) => b.missingPrereq).map((b) => b.missingPrereq!.skill_id));
     const eventIds = new Set(context.blockedEvents.map((b) => b.event_id));
     for (const s of result.suggestions) {
-      expect(gapIds.has(s.skill_id) || context.masteredSkills.some((m) => m.skill_id === s.skill_id)).toBe(true);
+      expect(gapIds.has(s.skill_id) || prereqIds.has(s.skill_id) || context.masteredSkills.some((m) => m.skill_id === s.skill_id)).toBe(true);
       for (const id of s.event_ids ?? []) expect(eventIds.has(id)).toBe(true);
+    }
+  });
+
+  it("E0065: no role/grade-mismatched event is ever referenced, and any prerequisite_path cites the real blocking skill", async () => {
+    const ds = await getDataset();
+    const emp = ds.employees.find((e) => e.employee_id === "E0065")!;
+    const context = buildSuggestContext("E0065", ds)!;
+    // Every blockedEvent the context exposes must actually target this
+    // employee's own role and grade - the E0065/EV_007 incoherence this
+    // guards against was an event blocked by "role not in target_roles"
+    // being offered as if it were a prerequisite path.
+    const eventById = new Map(ds.events.map((e) => [e.event_id, e]));
+    for (const b of context.blockedEvents) {
+      const event = eventById.get(b.event_id)!;
+      expect(event.target_roles).toContain(emp.role);
+      expect(event.target_grades).toContain(emp.grade);
+      expect(b.failedRule).toBe("prereqs-met");
+      expect(b.missingPrereq).toBeDefined();
+    }
+    const result = await generateSuggestions(context, "en");
+    for (const s of result.suggestions) {
+      if (s.type === "prerequisite_path") {
+        const cited = context.blockedEvents.find((b) => s.event_ids?.includes(b.event_id));
+        expect(cited).toBeDefined();
+        expect(cited!.missingPrereq!.skill_id).toBe(s.skill_id);
+      }
     }
   });
 
@@ -106,8 +133,9 @@ describe("generateSuggestions (mock:demo)", () => {
     expect(result.fallbackReason).toBe("no_valid_suggestions_from_model");
     // The template fallback itself only cites ids/numbers from the context.
     const gapIds = new Set(context.gapSkills.map((g) => g.skill_id));
+    const prereqIds = new Set(context.blockedEvents.filter((b) => b.missingPrereq).map((b) => b.missingPrereq!.skill_id));
     for (const s of result.suggestions) {
-      expect(gapIds.has(s.skill_id) || context.masteredSkills.some((m) => m.skill_id === s.skill_id)).toBe(true);
+      expect(gapIds.has(s.skill_id) || prereqIds.has(s.skill_id) || context.masteredSkills.some((m) => m.skill_id === s.skill_id)).toBe(true);
     }
   });
 

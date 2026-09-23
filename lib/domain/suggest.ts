@@ -25,6 +25,10 @@ export interface SuggestBlockedEvent {
   title: string;
   failedRule: string;
   detail: string;
+  /** Present only for "unlockable" events (role+grade match, develops a gap
+   * skill, blocked ONLY by prereqs-met) - the exact skill/levels a
+   * prerequisite_path suggestion may cite. */
+  missingPrereq?: { skill_id: string; name: string; required: number; effective: number };
 }
 
 export interface SuggestMasteredSkill {
@@ -98,13 +102,35 @@ export function buildSuggestContext(empId: string, ds: Dataset): SuggestContext 
         .slice(0, 5)
     : [];
 
+  // "Unlockable": targets this employee's own role AND grade, develops a
+  // gap skill, and the ONLY reason it is blocked is prereqs-met (failedRule
+  // is the first-failing rule in fixed order - not-mandatory, audience-role,
+  // audience-grade, prereqs-met, ... - so failedRule === "prereqs-met"
+  // already guarantees role/grade passed). Role/grade-mismatched or
+  // otherwise-blocked events are never offered as a prerequisite path
+  // (fixes: PREREQ_BLOCKED suggestions citing an event the employee's role
+  // isn't even targeted by, e.g. E0065/EV_007).
   const eventById = new Map(ds.events.map((e) => [e.event_id, e]));
   const blockedEvents: SuggestBlockedEvent[] = recs.blocked
     .filter((b) => {
       const event = eventById.get(b.event_id);
-      return event ? event.develops_skills.some((d) => gapSkillIds.has(d.skill_id)) : false;
+      if (!event) return false;
+      if (!event.target_roles.includes(emp.role) || !event.target_grades.includes(emp.grade)) return false;
+      if (!event.develops_skills.some((d) => gapSkillIds.has(d.skill_id))) return false;
+      return b.failedRule === "prereqs-met";
     })
-    .map((b) => ({ event_id: b.event_id, title: b.title, failedRule: b.failedRule, detail: b.detail }))
+    .map((b) => {
+      const event = eventById.get(b.event_id)!;
+      let missingPrereq: SuggestBlockedEvent["missingPrereq"];
+      for (const [skillId, required] of Object.entries(event.prerequisites)) {
+        const have = effective[skillId] ?? 0;
+        if (have < required) {
+          missingPrereq = { skill_id: skillId, name: skillNames.get(skillId) ?? skillId, required, effective: have };
+          break;
+        }
+      }
+      return { event_id: b.event_id, title: b.title, failedRule: b.failedRule, detail: b.detail, missingPrereq };
+    })
     .slice(0, 5);
 
   const own = ds.history.filter((h) => h.employee_id === empId);

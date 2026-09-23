@@ -48,7 +48,7 @@ function buildInstructions(locale: Locale): string {
     "Every suggestion's skill_id must be one of DATA.gapSkills (or DATA.masteredSkills, only for type maintain_and_share).",
     "Any event_ids you give must come only from DATA.blockedEvents. Use ONLY numbers/ids present in DATA - never invent one.",
     `Reply in locale "${locale}" (kk = Kazakh, ru = Russian, en = English).`,
-    "Allowed types: prerequisite_path (ONLY when DATA.noStep is PREREQ_BLOCKED, must cite a DATA.blockedEvents event_id),",
+    "Allowed types: prerequisite_path (ONLY when DATA.noStep is PREREQ_BLOCKED, must cite a DATA.blockedEvents event_id, and skill_id must be that event's own missingPrereq.skill_id - the real blocker, not the gap skill it develops),",
     "mentoring, stretch_assignment, peer_learning, request_training (ask HR to add catalogue training),",
     "maintain_and_share (ONLY when DATA.noStep is ALL_DONE, must cite a DATA.masteredSkills skill_id).",
     "Each suggestion needs: type, skill_id, an optional event_ids array, a short title, and a one-sentence rationale grounded in DATA.",
@@ -78,6 +78,11 @@ function contextGroundingSets(context: SuggestContext): { allowedIds: Set<string
     allowedIds.add(blocked.event_id);
     const numsInDetail = blocked.detail.match(NUMBER_PATTERN) ?? [];
     numsInDetail.forEach((n) => allowedNumbers.add(String(Number(n))));
+    if (blocked.missingPrereq) {
+      allowedIds.add(blocked.missingPrereq.skill_id);
+      allowedNumbers.add(String(blocked.missingPrereq.required));
+      allowedNumbers.add(String(blocked.missingPrereq.effective));
+    }
   }
   return { allowedIds, allowedNumbers };
 }
@@ -97,11 +102,29 @@ function isGroundedText(text: string, allowed: { allowedIds: Set<string>; allowe
   return true;
 }
 
+/**
+ * `context.blockedEvents` is already restricted to "unlockable" events by
+ * `buildSuggestContext` (role+grade match, develops a gap skill, blocked
+ * ONLY by prereqs-met) - a role/grade-mismatched event never reaches here.
+ * A `prerequisite_path` must cite one of those events AND its skill_id must
+ * be that event's own missing-prerequisite skill (chosen over the gap skill
+ * the event develops, since the prerequisite is the actual blocker and the
+ * one the employee needs to act on).
+ */
 function isValidSuggestion(
   suggestion: Suggestion,
   context: SuggestContext,
   allowed: { allowedIds: Set<string>; allowedNumbers: Set<string> },
 ): boolean {
+  if (suggestion.type === "prerequisite_path") {
+    if (context.noStep !== "PREREQ_BLOCKED") return false;
+    if (!suggestion.event_ids || suggestion.event_ids.length === 0) return false;
+    const events = context.blockedEvents.filter((b) => suggestion.event_ids!.includes(b.event_id));
+    if (events.length !== suggestion.event_ids.length) return false;
+    if (!events.every((e) => e.missingPrereq && e.missingPrereq.skill_id === suggestion.skill_id)) return false;
+    return isGroundedText(`${suggestion.title}\n${suggestion.rationale}`, allowed);
+  }
+
   const knownSkill =
     suggestion.type === "maintain_and_share"
       ? context.masteredSkills.some((m) => m.skill_id === suggestion.skill_id)
@@ -111,10 +134,6 @@ function isValidSuggestion(
   const knownEventIds = new Set(context.blockedEvents.map((b) => b.event_id));
   if (suggestion.event_ids && !suggestion.event_ids.every((id) => knownEventIds.has(id))) return false;
 
-  if (suggestion.type === "prerequisite_path") {
-    if (context.noStep !== "PREREQ_BLOCKED") return false;
-    if (!suggestion.event_ids || suggestion.event_ids.length === 0) return false;
-  }
   if (suggestion.type === "maintain_and_share" && context.noStep !== "ALL_DONE") return false;
 
   return isGroundedText(`${suggestion.title}\n${suggestion.rationale}`, allowed);
