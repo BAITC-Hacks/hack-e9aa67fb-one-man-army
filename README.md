@@ -115,7 +115,7 @@ have"), quoted via `docs/requirements.md`:
 
 | ID | Requirement | Implementation | Evidence | Status |
 | --- | --- | --- | --- | --- |
-| R-01 | Employee profile: role, grade, skills, history, next steps | `app/employee/[id]/page.tsx`, `lib/domain/trajectory.ts` | `tests/trajectory.test.ts`, `tests/engine.test.ts` | ✅ |
+| R-01 | Employee profile: role, grade, skills, completed activities, next steps | `app/employee/[id]/page.tsx`, `lib/domain/trajectory.ts`, `lib/domain/completed.ts` ("Completed activities" section: title, date, format, skills raised) | `tests/trajectory.test.ts`, `tests/engine.test.ts`, `tests/completed.test.ts` | ✅ |
 | R-02 | Career trajectory with per-skill gap | `lib/domain/trajectory.ts` | `tests/trajectory.test.ts` | ✅ |
 | R-03 | 1–3 eligible voluntary recommendations | `lib/domain/recommend.ts`, `lib/rules/eligibility.ts` | `tests/engine.test.ts` | ✅ |
 | R-04 | Rationale cites ≥ 3 distinct factors with numbers, as human-readable sentences | `lib/ai/rationale.ts` (sentence builder), `lib/ai/template.ts`, `lib/ai/grounding.ts` (numeric grounding), `lib/ai/explain.ts` (honest `source: llm\|mock\|template` badge) | `tests/explain.test.ts` | ✅ |

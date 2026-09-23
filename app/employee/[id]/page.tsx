@@ -13,6 +13,7 @@ import { getDataset } from "@/lib/data/load";
 import { trajectory } from "@/lib/domain/trajectory";
 import { recommend } from "@/lib/domain/recommend";
 import { gradePath, GradePathProfileIncompleteError } from "@/lib/domain/gradePath";
+import { completedActivities } from "@/lib/domain/completed";
 import { DEFAULT_LOCALE, isLocale, type Locale } from "@/lib/i18n/i18n";
 import { t, tf } from "@/lib/i18n/dict";
 import { RoleBar } from "@/components/RoleBar";
@@ -163,6 +164,9 @@ export default async function EmployeePage({ params }: { params: Promise<{ id: s
   }
 
   const skillNames: Record<string, string> = Object.fromEntries(ds.skills.map((s) => [s.skill_id, s.name]));
+  const completed = completedActivities(employee, ds);
+  const completedVisible = completed.slice(0, 10);
+  const completedRest = completed.slice(10);
 
   // Group blocked candidates by the rule that stopped them, so the UI shows
   // "Not for your role (28)" instead of dozens of raw per-event rows.
@@ -260,6 +264,58 @@ export default async function EmployeePage({ params }: { params: Promise<{ id: s
                 ))}
               </ul>
             </details>
+          )}
+        </section>
+
+        {/* 2b. Completed activities: read-only history, newest first. */}
+        <section aria-labelledby="completed-heading">
+          <h2 id="completed-heading" className="text-base font-semibold text-[var(--color-ink)]">
+            {t(locale, "completed.title")}
+          </h2>
+          {completed.length === 0 ? (
+            <p className="mt-2 text-sm text-[var(--color-muted)]">{t(locale, "completed.empty")}</p>
+          ) : (
+            <>
+              <ul className="mt-3 divide-y divide-[var(--color-line)] rounded-[var(--radius-lg)] border border-[var(--color-line)] bg-[var(--color-surface)]">
+                {completedVisible.map((item) => (
+                  <li key={item.record_id} className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 px-4 py-3">
+                    <div>
+                      <p className="font-semibold text-[var(--color-ink)]">{item.title}</p>
+                      {item.skills.length > 0 && (
+                        <p className="mt-0.5 text-xs text-[var(--color-muted)]">
+                          {item.skills.map((s) => tf(locale, "completed.skillGain", { gain: s.gain, skill: s.name })).join(" · ")}
+                        </p>
+                      )}
+                    </div>
+                    <span className="whitespace-nowrap text-sm text-[var(--color-muted)]">{item.date}</span>
+                  </li>
+                ))}
+              </ul>
+              {completedRest.length > 0 && (
+                <details className="mt-3">
+                  <summary className="cursor-pointer rounded text-sm font-semibold text-[var(--color-ink)] hover:text-[var(--color-accent)]">
+                    {tf(locale, "completed.showAll", { count: completed.length })}
+                  </summary>
+                  <ul className="mt-2 divide-y divide-[var(--color-line)] rounded-[var(--radius-lg)] border border-[var(--color-line)] bg-[var(--color-surface)]">
+                    {completedRest.map((item) => (
+                      <li key={item.record_id} className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 px-4 py-3">
+                        <div>
+                          <p className="font-semibold text-[var(--color-ink)]">{item.title}</p>
+                          {item.skills.length > 0 && (
+                            <p className="mt-0.5 text-xs text-[var(--color-muted)]">
+                              {item.skills
+                                .map((s) => tf(locale, "completed.skillGain", { gain: s.gain, skill: s.name }))
+                                .join(" · ")}
+                            </p>
+                          )}
+                        </div>
+                        <span className="whitespace-nowrap text-sm text-[var(--color-muted)]">{item.date}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </details>
+              )}
+            </>
           )}
         </section>
 

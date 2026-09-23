@@ -76,6 +76,11 @@ const en = {
   "gaps.pendingFrom": "Pending gain from",
   "gaps.empty": "No gaps recorded - every required skill is already at or above target.",
 
+  "completed.title": "Completed activities",
+  "completed.empty": "No completed activities yet.",
+  "completed.showAll": "Show all ({count})",
+  "completed.skillGain": "+{gain} {skill}",
+
   "recs.title": "Recommended next steps",
   "recs.subtitle": "Up to three, ranked by how much they close a real, critical gap - not by popularity.",
   "recs.empty.title": "No step to recommend right now",
@@ -382,6 +387,11 @@ const ru: Dict = {
   "gaps.pendingFrom": "Ожидаемый прирост от",
   "gaps.empty": "Пробелов нет - все требуемые навыки уже на целевом уровне или выше.",
 
+  "completed.title": "Завершённые активности",
+  "completed.empty": "Пока нет завершённых активностей.",
+  "completed.showAll": "Показать все ({count})",
+  "completed.skillGain": "{skill}: +{gain}",
+
   "recs.title": "Рекомендованные следующие шаги",
   "recs.subtitle": "До трёх пунктов, ранжированных по тому, насколько они закрывают реальный критичный пробел, а не по популярности.",
   "recs.empty.title": "Сейчас нет шага для рекомендации",
@@ -685,6 +695,11 @@ const kk: Dict = {
   "gaps.regular": "Ашық олқылық",
   "gaps.pendingFrom": "Күтілетін өсім",
   "gaps.empty": "Олқылықтар жоқ - барлық қажетті дағдылар мақсатты деңгейде немесе одан жоғары.",
+
+  "completed.title": "Аяқталған әрекеттер",
+  "completed.empty": "Әзірге аяқталған әрекеттер жоқ.",
+  "completed.showAll": "Барлығын көрсету ({count})",
+  "completed.skillGain": "{skill}: +{gain}",
 
   "recs.title": "Ұсынылатын келесі қадамдар",
   "recs.subtitle": "Ең көбі үш қадам, олар танымалдығы бойынша емес, нақты әрі маңызды олқылықты қаншалықты жабатынына қарай реттелген.",
