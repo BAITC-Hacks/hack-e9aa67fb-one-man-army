@@ -11,18 +11,13 @@
  */
 import type { Factor, Locale } from "../contracts";
 import type { MockScenario } from "./mock-provider";
+import { buildWhyLines, buildExpectedProgress } from "./rationale";
 
 interface ExplainPromptData {
   title: string;
   factors: Factor[];
   expected: Array<{ skill_id: string; from: number; to: number; max_level: number }>;
 }
-
-const CONNECT: Record<Locale, { contributes: string; addresses: string; progress: string }> = {
-  en: { contributes: "contributes", addresses: "Fits your track for", progress: "Expected: " },
-  ru: { contributes: "вклад", addresses: "Подходит для вашего трека:", progress: "Ожидается: " },
-  kk: { contributes: "үлесі", addresses: "Сіздің бағытыңызға сай:", progress: "Күтілуде: " },
-};
 
 /**
  * Explanation scenario (ADR-0007, docs/architecture.md §5).
@@ -42,22 +37,9 @@ export const scenarios: MockScenario[] = [
       const locale = (localeMatch?.[1] as Locale | undefined) ?? "en";
       const marker = "DATA:\n";
       const data = JSON.parse(prompt.slice(prompt.indexOf(marker) + marker.length)) as ExplainPromptData;
-      const phrase = CONNECT[locale] ?? CONNECT.en;
 
-      const why = data.factors.slice(0, 4).map((factor) => {
-        const values = Object.entries(factor.values)
-          .map(([key, value]) => `${key}=${value}`)
-          .join(", ");
-        return `${factor.kind}: ${phrase.contributes} ${factor.contribution} (${values})`;
-      });
-      while (why.length < 3) why.push(`${phrase.addresses} ${data.title}.`);
-
-      const expected_progress =
-        data.expected.length > 0
-          ? `${phrase.progress}${data.expected
-              .map((item) => `${item.skill_id} ${item.from}→${item.to} (max ${item.max_level})`)
-              .join("; ")}`
-          : `${phrase.progress}${data.title}`;
+      const why = buildWhyLines(locale, data.title, data.factors);
+      const expected_progress = buildExpectedProgress(locale, data.title, data.expected);
 
       return {
         kind: "object",

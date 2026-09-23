@@ -7,6 +7,12 @@
  * At least 3 distinct factor kinds must be cited, matching R-04's "no
  * single-field AI" rule. Failing any of this is not an error - it is the
  * signal to fall back to the deterministic template.
+ *
+ * Kind citation only counts a factor that actually contributed (`raw !== 0`):
+ * a factor's constant `weight` and a bare "0" are excluded from evidence, so
+ * a zero-contribution factor (e.g. `career_goal: hasGoal=0`) can no longer be
+ * "cited" for free just because its weight or contribution happens to render
+ * as a common digit somewhere else in the text.
  */
 import type { Factor, FactorKind } from "../contracts";
 
@@ -26,14 +32,31 @@ export function groundingCheck(text: string, input: GroundingInput): GroundingRe
   const kindsAvailable: Array<{ kind: FactorKind; tokens: string[] }> = [];
 
   for (const factor of input.factors) {
-    const tokens = [String(factor.raw), String(factor.weight), String(factor.contribution)];
+    const numberTokens = [String(factor.raw), String(factor.contribution)];
+    // Every value (string or number) is a candidate citation token - a grade
+    // name ("Senior") or a format ("self_paced") is just as valid evidence
+    // that a kind was discussed as a number is.
+    const valueTokens: string[] = [];
     for (const value of Object.values(factor.values)) {
-      if (typeof value === "number") tokens.push(String(value));
+      valueTokens.push(String(value));
+      if (typeof value === "number") numberTokens.push(String(value));
       else if (ID_PATTERN.test(value)) allowedIds.add(value);
       ID_PATTERN.lastIndex = 0;
     }
-    tokens.forEach((t) => allowedNumbers.add(t));
-    kindsAvailable.push({ kind: factor.kind, tokens });
+    // `weight` is a fixed config constant, not a fact about this employee -
+    // it is a valid number to appear in text (so it doesn't false-fail
+    // grounding) but must never count as evidence that a kind was cited.
+    allowedNumbers.add(String(factor.weight));
+    numberTokens.forEach((n) => allowedNumbers.add(n));
+
+    // Only a factor that actually contributed (or, for a negative-weight
+    // factor like the participation penalty, actively worked against the
+    // score) is eligible to be "cited" - and a bare "0" never counts as
+    // evidence on its own, since it signals absence, not a cited fact.
+    if (factor.raw !== 0) {
+      const citeTokens = [...new Set([...numberTokens, ...valueTokens])].filter((token) => token !== "0");
+      kindsAvailable.push({ kind: factor.kind, tokens: citeTokens });
+    }
   }
   for (const item of input.expected ?? []) {
     allowedNumbers.add(String(item.from));

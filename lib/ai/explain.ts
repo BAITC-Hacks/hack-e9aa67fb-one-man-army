@@ -82,12 +82,18 @@ export async function explain(
       return templateExplanation(rec, locale, `grounding_failed: ${grounding.reason}`);
     }
 
+    // The mock provider self-identifies as `provider: "mock"` (see
+    // ./mock-provider.ts). Label it truthfully - it is a deterministic
+    // scripted response, not a real model call, even though it went through
+    // the same generateStructured + grounding pipeline as a live provider.
+    const source: Explanation["source"] = resolved.provider === "mock" ? "mock" : "llm";
+
     return {
       event_id: rec.event_id,
       headline: result.data.headline,
       why: result.data.why,
       expected_progress: result.data.expected_progress,
-      source: "llm",
+      source,
     };
   } catch (error) {
     const reason = error instanceof Error ? error.message : "unknown_error";

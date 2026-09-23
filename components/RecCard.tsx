@@ -169,7 +169,7 @@ export function RecCard({
                   ))}
                 </ul>
                 <span className="mt-1 inline-block rounded-full bg-[var(--color-canvas)] px-2 py-0.5 text-xs uppercase tracking-wide text-[var(--color-muted)]">
-                  {explanation.source}
+                  {t(locale, `explain.source.${explanation.source}`)}
                 </span>
               </div>
             )}

@@ -101,6 +101,11 @@ export const NoStepReason = z.enum([
   "CATALOGUE_GAP",
   "ALL_DONE",
   "DATA_INCOMPLETE",
+  // Appended, backward compatible: eligible candidates exist (gaps are
+  // real and the catalogue has a matching event) but every candidate's
+  // score is <= 0 (typically a heavy F5 participation penalty). Distinct
+  // from DATA_INCOMPLETE, which means the profile itself is broken.
+  "LOW_FIT",
 ]);
 export type NoStepReason = z.infer<typeof NoStepReason>;
 
@@ -121,7 +126,10 @@ export const Explanation = z.object({
   headline: z.string(),
   why: z.array(z.string()).min(3).max(5),
   expected_progress: z.string(),
-  source: z.enum(["llm", "template"]),
+  /** "llm" = a live provider call; "mock" = the offline scripted model (still
+   *  ran through generateStructured + grounding, just deterministic); "template"
+   *  = the deterministic fallback used on any failure. Never label "mock" as "llm". */
+  source: z.enum(["llm", "mock", "template"]),
   fallbackReason: z.string().optional(),
 });
 export type Explanation = z.infer<typeof Explanation>;
