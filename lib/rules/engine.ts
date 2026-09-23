@@ -25,9 +25,9 @@ export type RuleOutcome =
   | { status: "fail"; detail: string }
   /**
    * The rule could not be evaluated: a fact is missing, or a source that would
-   * supply it was unreachable. This must NEVER collapse into "fail" - telling a
-   * citizen they are ineligible because a registry was down is a wrong answer
-   * wearing the clothes of a decision.
+   * supply it was unreachable. This must NEVER collapse into "fail" - telling an
+   * employee they are ineligible because a data source was down is a wrong
+   * answer wearing the clothes of a decision.
    */
   | { status: "undetermined"; detail: string }
   | { status: "not-applicable"; detail?: string };
@@ -49,7 +49,7 @@ export interface Decision {
   /** True only when status is "granted". Fails closed. */
   granted: boolean;
   trace: RuleTraceEntry[];
-  /** The first failing rule, which is the one to show the citizen. */
+  /** The first failing rule, which is the one to show the employee. */
   blockedBy?: RuleTraceEntry;
   /** Rules that could not be evaluated. Non-empty when status is "undetermined". */
   undeterminedBy: RuleTraceEntry[];

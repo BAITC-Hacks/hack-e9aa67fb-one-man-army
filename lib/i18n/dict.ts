@@ -200,6 +200,22 @@ const en = {
   "import.report.message": "Message",
 
   "recs.noStep.LOW_FIT": "There are eligible steps, but none score well enough right now (often due to past no-shows or declines).",
+
+  "gradePath.title": "Path to {grade}",
+  "gradePath.subtitle": "A voluntary plan - not a requirement or a deadline. Follow it at whatever pace suits you.",
+  "gradePath.current": "Current",
+  "gradePath.target": "Target",
+  "gradePath.held.title": "You already hold {grade}, the top grade",
+  "gradePath.held.body": "There's no further grade to plan toward. This shows what it takes to stay strong at {grade}.",
+  "gradePath.gapsTitle": "What {grade} requires",
+  "gradePath.gaps.empty": "You already meet every requirement for {grade}.",
+  "gradePath.stepsTitle": "Steps that would get you there",
+  "gradePath.steps.empty": "No catalogue event currently closes a gap toward {grade}.",
+  "gradePath.stepMoves": "Moves",
+  "gradePath.unresolvedTitle": "Gaps nothing in the catalogue closes yet",
+  "gradePath.unresolvedBody": "no activity in the catalogue closes this yet - talk to HR",
+  "gradePath.unavailable": "A path can't be computed for this profile yet.",
+  "gradePath.critical": "Critical",
 } satisfies Record<string, string>;
 
 type Dict = { [K in keyof typeof en]: string };
@@ -398,6 +414,22 @@ const ru: Dict = {
   "import.report.message": "Сообщение",
 
   "recs.noStep.LOW_FIT": "Есть подходящие шаги, но ни один пока не набирает нужный балл (часто из-за прошлых пропусков или отказов).",
+
+  "gradePath.title": "Путь к грейду {grade}",
+  "gradePath.subtitle": "Это добровольный план - не требование и не дедлайн. Следуйте ему в удобном для вас темпе.",
+  "gradePath.current": "Текущий",
+  "gradePath.target": "Цель",
+  "gradePath.held.title": "Вы уже на грейде {grade} - это высший уровень",
+  "gradePath.held.body": "Дальнейшего грейда нет. Здесь показано, что нужно, чтобы уверенно оставаться на уровне {grade}.",
+  "gradePath.gapsTitle": "Что требуется для {grade}",
+  "gradePath.gaps.empty": "Вы уже соответствуете всем требованиям для {grade}.",
+  "gradePath.stepsTitle": "Шаги, которые приведут вас туда",
+  "gradePath.steps.empty": "В каталоге пока нет мероприятия, закрывающего пробел на пути к {grade}.",
+  "gradePath.stepMoves": "Изменяет",
+  "gradePath.unresolvedTitle": "Пробелы, которые пока ничего в каталоге не закрывает",
+  "gradePath.unresolvedBody": "в каталоге пока нет мероприятия, закрывающего это - обратитесь в HR",
+  "gradePath.unavailable": "Для этого профиля пока нельзя рассчитать путь.",
+  "gradePath.critical": "Критично",
 };
 
 const kk: Dict = {
@@ -594,6 +626,22 @@ const kk: Dict = {
   "import.report.message": "Хабарлама",
 
   "recs.noStep.LOW_FIT": "Қолайлы қадамдар бар, бірақ олардың ешқайсысы әзірге жеткілікті балл жинамайды (көбіне бұрынғы қатыспаулар немесе бас тартулар себебінен).",
+
+  "gradePath.title": "{grade} грейдіне дейінгі жол",
+  "gradePath.subtitle": "Бұл ерікті жоспар - талап немесе мерзім емес. Өзіңізге ыңғайлы қарқынмен жүріңіз.",
+  "gradePath.current": "Ағымдағы",
+  "gradePath.target": "Мақсат",
+  "gradePath.held.title": "Сіз қазірдің өзінде {grade} грейдіндесіз - бұл ең жоғарғы деңгей",
+  "gradePath.held.body": "Одан кейінгі грейд жоқ. Мұнда {grade} деңгейінде сенімді қалу үшін не қажет екені көрсетілген.",
+  "gradePath.gapsTitle": "{grade} үшін не талап етіледі",
+  "gradePath.gaps.empty": "Сіз {grade} үшін барлық талаптарға сай келесіз.",
+  "gradePath.stepsTitle": "Сізді сол жерге жеткізетін қадамдар",
+  "gradePath.steps.empty": "Каталогта {grade} дейінгі олқылықты жабатын іс-шара әзірге жоқ.",
+  "gradePath.stepMoves": "Өзгертеді",
+  "gradePath.unresolvedTitle": "Каталогта әзірге ештеңе жаппайтын олқылықтар",
+  "gradePath.unresolvedBody": "каталогта мұны жабатын іс-шара әзірге жоқ - HR-ға хабарласыңыз",
+  "gradePath.unavailable": "Бұл профиль үшін жол әзірге есептелмейді.",
+  "gradePath.critical": "Маңызды",
 };
 
 export const dict: Record<Locale, Record<string, string>> = {

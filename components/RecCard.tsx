@@ -20,10 +20,14 @@ export function RecCard({
   rec,
   employeeId,
   locale,
+  readOnly = false,
 }: {
   rec: Recommendation;
   employeeId: string;
   locale: Locale;
+  /** HR viewing another employee's profile: actions are the employee's own
+   *  choice to make, not HR's - the server also rejects these with 403. */
+  readOnly?: boolean;
 }) {
   const router = useRouter();
   const [traceOpen, setTraceOpen] = useState(false);
@@ -121,30 +125,36 @@ export function RecCard({
         >
           {traceOpen ? t(locale, "recs.hideWhy") : t(locale, "recs.whyThisStep")}
         </button>
-        <button
-          type="button"
-          onClick={complete}
-          disabled={completeState === "busy" || completeState === "done"}
-          className="min-h-[44px] rounded-md bg-[var(--color-accent)] px-3 text-sm font-medium text-white hover:opacity-90 disabled:opacity-60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
-        >
-          {completeState === "busy" ? t(locale, "recs.completing") : t(locale, "recs.completeButton")}
-        </button>
-        <button
-          type="button"
-          onClick={dismiss}
-          disabled={dismissState === "busy" || dismissState === "done"}
-          className="min-h-[44px] rounded-md border border-[var(--color-line)] px-3 text-sm font-medium text-[var(--color-ink)] hover:border-[var(--color-accent)] disabled:opacity-60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
-        >
-          {dismissState === "busy" ? t(locale, "recs.dismissing") : t(locale, "recs.dismissButton")}
-        </button>
+        {!readOnly && (
+          <button
+            type="button"
+            onClick={complete}
+            disabled={completeState === "busy" || completeState === "done"}
+            className="min-h-[44px] rounded-md bg-[var(--color-accent)] px-3 text-sm font-medium text-white hover:opacity-90 disabled:opacity-60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
+          >
+            {completeState === "busy" ? t(locale, "recs.completing") : t(locale, "recs.completeButton")}
+          </button>
+        )}
+        {!readOnly && (
+          <button
+            type="button"
+            onClick={dismiss}
+            disabled={dismissState === "busy" || dismissState === "done"}
+            className="min-h-[44px] rounded-md border border-[var(--color-line)] px-3 text-sm font-medium text-[var(--color-ink)] hover:border-[var(--color-accent)] disabled:opacity-60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
+          >
+            {dismissState === "busy" ? t(locale, "recs.dismissing") : t(locale, "recs.dismissButton")}
+          </button>
+        )}
       </div>
 
-      <div aria-live="polite" className="mt-2 text-sm">
-        {completeState === "done" && <p className="text-emerald-700">{t(locale, "recs.completeSuccess")}</p>}
-        {completeState === "error" && <p className="text-red-700">{t(locale, "recs.completeError")}</p>}
-        {dismissState === "done" && <p className="text-emerald-700">{t(locale, "recs.dismissSuccess")}</p>}
-        {dismissState === "error" && <p className="text-red-700">{t(locale, "recs.dismissError")}</p>}
-      </div>
+      {!readOnly && (
+        <div aria-live="polite" className="mt-2 text-sm">
+          {completeState === "done" && <p className="text-emerald-700">{t(locale, "recs.completeSuccess")}</p>}
+          {completeState === "error" && <p className="text-red-700">{t(locale, "recs.completeError")}</p>}
+          {dismissState === "done" && <p className="text-emerald-700">{t(locale, "recs.dismissSuccess")}</p>}
+          {dismissState === "error" && <p className="text-red-700">{t(locale, "recs.dismissError")}</p>}
+        </div>
+      )}
 
       {traceOpen && (
         <>

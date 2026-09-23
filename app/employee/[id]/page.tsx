@@ -12,11 +12,13 @@ import { auditHrProfileView } from "@/lib/audit/hr-access";
 import { getDataset } from "@/lib/data/load";
 import { trajectory } from "@/lib/domain/trajectory";
 import { recommend } from "@/lib/domain/recommend";
+import { gradePath, GradePathProfileIncompleteError } from "@/lib/domain/gradePath";
 import { DEFAULT_LOCALE, isLocale, type Locale } from "@/lib/i18n/i18n";
-import { t } from "@/lib/i18n/dict";
+import { t, tf } from "@/lib/i18n/dict";
 import { RoleBar } from "@/components/RoleBar";
 import { GapTable } from "@/components/GapTable";
 import { RecCard } from "@/components/RecCard";
+import { GradePath } from "@/components/GradePath";
 
 async function readLocale(): Promise<Locale> {
   const store = await cookies();
@@ -147,6 +149,16 @@ export default async function EmployeePage({ params }: { params: Promise<{ id: s
     );
   }
 
+  // The grade path is a supplementary panel: if the profile can't support it
+  // (no catalogue profile / no assessed skills), the rest of the page still
+  // renders and the panel says so honestly instead of failing the page.
+  let gp: ReturnType<typeof gradePath> | null = null;
+  try {
+    gp = gradePath(employee, ds);
+  } catch (error) {
+    if (!(error instanceof GradePathProfileIncompleteError)) throw error;
+  }
+
   const identityLabel =
     session.role === "hr"
       ? `${t(locale, "common.viewingAsHr")}: ${employee.full_name} (${id})`
@@ -184,6 +196,17 @@ export default async function EmployeePage({ params }: { params: Promise<{ id: s
           </p>
         </section>
 
+        {gp ? (
+          <GradePath path={gp} locale={locale} />
+        ) : (
+          <section aria-labelledby="grade-path-unavailable-heading">
+            <h2 id="grade-path-unavailable-heading" className="text-base font-semibold text-[var(--color-ink)]">
+              {tf(locale, "gradePath.title", { grade: employee.grade })}
+            </h2>
+            <p className="mt-2 text-sm text-[var(--color-muted)]">{t(locale, "gradePath.unavailable")}</p>
+          </section>
+        )}
+
         <GapTable rows={traj.gaps} locale={locale} title={t(locale, "gaps.title")} />
         {traj.currentGradeGaps.length > 0 && (
           <GapTable rows={traj.currentGradeGaps} locale={locale} title={t(locale, "gaps.currentGradeTitle")} />
@@ -206,7 +229,13 @@ export default async function EmployeePage({ params }: { params: Promise<{ id: s
           ) : (
             <ul className="mt-3 space-y-3">
               {recs.recommendations.map((rec) => (
-                <RecCard key={rec.event_id} rec={rec} employeeId={id} locale={locale} />
+                <RecCard
+                  key={rec.event_id}
+                  rec={rec}
+                  employeeId={id}
+                  locale={locale}
+                  readOnly={session.role === "hr"}
+                />
               ))}
             </ul>
           )}

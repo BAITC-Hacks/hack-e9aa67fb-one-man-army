@@ -2,8 +2,8 @@
 
 /*
  * A restrained, institutional palette. Adjust the hues to suit the challenge,
- * but keep one accent used sparingly for the primary action - a government
- * service should read as calm and credible, not as a generated dashboard.
+ * but keep one accent used sparingly for the primary action - an internal
+ * HR tool should read as calm and credible, not as a generated dashboard.
  */
 @theme {
   --color-ink: #16202c;

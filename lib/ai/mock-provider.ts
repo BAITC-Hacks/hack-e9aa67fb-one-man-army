@@ -122,7 +122,7 @@ export function createMockModel(
     if (hit) return hit.respond(text, callOptions);
     if (options.fallback) return options.fallback(text);
     // Fail loudly and catchably rather than emitting prose that would fail a
-    // schema, or land a developer note on a citizen-facing page.
+    // schema, or land a developer note on an employee-facing page.
     throw new NoMockScenarioError(modelId, text.slice(0, 80));
   };
 

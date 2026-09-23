@@ -58,7 +58,7 @@ export const scenarios: MockScenario[] = [
  *
  *   - against a structured-output schema it fails validation and, uncaught,
  *     becomes a 500 in front of a judge;
- *   - caught but rendered, it prints a developer note onto a citizen-facing
+ *   - caught but rendered, it prints a developer note onto an employee-facing
  *     page, in the wrong language.
  *
  * With no fallback, `createMockModel` raises `NoMockScenarioError` instead: a
