@@ -170,6 +170,101 @@ describe("generateSuggestions (mock:demo)", () => {
     expect(result.source).toBe("template");
   });
 
+  it("an invented offering name in the rationale ('Peer Mentorship Program') is dropped, falling back to the template", async () => {
+    const ds = await getDataset();
+    const context = buildSuggestContext("E0065", ds)!;
+    const gap = context.gapSkills[0]!;
+    const inventedModel = createMockModel("invented-offering", {
+      scenarios: [
+        {
+          name: "invented",
+          match: () => true,
+          respond: () => ({
+            kind: "object",
+            value: {
+              suggestions: [
+                {
+                  type: "mentoring",
+                  skill_id: gap.skill_id,
+                  event_ids: [],
+                  rationale: `Join the Peer Mentorship Program to close the gap of ${gap.effective} of ${gap.required}.`,
+                },
+              ],
+            },
+          }),
+        },
+      ],
+    });
+    const result = await generateSuggestions(context, "en", inventedModel);
+    expect(result.source).toBe("template");
+    for (const s of result.suggestions) {
+      expect(s.rationale.toLowerCase()).not.toContain("peer mentorship program");
+    }
+  });
+
+  it("a rationale naming a foreign dataset skill is dropped, falling back to the template", async () => {
+    const ds = await getDataset();
+    const context = buildSuggestContext("E0065", ds)!;
+    const gap = context.gapSkills[0]!;
+    const foreignSkill = ds.skills.find((s) => s.name !== gap.name)!;
+    const foreignModel = createMockModel("foreign-skill", {
+      scenarios: [
+        {
+          name: "foreign",
+          match: () => true,
+          respond: () => ({
+            kind: "object",
+            value: {
+              suggestions: [
+                {
+                  type: "mentoring",
+                  skill_id: gap.skill_id,
+                  event_ids: [],
+                  rationale: `This also helps with ${foreignSkill.name}, currently at ${gap.effective} of ${gap.required}.`,
+                },
+              ],
+            },
+          }),
+        },
+      ],
+    });
+    const result = await generateSuggestions(context, "en", foreignModel);
+    expect(result.source).toBe("template");
+  });
+
+  it("titles are never taken from the model - they are code-generated from the skill/event name", async () => {
+    const ds = await getDataset();
+    const context = buildSuggestContext("E0065", ds)!;
+    const gap = context.gapSkills[0]!;
+    const titleInjectingModel = createMockModel("title-injection", {
+      scenarios: [
+        {
+          name: "title",
+          match: () => true,
+          respond: () => ({
+            kind: "object",
+            value: {
+              suggestions: [
+                {
+                  type: "mentoring",
+                  skill_id: gap.skill_id,
+                  event_ids: [],
+                  title: "Guaranteed promotion in 30 days", // model schema no longer even accepts this key
+                  rationale: `Discuss ${gap.name} with your manager (currently ${gap.effective} of ${gap.required}).`,
+                },
+              ],
+            },
+          }),
+        },
+      ],
+    });
+    const result = await generateSuggestions(context, "en", titleInjectingModel);
+    for (const s of result.suggestions) {
+      expect(s.title).not.toContain("Guaranteed promotion");
+      expect(s.title).toContain(gap.name);
+    }
+  });
+
   it("a provider timeout falls back to the deterministic template", async () => {
     const ds = await getDataset();
     const context = buildSuggestContext("E0065", ds)!;

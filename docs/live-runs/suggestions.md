@@ -198,3 +198,24 @@ through unlockable events, which is what validation allows.
 - Tokens and cost are not exposed by `generateSuggestions`, so they are not
   reported.
 - ru/kk samples are small (n = 5 each).
+
+---
+
+## Re-run with guardrails (2026-09-23, 17:40 Astana)
+
+Guardrails added (`lib/ai/suggest.ts`, `tests/suggest.test.ts`):
+
+- Titles are written by code from the type and the skill/event name; the model
+  cannot write a title.
+- A rationale is rejected if it names a skill or event other than the item's
+  own, mentions an offering (program, course, workshop, …) that is not an
+  allowed catalogue event, or frames a mastered skill as a gap.
+- If nothing survives, the card shows no suggestion (`no_reliable_suggestion`)
+  instead of padding.
+
+Same 44 calls on `openai:gpt-4o-mini`: 43 returned model output that passed
+validation, 1 used the template fallback, and no call returned zero. Validated
+suggestions dropped from 130 (first fixed run) to **107**: the guardrails
+removed 23 items that named something outside the context. Sample
+code-generated titles: "Mentor a colleague on "Mentoring"", "Take on a stretch
+assignment in "CRM Systems"", "Ask HR to add training for "API Design"".

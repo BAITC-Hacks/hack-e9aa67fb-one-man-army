@@ -164,16 +164,20 @@ export const Suggestion = z.object({
   skill_id: z.string(),
   /** Only meaningful for prerequisite_path: existing blocked event_ids that would unlock once the gap closes. */
   event_ids: z.array(z.string()).optional(),
+  /** Always code-generated (type + localized skill/event name) - never taken from model text. */
   title: z.string(),
   rationale: z.string(),
+  generatedBy: z.enum(["ai", "template"]).optional(),
 });
 export type Suggestion = z.infer<typeof Suggestion>;
 
 export const SuggestionResult = z.object({
   employee_id: z.string(),
   noStep: NoStepReason,
-  suggestions: z.array(Suggestion).min(1).max(3),
+  suggestions: z.array(Suggestion).max(3),
   source: z.enum(["llm", "mock", "template"]),
+  /** "no_reliable_suggestion": nothing survived validation - zero suggestions, never padded from the template. */
+  status: z.enum(["ok", "no_reliable_suggestion"]).optional(),
   fallbackReason: z.string().optional(),
 });
 export type SuggestionResult = z.infer<typeof SuggestionResult>;

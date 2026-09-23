@@ -39,6 +39,12 @@ The contracts in `lib/contracts.ts` are **frozen after this doc**. Changing them
 | `lib/ai/grounding.ts` | `groundingCheck(text, factors)`: every numeric token and every `SK_*` / `EV_*` id in the text must appear in the factor values. ≥ 3 distinct factor kinds are cited | B |
 | `lib/ai/template.ts` | Deterministic kk/ru/en rationale built from `factors[]`. This is also the fallback | B |
 | `lib/ai/scenarios.ts` | A mock scenario for the explain prompt that echoes the factors (so it passes grounding offline) | B |
+| `lib/domain/suggest.ts` | `buildSuggestContext(empId, ds)`: gap skills, mastered skills, "unlockable" blocked events, only for the noStep cases ALL_DONE/PREREQ_BLOCKED/CATALOGUE_GAP | A |
+| `lib/ai/suggest.ts` | `generateSuggestions(context, locale)`: fixed suggestion types, model call → validation guard (context-grounded ids/numbers, type-framing) → zero or template fallback | B |
+| `lib/ai/suggest-template.ts` | Deterministic kk/ru/en suggestion text, code-generated titles, used as the fallback and by the offline mock scenario | B |
+| `components/AiSuggestions.tsx` | Renders the AI-suggestions card, distinctly labelled as AI output | C |
+| `lib/domain/completed.ts` | Completed-activities summary for the employee profile | A |
+| `components/DataTable.tsx` | Search/sort table used by the HR views | C |
 | `app/api/**/route.ts` | Route handlers (§4). Each one runs `withErrorHandling` + `parseBody` + an auth guard **before** any data access | B |
 | `lib/i18n/dict.ts` | All UI keys, kk/ru/en with identical key sets | C |
 | `app/login/page.tsx` | Demo identity picker: employee id dropdown + "HR" button → `POST /api/session` | C |
@@ -171,6 +177,27 @@ Real auth or SSO, the manager role and consent flow (the domain matrix row is do
 
 ## 10. Complexity budget
 Fully compliant. Storage is the existing file store plus an in-memory cache. There is no DB, ORM, migrations, queue, vector store, auth provider, GraphQL or second service. The only new code without a dependency is a ~40-line CSV parser, which avoids adding a package. The multipart upload uses `request.formData()` (built into Next), which is the single documented exception to `parseBody` for non-JSON bodies. Its fields are still zod-parsed.
+
+## 11a. AI suggestions for no-step employees (extension, O-02)
+
+```mermaid
+flowchart LR
+  ENGINE[recommend engine\nlib/domain/recommend.ts] -->|noStep: ALL_DONE / PREREQ_BLOCKED / CATALOGUE_GAP| CTX[Suggest context, code\nlib/domain/suggest.ts]
+  CTX --> MODEL{Model, fixed types\nlib/ai/suggest.ts}
+  MODEL --> GUARD[Validation guard\nids + type-framing + grounded rationale]
+  GUARD -->|survives| UI[UI, AI-labelled card]
+  GUARD -->|none survive| ZERO[[zero suggestions\nno_reliable_suggestion]]
+  MODEL -->|offline / call fails| TPL[Deterministic template]
+  TPL --> UI
+```
+
+Same rule as §5: the model proposes, code decides. `buildSuggestContext` is
+the only data the model sees; `isValidSuggestion` in `lib/ai/suggest.ts`
+rejects any id, number, or type-framing outside that context before anything
+reaches the UI. Guardrails (titles code-generated, offering-catalogue check,
+`maintain_and_share` restricted to mastered skills, zero-padding forbidden):
+see `tests/suggest.test.ts` for the current, verified state. Tests: `tests/suggest.test.ts`.
+Eval: `suggestion-grounded`. Live evidence: `docs/live-runs/suggestions.md`.
 
 ## 11. Golden path (build first)
 Log in as E0028 → `/employee/E0028` shows SD assessed 2 → effective 3 (EV_006, pending gain), critical vs Senior 4 → the top rec is an SD event, with ≥ 3 factors and a template or mock explanation → Complete → SD 3 → 4 appears in the before/after panel, and the recs refresh. Then HR login → `/hr` 3 panels → `/hr/import` uploads `data/fixtures/trap-*.json` → open T9001 and see the correct rec.

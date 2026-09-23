@@ -19,11 +19,16 @@ import { SuggestionType } from "../contracts";
 import type { SuggestContext } from "../domain/suggest";
 import { generateStructured } from "./structured";
 import { resolveModel } from "./provider";
-import { buildTemplateSuggestions } from "./suggest-template";
+import { buildTemplateSuggestions, buildSuggestionTitle } from "./suggest-template";
 
 /** Exported so tests can assert the default stays within budget, mirroring EXPLAIN_TIMEOUT_MS. */
 export const SUGGEST_TIMEOUT_MS = 8000;
 
+// `title` is deliberately NOT part of the model schema: a live run once had
+// the model invent "Peer Mentorship Program" as a title. Every title shown
+// to a user is built in code afterwards (buildSuggestionTitle) from an i18n
+// key + the skill/event name already present in context - the model cannot
+// name anything.
 const SuggestOutput = z.object({
   suggestions: z
     .array(
@@ -32,13 +37,31 @@ const SuggestOutput = z.object({
         skill_id: z.string().min(1),
         // Required (not optional): OpenAI strict structured output rejects optional keys. Empty array = no events.
         event_ids: z.array(z.string()),
-        title: z.string().min(1),
         rationale: z.string().min(1),
       }),
     )
     .min(1)
     .max(3),
 });
+type ModelSuggestion = z.infer<typeof SuggestOutput>["suggestions"][number];
+
+/** Words that only belong in a rationale if they are part of one of the
+ * suggestion's own allowed event titles - otherwise the model is naming an
+ * offering that does not exist in the catalogue. */
+const OFFERING_WORDS = [
+  "program",
+  "programme",
+  "course",
+  "workshop",
+  "bootcamp",
+  "club",
+  "academy",
+  "академия",
+  "программа",
+  "курс",
+  "тренинг",
+  "бағдарлама",
+];
 
 function buildInstructions(locale: Locale): string {
   return [
@@ -52,7 +75,8 @@ function buildInstructions(locale: Locale): string {
     "Allowed types: prerequisite_path (ONLY when DATA.noStep is PREREQ_BLOCKED, must cite a DATA.blockedEvents event_id, and skill_id must be that event's own missingPrereq.skill_id - the real blocker, not the gap skill it develops),",
     "mentoring, stretch_assignment, peer_learning, request_training (ask HR to add catalogue training),",
     "maintain_and_share (ONLY when DATA.noStep is ALL_DONE, must cite a DATA.masteredSkills skill_id).",
-    "Each suggestion needs: type, skill_id, an event_ids array (use [] when no event applies), a short title, and a one-sentence rationale grounded in DATA.",
+    "Each suggestion needs: type, skill_id, an event_ids array (use [] when no event applies), and a one-sentence rationale grounded in DATA.",
+    "Do not invent any programme, course, workshop or club name. Do not name any skill or event other than the ones this suggestion is about.",
   ].join(" ");
 }
 
@@ -103,6 +127,62 @@ function isGroundedText(text: string, allowed: { allowedIds: Set<string>; allowe
   return true;
 }
 
+/** Own skill name (the item's skill, or its prerequisite for prerequisite_path - the
+ * same skill_id in that case) resolved from context, for the rationale-safety check. */
+function ownSkillName(suggestion: ModelSuggestion, context: SuggestContext): string | undefined {
+  return (
+    context.gapSkills.find((g) => g.skill_id === suggestion.skill_id)?.name ??
+    context.masteredSkills.find((m) => m.skill_id === suggestion.skill_id)?.name ??
+    context.blockedEvents.find((b) => b.missingPrereq?.skill_id === suggestion.skill_id)?.missingPrereq?.name
+  );
+}
+
+/** Event titles this specific suggestion is allowed to mention: only the
+ * events it actually cites via event_ids. */
+function ownEventTitles(suggestion: ModelSuggestion, context: SuggestContext): string[] {
+  const ids = new Set(suggestion.event_ids ?? []);
+  return context.blockedEvents.filter((b) => ids.has(b.event_id)).map((b) => b.title);
+}
+
+/**
+ * Rejects the ITEM (not just a number) when its rationale: (b) names any
+ * dataset event title other than one of this suggestion's own allowed
+ * events; (c) names any dataset skill name other than this suggestion's own
+ * skill/prerequisite; (d) contains an "offering" word (program, course,
+ * workshop, ...) that is not part of one of its own allowed event titles -
+ * i.e. no invented catalogue offering; (e) for maintain_and_share, frames
+ * the skill as a gap (cites that same skill's gap-level numbers).
+ */
+function isRationaleSafe(suggestion: ModelSuggestion, context: SuggestContext): boolean {
+  const lower = suggestion.rationale.toLowerCase();
+  const allowedTitles = ownEventTitles(suggestion, context);
+  const allowedTitlesLower = allowedTitles.map((t) => t.toLowerCase());
+
+  for (const title of context.allEventTitles) {
+    const titleLower = title.toLowerCase();
+    if (lower.includes(titleLower) && !allowedTitlesLower.includes(titleLower)) return false;
+  }
+
+  const own = ownSkillName(suggestion, context)?.toLowerCase();
+  for (const name of context.allSkillNames) {
+    const nameLower = name.toLowerCase();
+    if (lower.includes(nameLower) && nameLower !== own) return false;
+  }
+
+  for (const word of OFFERING_WORDS) {
+    if (lower.includes(word) && !allowedTitlesLower.some((t) => lower.includes(t))) return false;
+  }
+
+  if (suggestion.type === "maintain_and_share") {
+    const gap = context.gapSkills.find((g) => g.skill_id === suggestion.skill_id);
+    if (gap && gap.effective < gap.required) {
+      if (lower.includes(String(gap.effective)) && lower.includes(String(gap.required))) return false;
+    }
+  }
+
+  return true;
+}
+
 /**
  * `context.blockedEvents` is already restricted to "unlockable" events by
  * `buildSuggestContext` (role+grade match, develops a gap skill, blocked
@@ -113,7 +193,7 @@ function isGroundedText(text: string, allowed: { allowedIds: Set<string>; allowe
  * one the employee needs to act on).
  */
 function isValidSuggestion(
-  suggestion: Suggestion,
+  suggestion: ModelSuggestion,
   context: SuggestContext,
   allowed: { allowedIds: Set<string>; allowedNumbers: Set<string> },
 ): boolean {
@@ -123,7 +203,7 @@ function isValidSuggestion(
     const events = context.blockedEvents.filter((b) => suggestion.event_ids!.includes(b.event_id));
     if (events.length !== suggestion.event_ids.length) return false;
     if (!events.every((e) => e.missingPrereq && e.missingPrereq.skill_id === suggestion.skill_id)) return false;
-    return isGroundedText(`${suggestion.title}\n${suggestion.rationale}`, allowed);
+    return isGroundedText(suggestion.rationale, allowed) && isRationaleSafe(suggestion, context);
   }
 
   const knownSkill =
@@ -137,7 +217,7 @@ function isValidSuggestion(
 
   if (suggestion.type === "maintain_and_share" && context.noStep !== "ALL_DONE") return false;
 
-  return isGroundedText(`${suggestion.title}\n${suggestion.rationale}`, allowed);
+  return isGroundedText(suggestion.rationale, allowed) && isRationaleSafe(suggestion, context);
 }
 
 async function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
@@ -185,21 +265,48 @@ export async function generateSuggestions(
       timeoutMs,
     );
 
-    const allowed = contextGroundingSets(context);
-    const valid = result.data.suggestions.filter((s) => isValidSuggestion(s, context, allowed));
-    if (valid.length === 0) {
-      return templateResult(context, locale, "no_valid_suggestions_from_model");
-    }
-
     // Mirrors lib/ai/explain.ts: the mock provider self-identifies as
     // `provider: "mock"` - label it truthfully, it is a deterministic
     // scripted response, not a live model call.
-    const source: SuggestionResult["source"] = resolved.provider === "mock" ? "mock" : "llm";
+    const isMock = resolved.provider === "mock";
+
+    const allowed = contextGroundingSets(context);
+    const valid = result.data.suggestions.filter((s) => isValidSuggestion(s, context, allowed));
+    if (valid.length === 0) {
+      // The template is a deterministic fallback for an offline/mock run or
+      // an outright model failure - never used to "top up" a live model that
+      // came back with nothing reliable. A real, successful llm call with
+      // zero survivors returns zero suggestions, honestly labelled.
+      if (isMock) {
+        return templateResult(context, locale, "no_valid_suggestions_from_model");
+      }
+      return {
+        employee_id: context.employee_id,
+        noStep: context.noStep,
+        suggestions: [],
+        source: "llm",
+        status: "no_reliable_suggestion",
+      };
+    }
+
+    const source: SuggestionResult["source"] = isMock ? "mock" : "llm";
 
     return {
       employee_id: context.employee_id,
       noStep: context.noStep,
-      suggestions: valid.slice(0, 3),
+      suggestions: valid.slice(0, 3).map((s) => ({
+        type: s.type,
+        skill_id: s.skill_id,
+        event_ids: s.event_ids,
+        title: buildSuggestionTitle(
+          locale,
+          s.type,
+          ownSkillName(s, context) ?? s.skill_id,
+          ownEventTitles(s, context)[0],
+        ),
+        rationale: s.rationale,
+        generatedBy: "ai" as const,
+      })),
       source,
     };
   } catch (error) {

@@ -54,6 +54,13 @@ Verify any row with `ls <path>`. Source of truth: [README §4](../README.md#4-re
 | Auth / role separation | `lib/auth/session.ts` | `tests/authz.test.ts`, `tests/security.test.ts` |
 | Cross-origin rejection | `lib/http/origin.ts` | `tests/security-csrf.test.ts` |
 | i18n key parity | `lib/i18n/dict.ts` | `tests/i18n-keys.test.ts` |
+| AI suggestions for no-step employees | `lib/domain/suggest.ts`, `lib/ai/suggest.ts`, `lib/ai/suggest-template.ts`, `components/AiSuggestions.tsx` | `tests/suggest.test.ts`, eval `suggestion-grounded`, `docs/live-runs/suggestions.md` |
+
+To verify the suggestion guardrails (context-grounded ids/numbers,
+type-framing, code-generated titles, zero-padding forbidden): run
+`pnpm test tests/suggest.test.ts`, the eval case `suggestion-grounded`
+(`pnpm eval`), and read `docs/live-runs/suggestions.md` for repeated live
+evidence.
 
 ## 4. Reproducing the trap-profile checks
 

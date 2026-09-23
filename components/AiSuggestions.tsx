@@ -5,7 +5,10 @@
  * Shown only by the caller, when the employee has NO catalogue
  * recommendation (noStep ALL_DONE / PREREQ_BLOCKED / CATALOGUE_GAP). Fetches
  * on mount, labels its source honestly, and never implies these are
- * mandatory - see "suggest.disclaimer".
+ * mandatory - see "suggest.caution". Styled deliberately distinct from
+ * catalogue recommendation cards (dashed violet border, sparkle badges) so
+ * an employee never mistakes a probabilistic AI idea for a vetted
+ * recommendation.
  */
 import { useEffect, useState } from "react";
 import type { Locale } from "@/lib/i18n/i18n";
@@ -17,11 +20,13 @@ interface SuggestionItem {
   event_ids?: string[];
   title: string;
   rationale: string;
+  generatedBy?: "ai" | "template";
 }
 
 interface SuggestResult {
   suggestions: SuggestionItem[];
   source: "llm" | "mock" | "template";
+  status?: "ok" | "no_reliable_suggestion";
 }
 
 interface SuggestResponse {
@@ -47,7 +52,7 @@ export function AiSuggestions({ employeeId, locale }: { employeeId: string; loca
         if (!res.ok) throw new Error("suggest failed");
         const body = (await res.json()) as SuggestResponse;
         if (cancelled) return;
-        if (!body.applicable || !body.result || body.result.suggestions.length === 0) {
+        if (!body.applicable || !body.result) {
           setState("empty");
           return;
         }
@@ -70,23 +75,46 @@ export function AiSuggestions({ employeeId, locale }: { employeeId: string; loca
   }
   if (state === "empty" || !result) return null;
 
+  const noReliable = result.status === "no_reliable_suggestion" || result.suggestions.length === 0;
+
   return (
-    <div className="mt-3 rounded-[var(--radius-lg)] border border-[var(--color-line)] bg-[var(--color-surface)] p-4">
+    <div className="mt-3 rounded-[var(--radius-lg)] border border-dashed border-violet-400 bg-violet-50 p-4 dark:bg-violet-950/20">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="font-medium text-[var(--color-ink)]">{t(locale, "suggest.title")}</p>
-        <span className="rounded-full bg-[var(--color-canvas)] px-2 py-0.5 text-xs uppercase tracking-wide text-[var(--color-muted)]">
+        <div className="flex items-center gap-2">
+          <span className="rounded-full bg-violet-600 px-2 py-0.5 text-xs font-medium text-white">
+            {t(locale, "suggest.aiBadge")}
+          </span>
+          <p className="font-medium text-[var(--color-ink)]">{t(locale, "suggest.title")}</p>
+        </div>
+        <span className="rounded-full bg-violet-100 px-2 py-0.5 text-xs uppercase tracking-wide text-violet-700">
           {t(locale, `suggest.source.${result.source}`)}
         </span>
       </div>
-      <ul className="mt-3 space-y-2">
-        {result.suggestions.map((s, i) => (
-          <li key={`${s.type}-${s.skill_id}-${i}`} className="rounded-md border border-[var(--color-line)] p-3">
-            <p className="font-medium text-[var(--color-ink)]">{s.title}</p>
-            <p className="mt-1 text-sm text-[var(--color-muted)]">{s.rationale}</p>
-          </li>
-        ))}
-      </ul>
-      <p className="mt-3 text-xs text-[var(--color-muted)]">{t(locale, "suggest.disclaimer")}</p>
+
+      {noReliable ? (
+        <p className="mt-3 text-sm text-[var(--color-muted)]">{t(locale, "suggest.status.no_reliable_suggestion")}</p>
+      ) : (
+        <>
+          <ul className="mt-3 space-y-2">
+            {result.suggestions.map((s, i) => (
+              <li
+                key={`${s.type}-${s.skill_id}-${i}`}
+                className="rounded-md border border-dashed border-violet-300 bg-white/60 p-3 dark:bg-transparent"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="rounded bg-violet-100 px-1.5 py-0.5 text-[10px] font-medium text-violet-700">
+                    {t(locale, "suggest.aiBadge")}
+                  </span>
+                  <p className="font-medium text-[var(--color-ink)]">{s.title}</p>
+                </div>
+                <p className="mt-1 text-sm text-[var(--color-muted)]">{s.rationale}</p>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-3 text-xs text-[var(--color-muted)]">{t(locale, "suggest.disclaimer")}</p>
+        </>
+      )}
+      <p className="mt-2 text-xs italic text-violet-700">{t(locale, "suggest.caution")}</p>
     </div>
   );
 }

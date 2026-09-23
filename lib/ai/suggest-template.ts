@@ -7,13 +7,27 @@
  * paths stay trivially grounded (every number/id is copied verbatim, never
  * invented) and read as prose, not a key=value dump.
  */
-import type { Locale, Suggestion } from "../contracts";
+import type { Locale, Suggestion, SuggestionType } from "../contracts";
 import type { SuggestBlockedEvent, SuggestContext, SuggestGapSkill, SuggestMasteredSkill } from "../domain/suggest";
+import { tf } from "../i18n/dict";
 
-function prereqTitle(locale: Locale, skillName: string): string {
-  if (locale === "ru") return `Сначала закрыть требование по «${skillName}»`;
-  if (locale === "kk") return `Алдымен «${skillName}» бойынша алғышартты жабу`;
-  return `Close the prerequisite for "${skillName}" first`;
+/**
+ * Every suggestion title is built HERE, in code, from an i18n key + the
+ * skill/event name already present in `context` - never from model text (a
+ * live run once produced an invented "Peer Mentorship Program" title; this
+ * makes that impossible). Used both by the deterministic template below and
+ * by `lib/ai/suggest.ts` to re-title validated model suggestions.
+ */
+export function buildSuggestionTitle(
+  locale: Locale,
+  type: SuggestionType,
+  skillName: string,
+  eventTitle?: string,
+): string {
+  if (type === "prerequisite_path") {
+    return tf(locale, "suggest.item.title.prerequisite_path", { skill: skillName, event: eventTitle ?? "" });
+  }
+  return tf(locale, `suggest.item.title.${type}`, { skill: skillName });
 }
 
 /** `blocked.missingPrereq` is always set here - callers only reach this for
@@ -31,12 +45,6 @@ function prereqRationale(locale: Locale, blocked: SuggestBlockedEvent): string {
   return `Current level ${prereq.effective} of ${prereq.required} on "${prereq.name}" is blocking "${blocked.title}". Discuss a short path to that level with your manager before it opens up.`;
 }
 
-function maintainTitle(locale: Locale, skillName: string): string {
-  if (locale === "ru") return `Поделиться опытом по «${skillName}»`;
-  if (locale === "kk") return `«${skillName}» бойынша тәжірибе бөлісу`;
-  return `Share your expertise in "${skillName}"`;
-}
-
 function maintainRationale(locale: Locale, mastered: SuggestMasteredSkill): string {
   if (locale === "ru") {
     return `Уровень ${mastered.level} по «${mastered.name}» уже соответствует требованиям роли. Предложите наставничество или короткую сессию обмена опытом для коллег.`;
@@ -45,12 +53,6 @@ function maintainRationale(locale: Locale, mastered: SuggestMasteredSkill): stri
     return `«${mastered.name}» бойынша ${mastered.level} деңгейі рөл талабына сай келеді. Әріптестеріңізге тәлімгерлік немесе тәжірибе бөлісу сессиясын ұсыныңыз.`;
   }
   return `Level ${mastered.level} on "${mastered.name}" already meets the role requirement. Offer to mentor a colleague or run a short knowledge-sharing session on it.`;
-}
-
-function requestTitle(locale: Locale, skillName: string): string {
-  if (locale === "ru") return `Запросить обучение по «${skillName}»`;
-  if (locale === "kk") return `«${skillName}» бойынша оқытуды сұрау`;
-  return `Ask HR to add training for "${skillName}"`;
 }
 
 function requestRationale(locale: Locale, gap: SuggestGapSkill): string {
@@ -80,8 +82,9 @@ export function buildTemplateSuggestions(context: SuggestContext, locale: Locale
       type: "prerequisite_path",
       skill_id: unlockable.missingPrereq!.skill_id,
       event_ids: [unlockable.event_id],
-      title: prereqTitle(locale, unlockable.missingPrereq!.name),
+      title: buildSuggestionTitle(locale, "prerequisite_path", unlockable.missingPrereq!.name, unlockable.title),
       rationale: prereqRationale(locale, unlockable),
+      generatedBy: "template",
     });
   } else if (context.noStep === "ALL_DONE" && context.masteredSkills[0]) {
     const mastered = context.masteredSkills[0];
@@ -89,8 +92,9 @@ export function buildTemplateSuggestions(context: SuggestContext, locale: Locale
       type: "maintain_and_share",
       skill_id: mastered.skill_id,
       event_ids: [],
-      title: maintainTitle(locale, mastered.name),
+      title: buildSuggestionTitle(locale, "maintain_and_share", mastered.name),
       rationale: maintainRationale(locale, mastered),
+      generatedBy: "template",
     });
   }
 
@@ -99,8 +103,9 @@ export function buildTemplateSuggestions(context: SuggestContext, locale: Locale
       type: "request_training",
       skill_id: gap.skill_id,
       event_ids: [],
-      title: requestTitle(locale, gap.name),
+      title: buildSuggestionTitle(locale, "request_training", gap.name),
       rationale: requestRationale(locale, gap),
+      generatedBy: "template",
     });
   }
 

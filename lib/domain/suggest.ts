@@ -50,6 +50,12 @@ export interface SuggestContext {
   masteredSkills: SuggestMasteredSkill[];
   blockedEvents: SuggestBlockedEvent[];
   participation: { completed: number; inProgress: number; dropped: number };
+  /** Every event title / skill name in the dataset, not just this context's
+   * slice - lets the rationale-safety check in lib/ai/suggest.ts reject any
+   * suggestion that names an event or skill outside its own allowed set,
+   * even one that legitimately exists elsewhere in the catalogue. */
+  allEventTitles: string[];
+  allSkillNames: string[];
 }
 
 const ELIGIBLE_REASONS: ReadonlySet<NoStepReason> = new Set(["ALL_DONE", "PREREQ_BLOCKED", "CATALOGUE_GAP"]);
@@ -151,5 +157,7 @@ export function buildSuggestContext(empId: string, ds: Dataset): SuggestContext 
     masteredSkills,
     blockedEvents,
     participation,
+    allEventTitles: ds.events.map((e) => e.title),
+    allSkillNames: ds.skills.map((s) => s.name),
   };
 }
