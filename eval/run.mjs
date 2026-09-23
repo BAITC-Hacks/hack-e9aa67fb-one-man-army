@@ -170,6 +170,8 @@ const rec = {
   const result = context ? await generateSuggestions(context, "en") : null;
   const gapIds = new Set(context?.gapSkills.map((g) => g.skill_id) ?? []);
   const masteredIds = new Set(context?.masteredSkills.map((m) => m.skill_id) ?? []);
+  // A prerequisite_path cites the missing prerequisite skill of an unlockable event.
+  for (const b of context?.blockedEvents ?? []) if (b.missingPrereq) masteredIds.add(b.missingPrereq.skill_id);
   const eventIds = new Set(context?.blockedEvents.map((b) => b.event_id) ?? []);
   const ok =
     !!context &&
