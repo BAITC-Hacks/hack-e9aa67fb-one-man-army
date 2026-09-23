@@ -8,10 +8,20 @@ const TONE_STYLE: Record<PillTone, { bg: string; text: string; border: string; i
   neutral: { bg: "var(--color-neutral-bg)", text: "var(--color-neutral-text)", border: "var(--color-line)", icon: "i" },
 };
 
-export function Pill({ tone, children }: { tone: PillTone; children: React.ReactNode }) {
+export function Pill({
+  tone,
+  children,
+  title,
+}: {
+  tone: PillTone;
+  children: React.ReactNode;
+  /** Full explanation shown on hover/focus, e.g. for a shortened label. */
+  title?: string;
+}) {
   const style = TONE_STYLE[tone];
   return (
     <span
+      title={title}
       className="inline-flex items-center gap-1 rounded-[var(--radius-pill)] border px-2 py-0.5 text-xs font-medium"
       style={{ backgroundColor: style.bg, color: style.text, borderColor: style.border }}
     >

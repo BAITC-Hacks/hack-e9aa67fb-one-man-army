@@ -11,12 +11,21 @@ import { getSession } from "@/lib/auth/session";
 import { auditHrAggregatesView } from "@/lib/audit/hr-access";
 import { getDataset } from "@/lib/data/load";
 import { hrAggregates } from "@/lib/domain/hr";
-import type { Count } from "@/lib/contracts";
+import type { NoStepReason } from "@/lib/contracts";
 import { DEFAULT_LOCALE, isLocale, type Locale } from "@/lib/i18n/i18n";
 import { t, tf } from "@/lib/i18n/dict";
 import { RoleBar } from "@/components/RoleBar";
 import { KpiTile } from "@/components/KpiTile";
-import { Pill } from "@/components/Pill";
+import { DataTable, type DataTableColumn, type DataTableRow } from "@/components/DataTable";
+import type { PillTone } from "@/components/Pill";
+
+const PARTICIPATION_STATUS_ORDER = ["completed", "in_progress", "overdue", "no_show", "dropped", "declined"] as const;
+
+function noStepTone(reason: NoStepReason): PillTone {
+  if (reason === "AT_TOP_NO_GAP" || reason === "ALL_DONE") return "met";
+  if (reason === "LOW_FIT") return "regular";
+  return "neutral";
+}
 
 async function readLocale(): Promise<Locale> {
   const store = await cookies();
@@ -63,17 +72,6 @@ function StatePage({ locale, title, body, showRetry }: { locale: Locale; title: 
   );
 }
 
-function CountCell({ value, locale }: { value: Count; locale: Locale }) {
-  if (typeof value === "object") {
-    return (
-      <span className="inline-flex items-center rounded-[var(--radius-pill)] bg-[var(--color-neutral-bg)] px-2 py-0.5 text-xs font-medium text-[var(--color-neutral-text)]">
-        {t(locale, "hr.suppressed")}
-      </span>
-    );
-  }
-  return <span className="tabular-nums">{value}</span>;
-}
-
 export default async function HrPage() {
   const locale = await readLocale();
   const session = await readSession();
@@ -117,6 +115,65 @@ export default async function HrPage() {
       ? Math.round((voluntaryRates.reduce((sum, row) => sum + (row.completionRate ?? 0), 0) / voluntaryRates.length) * 100)
       : null;
 
+  const laggingColumns: DataTableColumn[] = [
+    { key: "skill", header: t(locale, "hr.lagging.skill"), sortable: true, type: "text" },
+    { key: "belowOwnGrade", header: t(locale, "hr.lagging.belowOwnGrade"), sortable: true, type: "count" },
+    { key: "belowTarget", header: t(locale, "hr.lagging.belowTarget"), sortable: true, type: "count" },
+    { key: "criticalBelowTarget", header: t(locale, "hr.lagging.criticalBelowTarget"), sortable: true, type: "count" },
+  ];
+  const laggingRows: DataTableRow[] = aggregates.laggingSkills.map((row) => ({
+    id: row.skill_id,
+    cells: {
+      skill: row.name,
+      belowOwnGrade: row.belowOwnGrade,
+      belowTarget: row.belowTarget,
+      criticalBelowTarget: row.criticalBelowTarget,
+    },
+  }));
+
+  const noStepColumns: DataTableColumn[] = [
+    { key: "employee", header: t(locale, "hr.noStep.employee"), sortable: true, type: "text" },
+    { key: "role", header: t(locale, "hr.noStep.role"), sortable: true, type: "text" },
+    { key: "grade", header: t(locale, "hr.noStep.grade"), sortable: true, type: "text" },
+    { key: "reason", header: t(locale, "hr.noStep.reason"), sortable: true, type: "pill" },
+  ];
+  const noStepRows: DataTableRow[] = aggregates.noStep.map((row) => ({
+    id: row.employee_id,
+    cells: {
+      employee: `${row.employee_id} — ${row.full_name}`,
+      role: row.role,
+      grade: row.grade,
+      reason: {
+        label: t(locale, `recs.noStep.short.${row.reason}`),
+        title: t(locale, `recs.noStep.${row.reason}`),
+        tone: noStepTone(row.reason),
+      },
+    },
+  }));
+
+  const participationColumns: DataTableColumn[] = [
+    { key: "event", header: t(locale, "hr.participation.event"), sortable: true, type: "text" },
+    { key: "mandatory", header: t(locale, "hr.participation.mandatory"), sortable: true, type: "text" },
+    { key: "completionRate", header: t(locale, "hr.participation.completionRate"), sortable: true, type: "number", suffix: "%" },
+    ...PARTICIPATION_STATUS_ORDER.map(
+      (status): DataTableColumn => ({
+        key: status,
+        header: t(locale, `hr.participation.status.${status}`),
+        sortable: true,
+        type: "count",
+      }),
+    ),
+  ];
+  const participationRows: DataTableRow[] = aggregates.participation.map((row) => {
+    const cells: DataTableRow["cells"] = {
+      event: row.title,
+      mandatory: row.mandatory ? t(locale, "hr.participation.mandatoryYes") : t(locale, "hr.participation.mandatoryNo"),
+      completionRate: row.completionRate === null ? null : Math.round(row.completionRate * 100),
+    };
+    for (const status of PARTICIPATION_STATUS_ORDER) cells[status] = row.byStatus[status] ?? 0;
+    return { id: row.event_id, cells };
+  });
+
   return (
     <>
       <RoleBar locale={locale} identityLabel={t(locale, "common.hr")} />
@@ -155,41 +212,18 @@ export default async function HrPage() {
           {aggregates.laggingSkills.length === 0 ? (
             <p className="mt-3 text-sm text-[var(--color-muted)]">{t(locale, "hr.lagging.empty")}</p>
           ) : (
-            <div className="mt-3 overflow-x-auto">
-              <table className="w-full min-w-[520px] border-collapse text-sm">
-                <thead>
-                  <tr className="border-b border-[var(--color-line)] text-left text-[var(--color-muted)]">
-                    <th scope="col" className="py-2 pr-3 font-medium">
-                      {t(locale, "hr.lagging.skill")}
-                    </th>
-                    <th scope="col" className="px-3 py-2 font-medium">
-                      {t(locale, "hr.lagging.belowOwnGrade")}
-                    </th>
-                    <th scope="col" className="px-3 py-2 font-medium">
-                      {t(locale, "hr.lagging.belowTarget")}
-                    </th>
-                    <th scope="col" className="py-2 pl-3 font-medium">
-                      {t(locale, "hr.lagging.criticalBelowTarget")}
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {aggregates.laggingSkills.map((row) => (
-                    <tr key={row.skill_id} className="border-b border-[var(--color-line)] last:border-0">
-                      <td className="py-2 pr-3 text-[var(--color-ink)]">{row.name}</td>
-                      <td className="px-3 py-2">
-                        <CountCell value={row.belowOwnGrade} locale={locale} />
-                      </td>
-                      <td className="px-3 py-2">
-                        <CountCell value={row.belowTarget} locale={locale} />
-                      </td>
-                      <td className="py-2 pl-3">
-                        <CountCell value={row.criticalBelowTarget} locale={locale} />
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div className="mt-3">
+              <DataTable
+                columns={laggingColumns}
+                rows={laggingRows}
+                searchPlaceholder={t(locale, "table.searchPlaceholder.skills")}
+                noMatchesText={t(locale, "table.noMatches")}
+                resultCountTemplate={t(locale, "table.resultCount")}
+                suppressedLabel={t(locale, "hr.suppressedChip")}
+                suppressedTitle={t(locale, "hr.suppressedTitle")}
+                minWidthClassName="min-w-[520px]"
+              />
+              <p className="mt-2 text-xs text-[var(--color-muted)]">{t(locale, "hr.legend.suppressed")}</p>
             </div>
           )}
         </section>
@@ -202,39 +236,18 @@ export default async function HrPage() {
           {aggregates.noStep.length === 0 ? (
             <p className="mt-3 text-sm text-[var(--color-muted)]">{t(locale, "hr.noStep.empty")}</p>
           ) : (
-            <div className="mt-3 overflow-x-auto">
-              <table className="w-full min-w-[560px] border-collapse text-sm">
-                <thead>
-                  <tr className="border-b border-[var(--color-line)] text-left text-[var(--color-muted)]">
-                    <th scope="col" className="py-2 pr-3 font-medium">
-                      {t(locale, "hr.noStep.employee")}
-                    </th>
-                    <th scope="col" className="px-3 py-2 font-medium">
-                      {t(locale, "hr.noStep.role")}
-                    </th>
-                    <th scope="col" className="px-3 py-2 font-medium">
-                      {t(locale, "hr.noStep.grade")}
-                    </th>
-                    <th scope="col" className="py-2 pl-3 font-medium">
-                      {t(locale, "hr.noStep.reason")}
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {aggregates.noStep.map((row) => (
-                    <tr key={row.employee_id} className="border-b border-[var(--color-line)] last:border-0">
-                      <td className="py-2 pr-3 text-[var(--color-ink)]">
-                        {row.employee_id} — {row.full_name}
-                      </td>
-                      <td className="px-3 py-2">{row.role}</td>
-                      <td className="px-3 py-2">{row.grade}</td>
-                      <td className="py-2 pl-3">
-                        <Pill tone="neutral">{t(locale, `recs.noStep.${row.reason}`)}</Pill>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div className="mt-3">
+              <DataTable
+                columns={noStepColumns}
+                rows={noStepRows}
+                searchPlaceholder={t(locale, "table.searchPlaceholder.employees")}
+                noMatchesText={t(locale, "table.noMatches")}
+                resultCountTemplate={t(locale, "table.resultCount")}
+                suppressedLabel={t(locale, "hr.suppressedChip")}
+                suppressedTitle={t(locale, "hr.suppressedTitle")}
+                minWidthClassName="min-w-[560px]"
+              />
+              <p className="mt-2 text-xs text-[var(--color-muted)]">{t(locale, "hr.legend.noStepReason")}</p>
             </div>
           )}
         </section>
@@ -247,45 +260,19 @@ export default async function HrPage() {
           {aggregates.participation.length === 0 ? (
             <p className="mt-3 text-sm text-[var(--color-muted)]">{t(locale, "hr.participation.empty")}</p>
           ) : (
-            <div className="mt-3 overflow-x-auto">
-              <table className="w-full min-w-[560px] border-collapse text-sm">
-                <thead>
-                  <tr className="border-b border-[var(--color-line)] text-left text-[var(--color-muted)]">
-                    <th scope="col" className="py-2 pr-3 font-medium">
-                      {t(locale, "hr.participation.event")}
-                    </th>
-                    <th scope="col" className="px-3 py-2 font-medium">
-                      {t(locale, "hr.participation.mandatory")}
-                    </th>
-                    <th scope="col" className="px-3 py-2 font-medium">
-                      {t(locale, "hr.participation.completionRate")}
-                    </th>
-                    <th scope="col" className="py-2 pl-3 font-medium">
-                      {Object.keys(aggregates.participation[0]?.byStatus ?? {}).join(" / ")}
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {aggregates.participation.map((row) => (
-                    <tr key={row.event_id} className="border-b border-[var(--color-line)] last:border-0">
-                      <td className="py-2 pr-3 text-[var(--color-ink)]">{row.title}</td>
-                      <td className="px-3 py-2">
-                        {row.mandatory ? t(locale, "hr.participation.mandatoryYes") : t(locale, "hr.participation.mandatoryNo")}
-                      </td>
-                      <td className="px-3 py-2 tabular-nums">
-                        {row.completionRate === null
-                          ? t(locale, "hr.participation.noRate")
-                          : `${Math.round(row.completionRate * 100)}%`}
-                      </td>
-                      <td className="py-2 pl-3 text-xs">
-                        {Object.entries(row.byStatus)
-                          .map(([status, count]) => `${status}: ${typeof count === "object" ? t(locale, "hr.suppressed") : count}`)
-                          .join(" · ")}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div className="mt-3">
+              <DataTable
+                columns={participationColumns}
+                rows={participationRows}
+                searchPlaceholder={t(locale, "table.searchPlaceholder.events")}
+                noMatchesText={t(locale, "table.noMatches")}
+                resultCountTemplate={t(locale, "table.resultCount")}
+                suppressedLabel={t(locale, "hr.suppressedChip")}
+                suppressedTitle={t(locale, "hr.suppressedTitle")}
+                emptyCellText={t(locale, "hr.participation.noRate")}
+                minWidthClassName="min-w-[720px]"
+              />
+              <p className="mt-2 text-xs text-[var(--color-muted)]">{t(locale, "hr.legend.suppressed")}</p>
             </div>
           )}
         </section>
