@@ -35,6 +35,13 @@ rejected and replaced by a deterministic template if it names any number, skill
 or event the engine did not produce (`lib/ai/grounding.ts`). Nothing about
 eligibility, ranking or skill arithmetic is decided by the model.
 
+The profile also shows a **grade-transition path** (`lib/domain/gradePath.ts`,
+`GET /api/employees/[id]/grade-path`, `components/GradePath.tsx`): a
+deterministic, greedy, critical-gap-first plan of catalogue events that would
+close every gap to the next grade, respecting prerequisites and `max_level`
+caps, with any gap no catalogue event can close shown honestly as
+"unresolved" rather than hidden.
+
 ## 3. Exact challenge requirements
 
 From the case brief (`docs/task/halyk-career-quest-spec.txt`, EN §7 "Must
@@ -113,11 +120,18 @@ key); setting `MODEL_REF=openai:gpt-4o-mini` or `anthropic:...` with a key
 routes the same call to a live model and the badge becomes `"llm"`.
 
 Same flow in the UI: log in as **E0028** → the profile page shows the same
-gap and the same top card with an expandable trace → **Mark complete** moves
-System Design 3 → 4 and the next recommendation takes the top slot. Log out,
-log in as **HR** (no password) → `/hr` shows lagging skills (`<5`-suppressed
-cells), the no-step list with a reason code (now including `LOW_FIT`, see
-`docs/domain.md` §3), and participation by event.
+gap and the same top card (**"Mentor Track"**) with an expandable trace →
+**Mark complete** moves that card's skill up by its gain, capped at
+`max_level`, and the completed step leaves the recommendation list, so the
+next eligible card takes the top slot. (Cards 2–3 are not named here:
+relevance filtering is being tightened so a card that closes no gap is
+dropped — only the top card is stable enough to document.) Completion is
+**employee-only** (`requireEmployeeSelf`); HR never completes on an
+employee's behalf and only sees aggregates read-only. Log out, log in as
+**HR** (no password) → `/hr` shows lagging skills (`<5`-suppressed cells),
+the no-step list with an honest reason code per employee (e.g. `LOW_FIT` —
+an eligible candidate scored ≤ 0 — or `ALL_DONE`, see `docs/domain.md` §3),
+and participation by event.
 
 **Trap-profile check (R-08):** `pnpm test tests/engine.test.ts` asserts,
 against `data/fixtures/trap-F01..F05.json/.csv`, that the top pick on each
@@ -294,19 +308,26 @@ aggregation and k-suppression (`tests/hr.test.ts`), authorization
 (`tests/explain.test.ts`), i18n key parity (`tests/i18n-keys.test.ts`). Run
 `pnpm test` to see current pass/fail counts.
 
-`pnpm test:e2e` (Playwright) and `pnpm eval` (promptfoo) are configured in
-`package.json` but were not exercised as part of this README pass — do not
-assume their output without running them.
+`pnpm test:e2e` runs Playwright against the committed kit dataset (the
+default). `pnpm eval` runs `eval/run.mjs` directly over the real
+`lib/ai/explain.ts` / `lib/ai/grounding.ts` / `lib/domain/recommend.ts`
+pipeline, offline (`MODEL_REF=mock:demo`, forced) — see [§15](#15-ai-evaluations).
 
 ## 15. AI evaluations
 
 ```bash
-pnpm eval     # promptfoo, runs against mock:demo, no credentials needed
+pnpm eval     # eval/run.mjs, offline (mock:demo forced), no credentials needed
 ```
 
-Config: `promptfoo.yaml`, cases under `eval/cases/`. Grounding is additionally
+Not promptfoo: the explain/recommend pipeline has no HTTP route to point
+promptfoo at, so `eval/run.mjs` imports the production functions in-process
+and asserts grounding, factor-coverage, language, prompt-injection resistance
+and the trap-profile case directly. Full case list and rationale:
+[`eval/README.md`](eval/README.md). (`promptfoo.yaml` + `eval/cases/health.yaml`
+separately cover the one real HTTP route, `/api/health`, via
+`pnpm exec promptfoo eval -c promptfoo.yaml`.) Grounding is additionally
 enforced in-product (`lib/ai/grounding.ts`) and covered by
-`tests/explain.test.ts`, independent of the promptfoo suite.
+`tests/explain.test.ts`, independent of `pnpm eval`.
 
 ## 16. Demo instructions
 
@@ -316,9 +337,14 @@ pnpm demo:seed    # (re)writes committed demo overlays
 pnpm dev
 ```
 
-Then follow [§5](#5-main-user-scenario--procedure-for-checking-it). No
-screenshot capture (`pnpm screenshots`) has been committed to this README pass;
-none is claimed here that was not produced by running the app.
+Then follow [§5](#5-main-user-scenario--procedure-for-checking-it).
+
+![Employee E0028 profile: trajectory, top recommendation with grounded rationale, and grade-transition path](docs/assets/employee-e0028.png)
+
+![HR dashboard: lagging skills, no-step list with reason codes, participation by event](docs/assets/hr-dashboard.png)
+
+Both captured live from `pnpm screenshots` against the app described in
+[§5](#5-main-user-scenario--procedure-for-checking-it); not mockups.
 
 ## 17. Deployment
 
@@ -350,13 +376,13 @@ dataset — was written during the competition; commit history is the evidence.
   manager-consent role (matrix documented in `docs/domain.md`, not built), HR
   scoring-config approval workflow, session booking, the LLM choosing/
   re-ranking events (it only explains what the engine already picked),
-  RAG/embeddings, gamification, the HR event builder, .ics export, grade-
-  transition simulation, and write concurrency safety in the file store —
-  acceptable for a single-demo-instance judged artifact.
-- `pnpm test:e2e` (Playwright) now runs against the committed kit dataset (the
-  default); `pnpm eval` (promptfoo) runs against `mock:demo`. Both are
-  configured in `package.json`; their current pass/fail state was not
-  re-verified in this README pass.
+  RAG/embeddings, gamification, the HR event builder, .ics export, and write
+  concurrency safety in the file store — acceptable for a single-demo-instance
+  judged artifact.
+- **Recommendation-card relevance is being tightened.** The top card is
+  stable and documented in [§5](#5-main-user-scenario--procedure-for-checking-it);
+  cards 2–3 may currently include one that closes no real gap — an engineer
+  is actively filtering these out so a card is only shown if it closes a gap.
 
 ## 20. Future scalability
 
