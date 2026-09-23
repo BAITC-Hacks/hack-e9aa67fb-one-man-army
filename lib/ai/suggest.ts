@@ -30,7 +30,8 @@ const SuggestOutput = z.object({
       z.object({
         type: SuggestionType,
         skill_id: z.string().min(1),
-        event_ids: z.array(z.string()).optional(),
+        // Required (not optional): OpenAI strict structured output rejects optional keys. Empty array = no events.
+        event_ids: z.array(z.string()),
         title: z.string().min(1),
         rationale: z.string().min(1),
       }),
@@ -51,7 +52,7 @@ function buildInstructions(locale: Locale): string {
     "Allowed types: prerequisite_path (ONLY when DATA.noStep is PREREQ_BLOCKED, must cite a DATA.blockedEvents event_id, and skill_id must be that event's own missingPrereq.skill_id - the real blocker, not the gap skill it develops),",
     "mentoring, stretch_assignment, peer_learning, request_training (ask HR to add catalogue training),",
     "maintain_and_share (ONLY when DATA.noStep is ALL_DONE, must cite a DATA.masteredSkills skill_id).",
-    "Each suggestion needs: type, skill_id, an optional event_ids array, a short title, and a one-sentence rationale grounded in DATA.",
+    "Each suggestion needs: type, skill_id, an event_ids array (use [] when no event applies), a short title, and a one-sentence rationale grounded in DATA.",
   ].join(" ");
 }
 

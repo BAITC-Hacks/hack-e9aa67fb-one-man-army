@@ -129,6 +129,7 @@ have"), quoted via `docs/requirements.md`:
 | R-15 / R-16 | Employee/HR role separation, fails closed, no cross-employee data | `lib/auth/session.ts`, route guards | `tests/authz.test.ts` | ✅ |
 | R-17 | Voluntary; dismiss without penalty | `app/api/employees/[id]/dismiss/route.ts` | `tests/trajectory.test.ts` | ✅ |
 | R-18 | UI and rationale in kk/ru/en | `lib/i18n/dict.ts` (independently written text per locale, not clones) — all UI strings are available in kk/ru/en | `tests/i18n-keys.test.ts` (identical key set across all three locales); spot-checked live for E0137 in `ru` — see [§5](#5-main-user-scenario--procedure-for-checking-it) | ✅ |
+| O-02 | *Optional extension:* AI suggestions for employees with no catalogue step, validated by code | `lib/domain/suggest.ts`, `lib/ai/suggest.ts`, `lib/ai/suggest-template.ts`, `components/AiSuggestions.tsx`, `POST /api/employees/[id]/suggestions` | `tests/suggest.test.ts`, eval `suggestion-grounded`, `docs/live-runs/suggestions.md` | ✅ |
 | R-12 | Single-command launch, no keys | `Dockerfile`, `docker-compose.yml`, `pnpm start:demo` | `scripts/clean-room-test.sh` | ✅ |
 | R-13 | Testable with no personal account | `MODEL_REF=mock:demo` default, demo login picker | clean-room script runs offline | ✅ |
 | R-16b | Cross-origin state-changing requests rejected | `lib/http/origin.ts` (`crossOriginViolation`, wired in `withErrorHandling`) | confirmed live: mismatched `Origin` on POST → 403, same-origin/no-`Origin` (curl) → 200 | ✅ |
@@ -268,6 +269,47 @@ decision is code in `lib/rules/` and `lib/domain/`, each with a recorded trace.
   (reasoning model) exceeded the 8 s `EXPLAIN_TIMEOUT_MS` and correctly fell
   back to the template — the fallback working as designed, not a bug. Full
   transcript and reasoning: [`docs/live-llm-run.md`](docs/live-llm-run.md).
+
+**Repeated live evidence (2026-09-23, `docs/live-runs/`):**
+
+- [`explanations.md`](docs/live-runs/explanations.md) — 50 real `explain()`
+  calls on `gpt-4o-mini` (30 employees; en 30, ru 10, kk 10): 33/50 accepted
+  as `source: "llm"`, 17/50 rejected by the grounding check and replaced by the
+  template (15 cited fewer than 3 factor kinds, 2 named an ungrounded number or
+  id); latency p50 2.1 s, p95 3.2 s, max 3.5 s; no timeouts. The grounding gate
+  is doing real work: a third of live replies never reach the user.
+- [`eval.md`](docs/live-runs/eval.md) — the eval suite repeated: offline 10/10;
+  `gpt-4o-mini` ×3 → 7, 8, 7 of 10; `gpt-4.1-mini` ×2 → 6, 7 of 10. Failures are
+  explained per case (mock-only assertion, keyword-based ru/kk checks, and one
+  genuine finding listed under Known limitations).
+- [`suggestions.md`](docs/live-runs/suggestions.md) — AI suggestions for every
+  employee with no catalogue step (see below).
+
+### AI suggestions for employees with no catalogue step
+
+When the engine finds no eligible catalogue step (`ALL_DONE`,
+`PREREQ_BLOCKED`, `CATALOGUE_GAP`), the profile shows a clearly labelled
+"AI suggestions — not in the catalogue" card instead of an empty section.
+The same rule applies: **the model proposes, code decides.**
+
+1. Code builds the context (`lib/domain/suggest.ts`): open gap skills,
+   mastered skills, the no-step reason, and "unlockable" events — events that
+   match the employee's role and grade, develop a gap skill, and are blocked
+   *only* by a missing prerequisite (with the exact skill and levels).
+2. The model (`lib/ai/suggest.ts`, `generateStructured`) picks 1–3 items from
+   a fixed, code-defined set of types: `prerequisite_path`, `mentoring`,
+   `stretch_assignment`, `peer_learning`, `request_training`,
+   `maintain_and_share`.
+3. Code validates every item: skill ids must be gap or mastered skills (or the
+   missing prerequisite of an unlockable event), event ids must be unlockable
+   events, the type must fit the reason, and numbers must exist in the context.
+   Invalid items are dropped; if none survive, a deterministic template
+   (`lib/ai/suggest-template.ts`) is used. The source (`llm` / `mock` /
+   `template`) is shown on the card.
+4. Suggestions never create catalogue events, never change recommendations and
+   write no state. API: `POST /api/employees/[id]/suggestions` (same authz as
+   explanations). Tests: `tests/suggest.test.ts`; eval case
+   `suggestion-grounded`. Works offline via the mock scenario.
 
 | Concern | Handled by |
 | --- | --- |
@@ -458,6 +500,15 @@ dataset — was written during the competition; commit history is the evidence.
 
 ## 19. Known limitations
 
+- **Prompt-injection echo on one live model.** In the repeated live eval,
+  `gpt-4.1-mini` kept the correct engine-chosen event but repeated an injected
+  phrase ("top performer") from an uploaded event title in its prose (2/2
+  runs); `gpt-4o-mini`, the documented live model, passed the same case 3/3.
+  Hardening the explanation prompt/grounding against echoed free text is the
+  next step (`docs/live-runs/eval.md`).
+- **ru/kk eval checks are keyword-based.** They were tuned to the offline
+  template's wording, so fluent live replies that use synonyms can fail them;
+  the language itself was correct in the sampled failures.
 - **Low-fit employees get one flagged card, not an empty list.** When every
   eligible, gap-closing candidate scores ≤ 0, the engine surfaces the single
   best-scoring one as a recommendation with a "Low fit" pill and an honest

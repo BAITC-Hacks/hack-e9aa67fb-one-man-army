@@ -88,6 +88,7 @@ export function buildTemplateSuggestions(context: SuggestContext, locale: Locale
     out.push({
       type: "maintain_and_share",
       skill_id: mastered.skill_id,
+      event_ids: [],
       title: maintainTitle(locale, mastered.name),
       rationale: maintainRationale(locale, mastered),
     });
@@ -97,6 +98,7 @@ export function buildTemplateSuggestions(context: SuggestContext, locale: Locale
     out.push({
       type: "request_training",
       skill_id: gap.skill_id,
+      event_ids: [],
       title: requestTitle(locale, gap.name),
       rationale: requestRationale(locale, gap),
     });
