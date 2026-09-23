@@ -16,7 +16,7 @@ import { buildWhyLines, buildExpectedProgress } from "./rationale";
 interface ExplainPromptData {
   title: string;
   factors: Factor[];
-  expected: Array<{ skill_id: string; from: number; to: number; max_level: number }>;
+  expected: Array<{ skill_id: string; name?: string; from: number; to: number; max_level: number }>;
 }
 
 /**

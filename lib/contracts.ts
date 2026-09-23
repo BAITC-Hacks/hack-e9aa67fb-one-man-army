@@ -87,7 +87,10 @@ export const Recommendation = z.object({
   /** Asserted (not just typed) to be >= 3 distinct kinds where consumed. */
   factors: z.array(Factor),
   expected: z.array(
-    z.object({ skill_id: z.string(), from: z.number(), to: z.number(), max_level: z.number() }),
+    // `name` is additive/optional (review-final.md #4): the human-readable
+    // skill name, so the AI explanation layer never has to cite a raw SK_*
+    // id in prose. Old producers that omit it still validate.
+    z.object({ skill_id: z.string(), name: z.string().optional(), from: z.number(), to: z.number(), max_level: z.number() }),
   ),
   rules: z.array(RuleTraceEntry),
 });

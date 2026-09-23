@@ -9,14 +9,14 @@
  * The model never picks or ranks here - this is the deterministic decision
  * the LLM later rephrases (see lib/ai/explain.ts, owned by T3).
  */
-import type { NoStepReason, Recommendation, RecommendationResult } from "../contracts";
+import type { GapRow, NoStepReason, Recommendation, RecommendationResult } from "../contracts";
 import type { Dataset, Employee, Event } from "../data/load";
 import { effectiveSkills, isProfileIncomplete } from "./effective";
 import { engagement } from "./history";
 import { trajectory, ProfileIncompleteError } from "./trajectory";
 import { eligibilityRules, type EligFacts } from "../rules/eligibility";
 import { evaluateRules } from "../rules/engine";
-import { scoreEvent, SCORING_CONFIG } from "../rules/scoring";
+import { scoreEvent, usefulGain, SCORING_CONFIG } from "../rules/scoring";
 
 function findEmployee(empId: string, ds: Dataset): Employee | undefined {
   return ds.employees.find((e) => e.employee_id === empId);
@@ -30,6 +30,22 @@ function careerGoalSkillIds(emp: Employee, ds: Dataset): Set<string> {
     (p) => p.role === emp.career_goal?.target_role && p.grade === emp.career_goal?.target_grade,
   );
   return new Set(profile ? Object.keys(profile.required_skills) : []);
+}
+
+/**
+ * Union of an employee's current-grade and next-grade/goal gap rows, keyed
+ * by skill_id (next-grade/target wins on overlap, since that has always been
+ * "the" gap for ranking purposes). Used only to feed `scoreEvent`'s F1/F2/F3
+ * so a candidate that only closes a CURRENT-grade shortfall still earns real
+ * skill_gap/next_level_requirement citation evidence, not just grade/session
+ * (review-final.md #2: relevance and rationale must agree on what counts as
+ * a real gap).
+ */
+function mergeGapRows(targetGaps: GapRow[], currentGaps: GapRow[]): GapRow[] {
+  const bySkill = new Map<string, GapRow>();
+  for (const row of currentGaps) bySkill.set(row.skill_id, row);
+  for (const row of targetGaps) bySkill.set(row.skill_id, row);
+  return [...bySkill.values()];
 }
 
 function usefulGainSkills(event: Event, effective: Record<string, number>): string[] {
@@ -100,9 +116,11 @@ export function recommend(empId: string, ds: Dataset): RecommendationResult {
   }
 
   const effective = effectiveSkills(emp, ds.history, ds.events).effective;
+  const skillNames = new Map(ds.skills.map((s) => [s.skill_id, s.name]));
   const dismissedEventIds = ds.dismissals?.[empId] ?? [];
   const goalSkillIds = careerGoalSkillIds(emp, ds);
   const gapSkillIds = new Set(traj.gaps.map((g) => g.skill_id));
+  const scoringGaps = mergeGapRows(traj.gaps, traj.currentGradeGaps);
 
   const blocked: RecommendationResult["blocked"] = [];
   const scored: { event: Event; score: number; factors: ReturnType<typeof scoreEvent>["factors"]; rules: ReturnType<typeof evaluateRules>["trace"] }[] = [];
@@ -120,7 +138,7 @@ export function recommend(empId: string, ds: Dataset): RecommendationResult {
       employee: emp,
       event,
       effective,
-      gaps: traj.gaps,
+      gaps: scoringGaps,
       targetGrade: traj.target.grade,
       careerGoalSkillIds: goalSkillIds,
       engagement: engagement(empId, event, ds),
@@ -144,8 +162,40 @@ export function recommend(empId: string, ds: Dataset): RecommendationResult {
     });
   }
 
+  // Relevance: a recommendation must develop at least one skill with a real
+  // gap vs the employee's CURRENT grade or their next-grade/goal TARGET
+  // (effective < required) - scoring's own F1/F2/F3 only look at the target
+  // gaps, so a candidate can score > 0 on grade-fit/session/participation
+  // alone while closing nothing real. Those are not shown; they are traced
+  // in `blocked` with a distinct "no-gap" reason instead.
+  const relevantGapSkillIds = new Set([
+    ...traj.gaps.map((g) => g.skill_id),
+    ...traj.currentGradeGaps.map((g) => g.skill_id),
+  ]);
+  const relevantCandidates: typeof eligibleAndUseful = [];
+  for (const s of eligibleAndUseful) {
+    // Not just "the skill_id is on the gap list" - the event must be able to
+    // actually move that skill past the employee's current effective level
+    // (same test scoring's F1/F2 use). An event capped at/below the current
+    // level lists the skill but closes nothing.
+    const closesRealGap = s.event.develops_skills.some((d) => {
+      if (!relevantGapSkillIds.has(d.skill_id)) return false;
+      return usefulGain(effective[d.skill_id] ?? 0, d.gain, d.max_level) > 0;
+    });
+    if (closesRealGap) {
+      relevantCandidates.push(s);
+    } else {
+      blocked.push({
+        event_id: s.event.event_id,
+        title: s.event.title,
+        failedRule: "no-gap",
+        detail: `eligible and scored ${s.score.toFixed(2)}, but develops no skill with a gap vs the current or next grade`,
+      });
+    }
+  }
+
   // Deterministic tie-break: score desc, F1 (critical closure) desc, duration asc, event_id asc.
-  eligibleAndUseful.sort((a, b) => {
+  relevantCandidates.sort((a, b) => {
     if (b.score !== a.score) return b.score - a.score;
     const f1a = a.factors.find((f) => f.code === "F1")?.raw ?? 0;
     const f1b = b.factors.find((f) => f.code === "F1")?.raw ?? 0;
@@ -156,8 +206,8 @@ export function recommend(empId: string, ds: Dataset): RecommendationResult {
 
   // Diversity: no two picks whose useful-gain skill set is the same single skill.
   const claimedSingleSkills = new Set<string>();
-  const picked: typeof eligibleAndUseful = [];
-  for (const candidate of eligibleAndUseful) {
+  const picked: typeof relevantCandidates = [];
+  for (const candidate of relevantCandidates) {
     if (picked.length >= 3) break;
     const gainSkills = usefulGainSkills(candidate.event, effective);
     const onlySkill = gainSkills.length === 1 ? gainSkills[0] : undefined;
@@ -177,7 +227,13 @@ export function recommend(empId: string, ds: Dataset): RecommendationResult {
     factors: s.factors,
     expected: s.event.develops_skills
       .filter((d) => (effective[d.skill_id] ?? 0) < d.max_level)
-      .map((d) => ({ skill_id: d.skill_id, from: effective[d.skill_id] ?? 0, to: Math.min((effective[d.skill_id] ?? 0) + d.gain, d.max_level), max_level: d.max_level })),
+      .map((d) => ({
+        skill_id: d.skill_id,
+        name: skillNames.get(d.skill_id) ?? d.skill_id,
+        from: effective[d.skill_id] ?? 0,
+        to: Math.min((effective[d.skill_id] ?? 0) + d.gain, d.max_level),
+        max_level: d.max_level,
+      })),
     rules: s.rules,
   }));
 

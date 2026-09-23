@@ -263,4 +263,28 @@ describe("no-step classification on the career-quest kit (docs/domain.md §3)", 
       }
     }
   });
+
+  it("no recommendation closes zero gaps, across every employee in the shipped kit (review-final.md #2)", async () => {
+    const ds = await getDataset();
+    let checkedRecs = 0;
+    for (const emp of ds.employees) {
+      if (isProfileIncomplete(emp, ds)) continue;
+      let traj: ReturnType<typeof trajectory>;
+      try {
+        traj = trajectory(emp, ds);
+      } catch {
+        continue;
+      }
+      const gapSkillIds = new Set([...traj.gaps, ...traj.currentGradeGaps].map((g) => g.skill_id));
+      const result = recommend(emp.employee_id, ds);
+      for (const rec of result.recommendations) {
+        const event = ds.events.find((e) => e.event_id === rec.event_id);
+        expect(event).toBeDefined();
+        const closesRealGap = event?.develops_skills.some((d) => gapSkillIds.has(d.skill_id));
+        expect(closesRealGap).toBe(true);
+        checkedRecs++;
+      }
+    }
+    expect(checkedRecs).toBeGreaterThan(0);
+  });
 });
