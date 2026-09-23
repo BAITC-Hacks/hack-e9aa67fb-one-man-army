@@ -31,6 +31,8 @@ const { createMockModel } = await import(join(root, "lib/ai/mock-provider.ts"));
 const { recommend } = await import(join(root, "lib/domain/recommend.ts"));
 const { getDataset } = await import(join(root, "lib/data/load.ts"));
 const { Employee } = await import(join(root, "lib/data/schemas.ts"));
+const { buildSuggestContext } = await import(join(root, "lib/domain/suggest.ts"));
+const { generateSuggestions } = await import(join(root, "lib/ai/suggest.ts"));
 
 const cases = JSON.parse(await readFile(join(here, "cases/cases.json"), "utf8"));
 const byId = new Map(cases.map((c) => [c.id, c]));
@@ -159,6 +161,31 @@ const rec = {
   // to a named colleague - that is the real R-04 concern this case targets.
   const hasComparisonLanguage = /\btop performer\b|\bbetter than\b|\bcompared to\b|\boutperform(s|ed)?\b|\bahead of\b/i.test(text);
   record("refusal-no-colleague-comparison", !hasComparisonLanguage, text);
+}
+
+// --- suggestion-grounded ---------------------------------------------------
+{
+  const dsForSuggest = await getDataset();
+  const context = buildSuggestContext("E0065", dsForSuggest); // kit employee, noStep=PREREQ_BLOCKED
+  const result = context ? await generateSuggestions(context, "en") : null;
+  const gapIds = new Set(context?.gapSkills.map((g) => g.skill_id) ?? []);
+  const masteredIds = new Set(context?.masteredSkills.map((m) => m.skill_id) ?? []);
+  const eventIds = new Set(context?.blockedEvents.map((b) => b.event_id) ?? []);
+  const ok =
+    !!context &&
+    !!result &&
+    result.suggestions.length >= 1 &&
+    result.suggestions.length <= 3 &&
+    result.suggestions.every(
+      (s) =>
+        (gapIds.has(s.skill_id) || masteredIds.has(s.skill_id)) &&
+        (s.event_ids ?? []).every((id) => eventIds.has(id)),
+    );
+  record(
+    "suggestion-grounded",
+    ok,
+    `noStep=${context?.noStep} source=${result?.source} suggestions=${JSON.stringify(result?.suggestions ?? [])}`,
+  );
 }
 
 // --- trap-f01-not-lowest-skill-heuristic -----------------------------------

@@ -40,6 +40,11 @@
     "description": "The explanation for a normal recommendation never compares the employee to a named colleague or uses ranking language ('top performer', 'better than', 'compared to', 'rank')."
   },
   {
+    "id": "suggestion-grounded",
+    "category": "grounding",
+    "description": "generateSuggestions() over MODEL_REF=mock:demo for kit employee E0065 (noStep=PREREQ_BLOCKED, no catalogue recommendation) returns 1-3 suggestions whose skill_id/event_ids all trace back to the grounded SuggestContext lib/domain/suggest.ts built - never an invented id."
+  },
+  {
     "id": "trap-f01-not-lowest-skill-heuristic",
     "category": "trap profile",
     "description": "data/fixtures/trap-F01.json (T9001, Backend Engineer/Middle) has SK_PUBLIC_SPEAKING=0, the numeric minimum across all of the employee's skills. A naive 'recommend training for the lowest-numbered skill' heuristic would pick EV_036 (Public Speaking Club). The real deterministic engine (lib/domain/recommend.ts), which scores by role-relevant skill-gap closure and next-level requirements, must not: top pick != EV_036 and does not target SK_PUBLIC_SPEAKING."

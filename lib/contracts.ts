@@ -142,6 +142,42 @@ export const Explanation = z.object({
 });
 export type Explanation = z.infer<typeof Explanation>;
 
+/**
+ * Development suggestion for an employee the deterministic engine could not
+ * match to any catalogue recommendation (operator-approved extension,
+ * 2026-09-23; noStep ALL_DONE / PREREQ_BLOCKED / CATALOGUE_GAP only). The
+ * model proposes; it never creates a catalogue event, changes a
+ * recommendation, or writes state - see lib/ai/suggest.ts.
+ */
+export const SuggestionType = z.enum([
+  "prerequisite_path",
+  "mentoring",
+  "stretch_assignment",
+  "peer_learning",
+  "request_training",
+  "maintain_and_share",
+]);
+export type SuggestionType = z.infer<typeof SuggestionType>;
+
+export const Suggestion = z.object({
+  type: SuggestionType,
+  skill_id: z.string(),
+  /** Only meaningful for prerequisite_path: existing blocked event_ids that would unlock once the gap closes. */
+  event_ids: z.array(z.string()).optional(),
+  title: z.string(),
+  rationale: z.string(),
+});
+export type Suggestion = z.infer<typeof Suggestion>;
+
+export const SuggestionResult = z.object({
+  employee_id: z.string(),
+  noStep: NoStepReason,
+  suggestions: z.array(Suggestion).min(1).max(3),
+  source: z.enum(["llm", "mock", "template"]),
+  fallbackReason: z.string().optional(),
+});
+export type SuggestionResult = z.infer<typeof SuggestionResult>;
+
 export const ProgressResult = z.object({
   event_id: z.string(),
   changes: z.array(

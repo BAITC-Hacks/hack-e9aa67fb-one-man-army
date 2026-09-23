@@ -149,6 +149,12 @@ const en = {
   "explain.source.mock": "Demo model (offline, not a live AI)",
   "explain.source.template": "Template (no AI)",
 
+  "suggest.title": "AI suggestions — not in the catalogue",
+  "suggest.disclaimer": "These are ideas to discuss with HR or your manager — voluntary.",
+  "suggest.source.llm": "AI (live model)",
+  "suggest.source.mock": "Demo model (offline, not a live AI)",
+  "suggest.source.template": "Template (no AI)",
+
   "rule.status.pass": "Passed",
   "rule.status.fail": "Failed",
   "rule.status.undetermined": "Undetermined",
@@ -460,6 +466,12 @@ const ru: Dict = {
   "explain.source.mock": "Демо-модель (офлайн, не настоящий ИИ)",
   "explain.source.template": "Шаблон (без ИИ)",
 
+  "suggest.title": "Предложения ИИ — вне каталога",
+  "suggest.disclaimer": "Это идеи для обсуждения с HR или руководителем — по желанию.",
+  "suggest.source.llm": "ИИ (живая модель)",
+  "suggest.source.mock": "Демо-модель (офлайн, не настоящий ИИ)",
+  "suggest.source.template": "Шаблон (без ИИ)",
+
   "rule.status.pass": "Пройдено",
   "rule.status.fail": "Не пройдено",
   "rule.status.undetermined": "Не определено",
@@ -768,6 +780,12 @@ const kk: Dict = {
   "explain.source.llm": "ЖИ моделі",
   "explain.source.mock": "Демо-модель (офлайн, нақты ЖИ емес)",
   "explain.source.template": "Үлгі (ЖИ жоқ)",
+
+  "suggest.title": "ЖИ ұсыныстары — каталогта жоқ",
+  "suggest.disclaimer": "Бұл HR немесе жетекшіңізбен талқылауға арналған идеялар — өз еркіңізбен.",
+  "suggest.source.llm": "ЖИ (тірі модель)",
+  "suggest.source.mock": "Демо-модель (офлайн, нақты ЖИ емес)",
+  "suggest.source.template": "Үлгі (ЖИ жоқ)",
 
   "rule.status.pass": "Өтті",
   "rule.status.fail": "Өтпеді",

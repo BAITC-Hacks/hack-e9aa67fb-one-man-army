@@ -10,8 +10,10 @@
  * the easiest kind to miss - the tests pass, but the screenshot shows it.
  */
 import type { Factor, Locale } from "../contracts";
+import type { SuggestContext } from "../domain/suggest";
 import type { MockScenario } from "./mock-provider";
 import { buildWhyLines, buildExpectedProgress } from "./rationale";
+import { buildTemplateSuggestions } from "./suggest-template";
 
 interface ExplainPromptData {
   title: string;
@@ -44,6 +46,28 @@ export const scenarios: MockScenario[] = [
       return {
         kind: "object",
         value: { headline: data.title, why, expected_progress },
+      };
+    },
+  },
+  {
+    name: "suggest-dev",
+    match: (prompt) => prompt.startsWith("TASK: suggest_dev"),
+    respond: (prompt) => {
+      const localeMatch = /LOCALE: (\w+)/.exec(prompt);
+      const locale = (localeMatch?.[1] as Locale | undefined) ?? "en";
+      const marker = "DATA:\n";
+      const context = JSON.parse(prompt.slice(prompt.indexOf(marker) + marker.length)) as SuggestContext;
+
+      // Reuses the same grounded builder as the template fallback (see
+      // suggest-template.ts's doc comment) - deterministic, but plausible
+      // enough that the offline demo reads as real product behaviour, and
+      // it always passes lib/ai/suggest.ts's validation since every
+      // number/id here is copied verbatim from DATA.
+      const suggestions = buildTemplateSuggestions(context, locale);
+
+      return {
+        kind: "object",
+        value: { suggestions },
       };
     },
   },

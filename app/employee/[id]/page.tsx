@@ -23,6 +23,7 @@ import { GradePath } from "@/components/GradePath";
 import { ProgressBar } from "@/components/ProgressBar";
 import { Legend } from "@/components/Legend";
 import { OnboardingHint } from "@/components/OnboardingHint";
+import { AiSuggestions } from "@/components/AiSuggestions";
 
 async function readLocale(): Promise<Locale> {
   const store = await cookies();
@@ -231,6 +232,9 @@ export default async function EmployeePage({ params }: { params: Promise<{ id: s
               {recs.noStep && (
                 <p className="mt-2 text-sm text-[var(--color-ink)]">{t(locale, `recs.noStep.${recs.noStep}`)}</p>
               )}
+              {(recs.noStep === "ALL_DONE" ||
+                recs.noStep === "PREREQ_BLOCKED" ||
+                recs.noStep === "CATALOGUE_GAP") && <AiSuggestions employeeId={id} locale={locale} />}
             </div>
           ) : (
             <ul className="mt-3 space-y-3">
