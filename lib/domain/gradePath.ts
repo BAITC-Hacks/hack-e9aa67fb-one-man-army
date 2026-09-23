@@ -44,6 +44,11 @@ export interface GradePathGap {
   required: number;
   gap: number;
   critical: boolean;
+  /** Only set on `unresolvedGaps`: the effective level after every planned
+   *  step is applied (may be > `effective` if a step partially closed it
+   *  without reaching `required`). Additive, backward-compatible field -
+   *  `effective`/`gap` above stay the pre-plan baseline. */
+  projected?: number;
 }
 
 export interface GradePathStep {
@@ -52,6 +57,10 @@ export interface GradePathStep {
   /** Every skill this step raises, including side-benefits beyond the skill
    *  it was picked for. */
   closes: Array<{ skill_id: string; from: number; to: number }>;
+  /** Set only when this event was the sole (or least-avoided) catalogue
+   *  option and the employee has repeatedly skipped/dropped it before -
+   *  additive field so the UI can disclose it honestly. */
+  note?: { kind: "previously_skipped"; count: number };
 }
 
 export interface GradePathResult {
@@ -116,6 +125,17 @@ export function gradePath(emp: Employee, ds: Dataset): GradePathResult {
       .map((row) => row.event_id),
   );
 
+  // Same negative signal the recommender's participation-history factor uses
+  // (lib/domain/history.ts F5/F7): no_show/declined/dropped, per event_id,
+  // for this employee. Used here to avoid re-proposing an event the employee
+  // has repeatedly skipped when an equivalent alternative exists.
+  const dropCounts = new Map<string, number>();
+  for (const row of ds.history) {
+    if (row.employee_id !== emp.employee_id) continue;
+    if (row.status !== "no_show" && row.status !== "declined" && row.status !== "dropped") continue;
+    dropCounts.set(row.event_id, (dropCounts.get(row.event_id) ?? 0) + 1);
+  }
+
   const steps: GradePathStep[] = [];
   const selectedIds = new Set<string>();
   const unresolvedSkillIds = new Set<string>();
@@ -134,8 +154,7 @@ export function gradePath(emp: Employee, ds: Dataset): GradePathResult {
     const target = active[0];
     if (!target) break;
 
-    let best: Event | null = null;
-    let bestGain = 0;
+    const candidates: Array<{ event: Event; gain: number; avoidance: number }> = [];
     for (const ev of ds.events) {
       if (selectedIds.has(ev.event_id)) continue;
       if (ev.mandatory) continue;
@@ -156,19 +175,27 @@ export function gradePath(emp: Employee, ds: Dataset): GradePathResult {
       if (!dev) continue;
       const gain = usefulGain(effective[target.skill_id] ?? 0, dev.gain, dev.max_level);
       if (gain <= 0) continue;
-      if (gain > bestGain || (gain === bestGain && best !== null && ev.event_id < best.event_id)) {
-        best = ev;
-        bestGain = gain;
-      } else if (best === null) {
-        best = ev;
-        bestGain = gain;
-      }
+      candidates.push({ event: ev, gain, avoidance: dropCounts.get(ev.event_id) ?? 0 });
     }
 
-    if (!best) {
+    if (candidates.length === 0) {
       unresolvedSkillIds.add(target.skill_id);
       continue;
     }
+
+    // Prefer an alternative (other format) that develops the same skill and
+    // that the employee has not repeatedly skipped/dropped; only fall back
+    // to a repeatedly-skipped event when it is the least-avoided option.
+    candidates.sort(
+      (a, b) => a.avoidance - b.avoidance || b.gain - a.gain || a.event.event_id.localeCompare(b.event.event_id),
+    );
+    const chosen = candidates[0];
+    if (!chosen) {
+      unresolvedSkillIds.add(target.skill_id);
+      continue;
+    }
+    const best = chosen.event;
+    const note: GradePathStep["note"] = chosen.avoidance >= 2 ? { kind: "previously_skipped", count: chosen.avoidance } : undefined;
 
     const closes: Array<{ skill_id: string; from: number; to: number }> = [];
     for (const dev of best.develops_skills) {
@@ -179,14 +206,16 @@ export function gradePath(emp: Employee, ds: Dataset): GradePathResult {
         closes.push({ skill_id: dev.skill_id, from, to });
       }
     }
-    steps.push({ event_id: best.event_id, title: best.title, closes });
+    steps.push(note ? { event_id: best.event_id, title: best.title, closes, note } : { event_id: best.event_id, title: best.title, closes });
     selectedIds.add(best.event_id);
   }
 
   const projectedLevels: Record<string, number> = {};
   for (const skillId of Object.keys(required)) projectedLevels[skillId] = effective[skillId] ?? 0;
 
-  const unresolvedGaps = gaps.filter((g) => remainingGap(g.skill_id) > 0);
+  const unresolvedGaps = gaps
+    .filter((g) => remainingGap(g.skill_id) > 0)
+    .map((g) => ({ ...g, projected: effective[g.skill_id] ?? 0 }));
 
   return {
     employee_id: emp.employee_id,
