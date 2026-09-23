@@ -115,6 +115,8 @@ const en = {
   "rationale.skillGapBoth": "It closes {critical} critical and {nonCritical} non-critical skill-gap level(s).",
   "rationale.nextLevel": "The largest remaining gap toward {target} is {gap} level(s); this session narrows it.",
   "rationale.participation": "You have {count} skipped or no-show record(s) recently, which was weighed in this ranking.",
+  "rationale.participationFormatSwitch":
+    "You skipped {skipped} similar {format} session(s) before; this one is {altFormat}.",
   "rationale.careerGoal": "It also develops a skill tied to your stated career goal.",
   "rationale.sessionSoon": "A session is scheduled soon, so you don't have to wait.",
   "rationale.sessionSelfPaced": "It is self-paced, so you can start right away.",
@@ -311,6 +313,8 @@ const ru: Dict = {
   "rationale.skillGapBoth": "Закрывает {critical} ур. критичного и {nonCritical} ур. некритичного пробела.",
   "rationale.nextLevel": "Наибольший оставшийся разрыв до {target} — {gap} ур.; это мероприятие его сокращает.",
   "rationale.participation": "За последнее время у вас {count} пропуск(ов)/неявок(-и); это было учтено при ранжировании.",
+  "rationale.participationFormatSwitch":
+    "Ранее вы пропустили {skipped} похожих занятий в формате {format}; это мероприятие — {altFormat}.",
   "rationale.careerGoal": "Также развивает навык, связанный с вашей карьерной целью.",
   "rationale.sessionSoon": "Ближайшая сессия скоро состоится, ждать не нужно.",
   "rationale.sessionSelfPaced": "Формат самостоятельный — можно начать сразу.",
@@ -505,6 +509,8 @@ const kk: Dict = {
   "rationale.skillGapBoth": "Маңызды алшақтықты {critical} деңгейге, маңызды емесін {nonCritical} деңгейге жабады.",
   "rationale.nextLevel": "{target} деңгейіне дейінгі ең үлкен алшақтық — {gap} деңгей; бұл іс-шара соны қысқартады.",
   "rationale.participation": "Соңғы уақытта сізде {count} өткізіп алу/қатыспау жазбасы бар; бұл реттеуде ескерілді.",
+  "rationale.participationFormatSwitch":
+    "Бұрын сіз {format} форматындағы {skipped} ұқсас сессияны өткізіп алдыңыз; бұл іс-шара — {altFormat}.",
   "rationale.careerGoal": "Сондай-ақ сіз көрсеткен мансаптық мақсатпен байланысты дағдыны дамытады.",
   "rationale.sessionSoon": "Жақын арада сессия жоспарланған, күтудің қажеті жоқ.",
   "rationale.sessionSelfPaced": "Бұл өздігінен оқу форматы — бірден бастауға болады.",
