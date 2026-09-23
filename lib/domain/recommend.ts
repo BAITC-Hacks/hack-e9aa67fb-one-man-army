@@ -45,18 +45,41 @@ function classifyNoStep(
   targetSource: "goal" | "next_grade" | "hold",
   blocked: { event_id: string; failedRule: string }[],
   gapSkillIds: Set<string>,
+  hasEligibleCandidates: boolean,
 ): NoStepReason {
   if (gapsEmpty) return targetSource === "hold" ? "AT_TOP_NO_GAP" : "NO_GAP_TO_NEXT";
 
-  const catalogueForRole = ds.events.filter((e) => e.target_roles.includes(emp.role));
-  const anyDevelopsGapSkill = catalogueForRole.some((e) => e.develops_skills.some((d) => gapSkillIds.has(d.skill_id)));
-  if (!anyDevelopsGapSkill) return "CATALOGUE_GAP";
+  // At least one event passed every eligibility rule (role, grade, prereqs,
+  // repeats, session, dismissal). The catalogue is not the problem here -
+  // every candidate simply scored <= 0 (e.g. a heavy F5 participation
+  // penalty). That is a real, distinct case from "no eligible event exists".
+  if (hasEligibleCandidates) return "LOW_FIT";
 
-  const reasons = new Set(blocked.map((b) => b.failedRule));
+  const catalogueForRole = ds.events.filter((e) => e.target_roles.includes(emp.role));
+  const gapEventIds = new Set(
+    catalogueForRole.filter((e) => e.develops_skills.some((d) => gapSkillIds.has(d.skill_id))).map((e) => e.event_id),
+  );
+  if (gapEventIds.size === 0) return "CATALOGUE_GAP";
+
+  // Only reason about events that actually bear on a real gap - an
+  // unrelated event blocked on e.g. audience-grade must not pollute this
+  // classification (that was the original bug: DATA_INCOMPLETE was a
+  // catch-all whenever the blocked reasons were a mix of relevant and
+  // irrelevant events).
+  const relevantBlocked = blocked.filter((b) => gapEventIds.has(b.event_id));
+  const reasons = new Set(relevantBlocked.map((b) => b.failedRule));
   if (reasons.has("prereqs-met") && !reasons.has("has-session")) return "PREREQ_BLOCKED";
   if (reasons.has("has-session")) return "NO_SESSION";
-  if (blocked.length > 0 && [...reasons].every((r) => r === "not-completed" || r === "not-in-progress")) return "ALL_DONE";
-  return "DATA_INCOMPLETE";
+  // By construction every event in gapEventIds is either eligible (which
+  // would have produced a candidate in `scored`, already excluded above by
+  // hasEligibleCandidates) or blocked - so relevantBlocked is never empty
+  // here. Whatever combination of reasons blocks them (already completed,
+  // in progress, no more useful gain left, mandatory-assigned, wrong grade,
+  // dismissed, ...), there is currently no actionable step for a real gap,
+  // which is what ALL_DONE communicates. DATA_INCOMPLETE is reserved for
+  // the two profile-validation early-returns above in `recommend()` - it is
+  // never a fallback for "the classifier ran out of specific reasons".
+  return "ALL_DONE";
 }
 
 export function recommend(empId: string, ds: Dataset): RecommendationResult {
@@ -108,6 +131,19 @@ export function recommend(empId: string, ds: Dataset): RecommendationResult {
 
   const eligibleAndUseful = scored.filter((s) => s.score > 0);
 
+  // Candidates that passed every eligibility rule but scored at or below
+  // the minimum threshold must still be traceable, not silently dropped:
+  // record them in `blocked` alongside the rule-level rejections.
+  for (const s of scored) {
+    if (s.score > 0) continue;
+    blocked.push({
+      event_id: s.event.event_id,
+      title: s.event.title,
+      failedRule: "score-threshold",
+      detail: `eligible, but score ${s.score.toFixed(2)} is at or below the minimum (0)`,
+    });
+  }
+
   // Deterministic tie-break: score desc, F1 (critical closure) desc, duration asc, event_id asc.
   eligibleAndUseful.sort((a, b) => {
     if (b.score !== a.score) return b.score - a.score;
@@ -146,7 +182,9 @@ export function recommend(empId: string, ds: Dataset): RecommendationResult {
   }));
 
   const noStep: NoStepReason | null =
-    recommendations.length > 0 ? null : classifyNoStep(emp, ds, traj.gaps.length === 0, traj.target.source, blocked, gapSkillIds);
+    recommendations.length > 0
+      ? null
+      : classifyNoStep(emp, ds, traj.gaps.length === 0, traj.target.source, blocked, gapSkillIds, scored.length > 0);
 
   return { employee_id: empId, scoringVersion: SCORING_CONFIG.version, asOf, recommendations, noStep, blocked };
 }

@@ -196,6 +196,8 @@ const en = {
   "import.report.row": "Row",
   "import.report.field": "Field",
   "import.report.message": "Message",
+
+  "recs.noStep.LOW_FIT": "There are eligible steps, but none score well enough right now (often due to past no-shows or declines).",
 } satisfies Record<string, string>;
 
 type Dict = { [K in keyof typeof en]: string };
@@ -390,6 +392,8 @@ const ru: Dict = {
   "import.report.row": "Строка",
   "import.report.field": "Поле",
   "import.report.message": "Сообщение",
+
+  "recs.noStep.LOW_FIT": "Есть подходящие шаги, но ни один пока не набирает нужный балл (часто из-за прошлых пропусков или отказов).",
 };
 
 const kk: Dict = {
@@ -582,6 +586,8 @@ const kk: Dict = {
   "import.report.row": "Жол",
   "import.report.field": "Өріс",
   "import.report.message": "Хабарлама",
+
+  "recs.noStep.LOW_FIT": "Қолайлы қадамдар бар, бірақ олардың ешқайсысы әзірге жеткілікті балл жинамайды (көбіне бұрынғы қатыспаулар немесе бас тартулар себебінен).",
 };
 
 export const dict: Record<Locale, Record<string, string>> = {

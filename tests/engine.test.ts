@@ -11,7 +11,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { getDataset, invalidateDataset, type Dataset } from "@/lib/data/load";
 import { parseCsv, emptyToUndefined } from "@/lib/data/csv";
 import { Employee, HistoryRow } from "@/lib/data/schemas";
-import { effectiveSkills } from "@/lib/domain/effective";
+import { effectiveSkills, isProfileIncomplete } from "@/lib/domain/effective";
 import { engagement } from "@/lib/domain/history";
 import { recommend } from "@/lib/domain/recommend";
 import { trajectory } from "@/lib/domain/trajectory";
@@ -146,6 +146,35 @@ describe("trap profiles (R-08, N-01)", () => {
       expect(after).toBeGreaterThan(before);
     } finally {
       SCORING_CONFIG.weights.F5_participation = savedWeight;
+    }
+  });
+});
+
+describe("no-step classification on the career-quest kit (docs/domain.md §3)", () => {
+  it("LOW_FIT: eligible candidate exists but its score is <= 0, and it is traceable in blocked", async () => {
+    const ds = await getDataset();
+    const result = recommend("E0029", ds);
+    expect(result.recommendations).toEqual([]);
+    expect(result.noStep).toBe("LOW_FIT");
+    const dropped = result.blocked.find((b) => b.event_id === "EV_036");
+    expect(dropped).toBeDefined();
+    expect(dropped?.failedRule).toBe("score-threshold");
+  });
+
+  it("ALL_DONE, not DATA_INCOMPLETE: every event that could close a real gap was already completed", async () => {
+    const ds = await getDataset();
+    const result = recommend("E0093", ds);
+    expect(result.recommendations).toEqual([]);
+    expect(result.noStep).toBe("ALL_DONE");
+  });
+
+  it("no employee in the shipped kit is mislabeled DATA_INCOMPLETE when their profile is complete", async () => {
+    const ds = await getDataset();
+    for (const emp of ds.employees) {
+      const result = recommend(emp.employee_id, ds);
+      if (result.noStep === "DATA_INCOMPLETE") {
+        expect(isProfileIncomplete(emp, ds)).toBe(true);
+      }
     }
   });
 });
