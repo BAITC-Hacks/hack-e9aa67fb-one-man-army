@@ -126,6 +126,12 @@ function processRows<T extends z.ZodType>(
   knownIds: Set<string>,
   errors: RowError[],
   checkRefs?: (row: z.infer<T>) => string | null,
+  // role_profiles has no single `id` field - idOf returns a composite
+  // "role::grade" merge key (matching load.ts's upsert key) purely for the
+  // `updated` count and dedup, not a persisted id, so the T8 id-pattern
+  // check (which real ids like employee_id/event_id/skill_id must satisfy)
+  // does not apply to it.
+  enforceIdPattern = true,
 ): { rows: z.infer<T>[]; acceptedCount: number; updatedCount: number } {
   const out: z.infer<T>[] = [];
   let updatedCount = 0;
@@ -138,7 +144,7 @@ function processRows<T extends z.ZodType>(
       return;
     }
     const id = idOf(parsed.data);
-    if (!ID_PATTERN.test(id)) {
+    if (enforceIdPattern && !ID_PATTERN.test(id)) {
       errors.push({ file, row: rowNum, field: "id", message: `Id "${id}" must match ^[A-Z0-9_]+$.` });
       return;
     }
@@ -194,6 +200,8 @@ export async function importFiles(files: ImportFileInput[]): Promise<ImportRepor
         (r) => `${r.role}::${r.grade}`,
         knownRolePairs,
         errors,
+        undefined,
+        false,
       );
       overlay.skills = [...overlay.skills, ...skillRows.rows];
       overlay.role_profiles = [...overlay.role_profiles, ...roleRows.rows];

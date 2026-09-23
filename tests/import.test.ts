@@ -107,6 +107,54 @@ describe("importFiles: per-row validation report", () => {
   });
 });
 
+describe("importFiles: role_profiles overlay merge (review-1430 #1)", () => {
+  it("uploading a new role_profile + an employee in that role gives the employee a trajectory and recommendations", async () => {
+    const skillsPayload = {
+      role_profiles: [
+        {
+          role: "TEST_NEW_ROLE",
+          grade: "Junior",
+          required_skills: { SK_SYSTEM_DESIGN: 2 },
+          critical_skills: ["SK_SYSTEM_DESIGN"],
+        },
+      ],
+    };
+    const employeesPayload = {
+      employees: [
+        {
+          employee_id: "T9002",
+          full_name: "Test Person",
+          department: "Test",
+          role: "TEST_NEW_ROLE",
+          grade: "Junior",
+          manager_id: null,
+          hire_date: "2025-01-01",
+          tenure_months: 12,
+          work_format: "office",
+          preferred_language: "en",
+          career_goal: null,
+          skills: { SK_SYSTEM_DESIGN: 1 },
+          last_review_date: "2026-01-01",
+        },
+      ],
+    };
+
+    const report = await importFiles([
+      { kind: "skills", filename: "skills.json", text: JSON.stringify(skillsPayload), size: 0 },
+      { kind: "employees", filename: "employees.json", text: JSON.stringify(employeesPayload), size: 0 },
+    ]);
+
+    expect(report.errors).toEqual([]);
+    expect(report.accepted.employees).toBe(1);
+
+    const dataset = await getDataset();
+    expect(dataset.roleProfiles.some((r) => r.role === "TEST_NEW_ROLE" && r.grade === "Junior")).toBe(true);
+
+    const result = recommend("T9002", dataset);
+    expect(result.noStep).not.toBe("DATA_INCOMPLETE");
+  });
+});
+
 describe("MAX_FILE_BYTES", () => {
   it("is 5 MB, matching the documented cap", () => {
     expect(MAX_FILE_BYTES).toBe(5 * 1024 * 1024);

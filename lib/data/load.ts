@@ -95,6 +95,11 @@ interface ImportsOverlay {
   history?: unknown[];
   events?: unknown[];
   skills?: unknown[];
+  role_profiles?: unknown[];
+}
+
+function roleProfileKey(r: RoleProfile): string {
+  return `${r.role}::${r.grade}`;
 }
 
 export async function getDataset(): Promise<Dataset> {
@@ -139,6 +144,11 @@ export async function getDataset(): Promise<Dataset> {
       const merged = byId(skills, (s) => s.skill_id);
       for (const row of parseEach(Skill, importsOverlay.skills)) merged.set(row.skill_id, row);
       skills = [...merged.values()];
+    }
+    if (importsOverlay.role_profiles) {
+      const merged = new Map(roleProfiles.map((r) => [roleProfileKey(r), r] as const));
+      for (const row of parseEach(RoleProfile, importsOverlay.role_profiles)) merged.set(roleProfileKey(row), row);
+      roleProfiles = [...merged.values()];
     }
   }
 
