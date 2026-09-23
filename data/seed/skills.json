@@ -1,0 +1,315 @@
+{
+  "meta": {
+    "as_of_date": "2026-10-01"
+  },
+  "proficiency_scale": {
+    "0": "None",
+    "1": "Aware",
+    "2": "Working",
+    "3": "Proficient",
+    "4": "Advanced",
+    "5": "Expert"
+  },
+  "skills": [
+    {
+      "skill_id": "SK_SYSTEM_DESIGN",
+      "name": "System Design",
+      "type": "hard",
+      "category": "Architecture",
+      "description": "System Design (demo synthetic skill)."
+    },
+    {
+      "skill_id": "SK_API_DESIGN",
+      "name": "API Design",
+      "type": "hard",
+      "category": "Architecture",
+      "description": "API Design (demo synthetic skill)."
+    },
+    {
+      "skill_id": "SK_CLOUD",
+      "name": "Cloud Platforms",
+      "type": "hard",
+      "category": "Infrastructure",
+      "description": "Cloud Platforms (demo synthetic skill)."
+    },
+    {
+      "skill_id": "SK_CONTAINERS",
+      "name": "Containers",
+      "type": "hard",
+      "category": "Infrastructure",
+      "description": "Containers (demo synthetic skill)."
+    },
+    {
+      "skill_id": "SK_OBSERVABILITY",
+      "name": "Observability",
+      "type": "hard",
+      "category": "Infrastructure",
+      "description": "Observability (demo synthetic skill)."
+    },
+    {
+      "skill_id": "SK_SQL",
+      "name": "SQL",
+      "type": "hard",
+      "category": "Data",
+      "description": "SQL (demo synthetic skill)."
+    },
+    {
+      "skill_id": "SK_DATA_VIZ",
+      "name": "Data Visualization",
+      "type": "hard",
+      "category": "Data",
+      "description": "Data Visualization (demo synthetic skill)."
+    },
+    {
+      "skill_id": "SK_REACT",
+      "name": "React",
+      "type": "hard",
+      "category": "Frontend",
+      "description": "React (demo synthetic skill)."
+    },
+    {
+      "skill_id": "SK_TYPESCRIPT",
+      "name": "TypeScript",
+      "type": "hard",
+      "category": "Frontend",
+      "description": "TypeScript (demo synthetic skill)."
+    },
+    {
+      "skill_id": "SK_JAVASCRIPT",
+      "name": "JavaScript",
+      "type": "hard",
+      "category": "Frontend",
+      "description": "JavaScript (demo synthetic skill)."
+    },
+    {
+      "skill_id": "SK_WEB_PERFORMANCE",
+      "name": "Web Performance",
+      "type": "hard",
+      "category": "Frontend",
+      "description": "Web Performance (demo synthetic skill)."
+    },
+    {
+      "skill_id": "SK_PUBLIC_SPEAKING",
+      "name": "Public Speaking",
+      "type": "soft",
+      "category": "Communication",
+      "description": "Public Speaking (demo synthetic skill)."
+    }
+  ],
+  "role_profiles": [
+    {
+      "role": "Backend Engineer",
+      "grade": "Junior",
+      "required_skills": {
+        "SK_SYSTEM_DESIGN": 1,
+        "SK_API_DESIGN": 2,
+        "SK_CLOUD": 1,
+        "SK_CONTAINERS": 1,
+        "SK_OBSERVABILITY": 1,
+        "SK_PUBLIC_SPEAKING": 1
+      },
+      "critical_skills": []
+    },
+    {
+      "role": "Backend Engineer",
+      "grade": "Middle",
+      "required_skills": {
+        "SK_SYSTEM_DESIGN": 2,
+        "SK_API_DESIGN": 3,
+        "SK_CLOUD": 2,
+        "SK_CONTAINERS": 2,
+        "SK_OBSERVABILITY": 2,
+        "SK_PUBLIC_SPEAKING": 2
+      },
+      "critical_skills": [
+        "SK_SYSTEM_DESIGN"
+      ]
+    },
+    {
+      "role": "Backend Engineer",
+      "grade": "Senior",
+      "required_skills": {
+        "SK_SYSTEM_DESIGN": 4,
+        "SK_API_DESIGN": 4,
+        "SK_CLOUD": 3,
+        "SK_CONTAINERS": 3,
+        "SK_OBSERVABILITY": 3,
+        "SK_PUBLIC_SPEAKING": 2
+      },
+      "critical_skills": [
+        "SK_SYSTEM_DESIGN",
+        "SK_API_DESIGN"
+      ]
+    },
+    {
+      "role": "Backend Engineer",
+      "grade": "Lead",
+      "required_skills": {
+        "SK_SYSTEM_DESIGN": 5,
+        "SK_API_DESIGN": 5,
+        "SK_CLOUD": 4,
+        "SK_CONTAINERS": 4,
+        "SK_OBSERVABILITY": 4,
+        "SK_PUBLIC_SPEAKING": 3
+      },
+      "critical_skills": [
+        "SK_SYSTEM_DESIGN"
+      ]
+    },
+    {
+      "role": "Frontend Engineer",
+      "grade": "Junior",
+      "required_skills": {
+        "SK_JAVASCRIPT": 1,
+        "SK_TYPESCRIPT": 1,
+        "SK_REACT": 1,
+        "SK_WEB_PERFORMANCE": 1
+      },
+      "critical_skills": []
+    },
+    {
+      "role": "Frontend Engineer",
+      "grade": "Middle",
+      "required_skills": {
+        "SK_JAVASCRIPT": 2,
+        "SK_TYPESCRIPT": 2,
+        "SK_REACT": 2,
+        "SK_WEB_PERFORMANCE": 2
+      },
+      "critical_skills": [
+        "SK_TYPESCRIPT"
+      ]
+    },
+    {
+      "role": "Frontend Engineer",
+      "grade": "Senior",
+      "required_skills": {
+        "SK_JAVASCRIPT": 3,
+        "SK_TYPESCRIPT": 4,
+        "SK_REACT": 3,
+        "SK_WEB_PERFORMANCE": 3
+      },
+      "critical_skills": [
+        "SK_TYPESCRIPT"
+      ]
+    },
+    {
+      "role": "Frontend Engineer",
+      "grade": "Lead",
+      "required_skills": {
+        "SK_JAVASCRIPT": 4,
+        "SK_TYPESCRIPT": 5,
+        "SK_REACT": 4,
+        "SK_WEB_PERFORMANCE": 4
+      },
+      "critical_skills": [
+        "SK_TYPESCRIPT"
+      ]
+    },
+    {
+      "role": "Data Analyst",
+      "grade": "Junior",
+      "required_skills": {
+        "SK_SQL": 1,
+        "SK_DATA_VIZ": 1
+      },
+      "critical_skills": []
+    },
+    {
+      "role": "Data Analyst",
+      "grade": "Middle",
+      "required_skills": {
+        "SK_SQL": 3,
+        "SK_DATA_VIZ": 2
+      },
+      "critical_skills": [
+        "SK_SQL"
+      ]
+    },
+    {
+      "role": "Data Analyst",
+      "grade": "Senior",
+      "required_skills": {
+        "SK_SQL": 4,
+        "SK_DATA_VIZ": 3
+      },
+      "critical_skills": [
+        "SK_SQL"
+      ]
+    },
+    {
+      "role": "Data Analyst",
+      "grade": "Lead",
+      "required_skills": {
+        "SK_SQL": 5,
+        "SK_DATA_VIZ": 4
+      },
+      "critical_skills": [
+        "SK_SQL"
+      ]
+    },
+    {
+      "role": "QA Engineer",
+      "grade": "Junior",
+      "required_skills": {
+        "SK_SQL": 1,
+        "SK_JAVASCRIPT": 1
+      },
+      "critical_skills": []
+    },
+    {
+      "role": "QA Engineer",
+      "grade": "Middle",
+      "required_skills": {
+        "SK_SQL": 2,
+        "SK_JAVASCRIPT": 2
+      },
+      "critical_skills": []
+    },
+    {
+      "role": "QA Engineer",
+      "grade": "Senior",
+      "required_skills": {
+        "SK_SQL": 3,
+        "SK_JAVASCRIPT": 3
+      },
+      "critical_skills": []
+    },
+    {
+      "role": "HR Business Partner",
+      "grade": "Junior",
+      "required_skills": {
+        "SK_PUBLIC_SPEAKING": 1
+      },
+      "critical_skills": []
+    },
+    {
+      "role": "HR Business Partner",
+      "grade": "Middle",
+      "required_skills": {
+        "SK_PUBLIC_SPEAKING": 2
+      },
+      "critical_skills": []
+    },
+    {
+      "role": "HR Business Partner",
+      "grade": "Senior",
+      "required_skills": {
+        "SK_PUBLIC_SPEAKING": 3
+      },
+      "critical_skills": [
+        "SK_PUBLIC_SPEAKING"
+      ]
+    },
+    {
+      "role": "HR Business Partner",
+      "grade": "Lead",
+      "required_skills": {
+        "SK_PUBLIC_SPEAKING": 4
+      },
+      "critical_skills": [
+        "SK_PUBLIC_SPEAKING"
+      ]
+    }
+  ]
+}

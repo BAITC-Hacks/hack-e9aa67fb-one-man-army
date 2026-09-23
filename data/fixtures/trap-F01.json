@@ -1,0 +1,29 @@
+{
+  "meta": {
+    "as_of_date": "2026-10-01"
+  },
+  "employees": [
+    {
+      "employee_id": "T9001",
+      "full_name": "Test Trap-One",
+      "department": "Engineering",
+      "role": "Backend Engineer",
+      "grade": "Middle",
+      "manager_id": "E0001",
+      "hire_date": "2022-02-01",
+      "tenure_months": 40,
+      "work_format": "office",
+      "preferred_language": "en",
+      "career_goal": null,
+      "skills": {
+        "SK_PUBLIC_SPEAKING": 0,
+        "SK_SYSTEM_DESIGN": 2,
+        "SK_API_DESIGN": 3,
+        "SK_CLOUD": 2,
+        "SK_CONTAINERS": 2,
+        "SK_OBSERVABILITY": 2
+      },
+      "last_review_date": "2026-06-01"
+    }
+  ]
+}

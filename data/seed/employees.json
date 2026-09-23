@@ -1,0 +1,834 @@
+{
+  "meta": {
+    "as_of_date": "2026-10-01"
+  },
+  "employees": [
+    {
+      "employee_id": "E0001",
+      "full_name": "Demo Person 01",
+      "department": "Engineering",
+      "role": "Frontend Engineer",
+      "grade": "Junior",
+      "manager_id": null,
+      "hire_date": "2022-02-15",
+      "tenure_months": 13,
+      "work_format": "hybrid",
+      "preferred_language": "ru",
+      "career_goal": null,
+      "skills": {
+        "SK_JAVASCRIPT": 1,
+        "SK_TYPESCRIPT": 0,
+        "SK_REACT": 0,
+        "SK_WEB_PERFORMANCE": 3
+      },
+      "last_review_date": "2026-04-11"
+    },
+    {
+      "employee_id": "E0002",
+      "full_name": "Demo Person 02",
+      "department": "Product",
+      "role": "Data Analyst",
+      "grade": "Junior",
+      "manager_id": "E0001",
+      "hire_date": "2023-03-15",
+      "tenure_months": 14,
+      "work_format": "remote",
+      "preferred_language": "en",
+      "career_goal": {
+        "target_role": "Data Analyst",
+        "target_grade": "Middle"
+      },
+      "skills": {
+        "SK_SQL": 3,
+        "SK_DATA_VIZ": 1
+      },
+      "last_review_date": "2026-05-12"
+    },
+    {
+      "employee_id": "E0003",
+      "full_name": "Demo Person 03",
+      "department": "Engineering",
+      "role": "QA Engineer",
+      "grade": "Junior",
+      "manager_id": "E0001",
+      "hire_date": "2024-04-15",
+      "tenure_months": 15,
+      "work_format": "office",
+      "preferred_language": "kk",
+      "career_goal": null,
+      "skills": {
+        "SK_SQL": 1,
+        "SK_JAVASCRIPT": 1
+      },
+      "last_review_date": "2026-06-13"
+    },
+    {
+      "employee_id": "E0004",
+      "full_name": "Demo Person 04",
+      "department": "Engineering",
+      "role": "HR Business Partner",
+      "grade": "Junior",
+      "manager_id": "E0001",
+      "hire_date": "2025-05-15",
+      "tenure_months": 16,
+      "work_format": "hybrid",
+      "preferred_language": "ru",
+      "career_goal": null,
+      "skills": {
+        "SK_PUBLIC_SPEAKING": 2
+      },
+      "last_review_date": "2026-07-14"
+    },
+    {
+      "employee_id": "E0005",
+      "full_name": "Demo Person 05",
+      "department": "Product",
+      "role": "Backend Engineer",
+      "grade": "Middle",
+      "manager_id": "E0001",
+      "hire_date": "2021-06-15",
+      "tenure_months": 17,
+      "work_format": "remote",
+      "preferred_language": "en",
+      "career_goal": {
+        "target_role": "Backend Engineer",
+        "target_grade": "Senior"
+      },
+      "skills": {
+        "SK_SYSTEM_DESIGN": 1,
+        "SK_API_DESIGN": 4,
+        "SK_CLOUD": 3,
+        "SK_CONTAINERS": 3,
+        "SK_OBSERVABILITY": 2,
+        "SK_PUBLIC_SPEAKING": 4
+      },
+      "last_review_date": "2026-08-15"
+    },
+    {
+      "employee_id": "E0006",
+      "full_name": "Demo Person 06",
+      "department": "Data",
+      "role": "Frontend Engineer",
+      "grade": "Middle",
+      "manager_id": "E0001",
+      "hire_date": "2022-07-15",
+      "tenure_months": 18,
+      "work_format": "office",
+      "preferred_language": "kk",
+      "career_goal": {
+        "target_role": "Frontend Engineer",
+        "target_grade": "Senior"
+      },
+      "skills": {
+        "SK_JAVASCRIPT": 1,
+        "SK_TYPESCRIPT": 4,
+        "SK_REACT": 2,
+        "SK_WEB_PERFORMANCE": 4
+      },
+      "last_review_date": "2026-03-16"
+    },
+    {
+      "employee_id": "E0007",
+      "full_name": "Demo Person 07",
+      "department": "Data",
+      "role": "Data Analyst",
+      "grade": "Middle",
+      "manager_id": "E0001",
+      "hire_date": "2023-08-15",
+      "tenure_months": 19,
+      "work_format": "hybrid",
+      "preferred_language": "ru",
+      "career_goal": {
+        "target_role": "Data Analyst",
+        "target_grade": "Senior"
+      },
+      "skills": {
+        "SK_SQL": 3,
+        "SK_DATA_VIZ": 1
+      },
+      "last_review_date": "2026-04-17"
+    },
+    {
+      "employee_id": "E0008",
+      "full_name": "Demo Person 08",
+      "department": "Product",
+      "role": "QA Engineer",
+      "grade": "Middle",
+      "manager_id": "E0001",
+      "hire_date": "2024-09-15",
+      "tenure_months": 20,
+      "work_format": "remote",
+      "preferred_language": "en",
+      "career_goal": {
+        "target_role": "QA Engineer",
+        "target_grade": "Senior"
+      },
+      "skills": {
+        "SK_SQL": 1,
+        "SK_JAVASCRIPT": 2
+      },
+      "last_review_date": "2026-05-18"
+    },
+    {
+      "employee_id": "E0009",
+      "full_name": "Demo Person 09",
+      "department": "Data",
+      "role": "HR Business Partner",
+      "grade": "Middle",
+      "manager_id": "E0001",
+      "hire_date": "2025-01-15",
+      "tenure_months": 21,
+      "work_format": "office",
+      "preferred_language": "kk",
+      "career_goal": {
+        "target_role": "HR Business Partner",
+        "target_grade": "Senior"
+      },
+      "skills": {
+        "SK_PUBLIC_SPEAKING": 1
+      },
+      "last_review_date": "2026-06-10"
+    },
+    {
+      "employee_id": "E0010",
+      "full_name": "Demo Person 10",
+      "department": "People",
+      "role": "Backend Engineer",
+      "grade": "Senior",
+      "manager_id": "E0001",
+      "hire_date": "2021-02-15",
+      "tenure_months": 22,
+      "work_format": "hybrid",
+      "preferred_language": "ru",
+      "career_goal": {
+        "target_role": "Backend Engineer",
+        "target_grade": "Lead"
+      },
+      "skills": {
+        "SK_SYSTEM_DESIGN": 5,
+        "SK_API_DESIGN": 5,
+        "SK_CLOUD": 3,
+        "SK_CONTAINERS": 3,
+        "SK_OBSERVABILITY": 3,
+        "SK_PUBLIC_SPEAKING": 3
+      },
+      "last_review_date": "2026-07-11"
+    },
+    {
+      "employee_id": "E0011",
+      "full_name": "Demo Person 11",
+      "department": "People",
+      "role": "Frontend Engineer",
+      "grade": "Senior",
+      "manager_id": "E0001",
+      "hire_date": "2022-03-15",
+      "tenure_months": 23,
+      "work_format": "remote",
+      "preferred_language": "en",
+      "career_goal": {
+        "target_role": "Frontend Engineer",
+        "target_grade": "Lead"
+      },
+      "skills": {
+        "SK_JAVASCRIPT": 4,
+        "SK_TYPESCRIPT": 5,
+        "SK_REACT": 3,
+        "SK_WEB_PERFORMANCE": 4
+      },
+      "last_review_date": "2026-08-12"
+    },
+    {
+      "employee_id": "E0012",
+      "full_name": "Demo Person 12",
+      "department": "Engineering",
+      "role": "Data Analyst",
+      "grade": "Senior",
+      "manager_id": "E0001",
+      "hire_date": "2023-04-15",
+      "tenure_months": 24,
+      "work_format": "office",
+      "preferred_language": "kk",
+      "career_goal": null,
+      "skills": {
+        "SK_SQL": 5,
+        "SK_DATA_VIZ": 5
+      },
+      "last_review_date": "2026-03-13"
+    },
+    {
+      "employee_id": "E0013",
+      "full_name": "Demo Person 13",
+      "department": "Engineering",
+      "role": "QA Engineer",
+      "grade": "Senior",
+      "manager_id": "E0001",
+      "hire_date": "2024-05-15",
+      "tenure_months": 25,
+      "work_format": "hybrid",
+      "preferred_language": "ru",
+      "career_goal": {
+        "target_role": "QA Engineer",
+        "target_grade": "Lead"
+      },
+      "skills": {
+        "SK_SQL": 3,
+        "SK_JAVASCRIPT": 2
+      },
+      "last_review_date": "2026-04-14"
+    },
+    {
+      "employee_id": "E0014",
+      "full_name": "Demo Person 14",
+      "department": "Data",
+      "role": "HR Business Partner",
+      "grade": "Senior",
+      "manager_id": "E0001",
+      "hire_date": "2025-06-15",
+      "tenure_months": 26,
+      "work_format": "remote",
+      "preferred_language": "en",
+      "career_goal": {
+        "target_role": "HR Business Partner",
+        "target_grade": "Lead"
+      },
+      "skills": {
+        "SK_PUBLIC_SPEAKING": 3
+      },
+      "last_review_date": "2026-05-15"
+    },
+    {
+      "employee_id": "E0015",
+      "full_name": "Demo Person 15",
+      "department": "People",
+      "role": "Backend Engineer",
+      "grade": "Lead",
+      "manager_id": "E0001",
+      "hire_date": "2021-07-15",
+      "tenure_months": 27,
+      "work_format": "office",
+      "preferred_language": "kk",
+      "career_goal": {
+        "target_role": "Backend Engineer",
+        "target_grade": "Lead"
+      },
+      "skills": {
+        "SK_SYSTEM_DESIGN": 5,
+        "SK_API_DESIGN": 4,
+        "SK_CLOUD": 5,
+        "SK_CONTAINERS": 4,
+        "SK_OBSERVABILITY": 3,
+        "SK_PUBLIC_SPEAKING": 2
+      },
+      "last_review_date": "2026-06-16"
+    },
+    {
+      "employee_id": "E0016",
+      "full_name": "Demo Person 16",
+      "department": "Data",
+      "role": "Frontend Engineer",
+      "grade": "Lead",
+      "manager_id": "E0001",
+      "hire_date": "2022-08-15",
+      "tenure_months": 28,
+      "work_format": "hybrid",
+      "preferred_language": "ru",
+      "career_goal": null,
+      "skills": {
+        "SK_JAVASCRIPT": 5,
+        "SK_TYPESCRIPT": 5,
+        "SK_REACT": 5,
+        "SK_WEB_PERFORMANCE": 5
+      },
+      "last_review_date": "2026-07-17"
+    },
+    {
+      "employee_id": "E0017",
+      "full_name": "Demo Person 17",
+      "department": "People",
+      "role": "Data Analyst",
+      "grade": "Lead",
+      "manager_id": "E0001",
+      "hire_date": "2023-09-15",
+      "tenure_months": 29,
+      "work_format": "remote",
+      "preferred_language": "en",
+      "career_goal": null,
+      "skills": {
+        "SK_SQL": 5,
+        "SK_DATA_VIZ": 5
+      },
+      "last_review_date": "2026-08-18"
+    },
+    {
+      "employee_id": "E0018",
+      "full_name": "Demo Person 18",
+      "department": "People",
+      "role": "QA Engineer",
+      "grade": "Lead",
+      "manager_id": "E0001",
+      "hire_date": "2024-01-15",
+      "tenure_months": 30,
+      "work_format": "office",
+      "preferred_language": "kk",
+      "career_goal": {
+        "target_role": "QA Engineer",
+        "target_grade": "Lead"
+      },
+      "skills": {
+        "SK_SQL": 2,
+        "SK_JAVASCRIPT": 2
+      },
+      "last_review_date": "2026-03-10"
+    },
+    {
+      "employee_id": "E0019",
+      "full_name": "Demo Person 19",
+      "department": "Product",
+      "role": "HR Business Partner",
+      "grade": "Lead",
+      "manager_id": "E0001",
+      "hire_date": "2025-02-15",
+      "tenure_months": 31,
+      "work_format": "hybrid",
+      "preferred_language": "ru",
+      "career_goal": {
+        "target_role": "HR Business Partner",
+        "target_grade": "Lead"
+      },
+      "skills": {
+        "SK_PUBLIC_SPEAKING": 4
+      },
+      "last_review_date": "2026-04-11"
+    },
+    {
+      "employee_id": "E0020",
+      "full_name": "Demo Person 20",
+      "department": "People",
+      "role": "Backend Engineer",
+      "grade": "Junior",
+      "manager_id": "E0001",
+      "hire_date": "2021-03-15",
+      "tenure_months": 32,
+      "work_format": "remote",
+      "preferred_language": "en",
+      "career_goal": null,
+      "skills": {
+        "SK_SYSTEM_DESIGN": 0,
+        "SK_API_DESIGN": 3,
+        "SK_CLOUD": 2,
+        "SK_CONTAINERS": 2,
+        "SK_OBSERVABILITY": 3,
+        "SK_PUBLIC_SPEAKING": 0
+      },
+      "last_review_date": "2026-05-12"
+    },
+    {
+      "employee_id": "E0021",
+      "full_name": "Demo Person 21",
+      "department": "Product",
+      "role": "Frontend Engineer",
+      "grade": "Junior",
+      "manager_id": "E0001",
+      "hire_date": "2022-04-15",
+      "tenure_months": 33,
+      "work_format": "office",
+      "preferred_language": "kk",
+      "career_goal": null,
+      "skills": {
+        "SK_JAVASCRIPT": 1,
+        "SK_TYPESCRIPT": 2,
+        "SK_REACT": 0,
+        "SK_WEB_PERFORMANCE": 3
+      },
+      "last_review_date": "2026-06-13"
+    },
+    {
+      "employee_id": "E0022",
+      "full_name": "Demo Person 22",
+      "department": "People",
+      "role": "Data Analyst",
+      "grade": "Junior",
+      "manager_id": "E0001",
+      "hire_date": "2023-05-15",
+      "tenure_months": 34,
+      "work_format": "hybrid",
+      "preferred_language": "ru",
+      "career_goal": {
+        "target_role": "Data Analyst",
+        "target_grade": "Middle"
+      },
+      "skills": {
+        "SK_SQL": 0,
+        "SK_DATA_VIZ": 0
+      },
+      "last_review_date": "2026-07-14"
+    },
+    {
+      "employee_id": "E0023",
+      "full_name": "Demo Person 23",
+      "department": "People",
+      "role": "QA Engineer",
+      "grade": "Junior",
+      "manager_id": "E0001",
+      "hire_date": "2024-06-15",
+      "tenure_months": 35,
+      "work_format": "remote",
+      "preferred_language": "en",
+      "career_goal": null,
+      "skills": {
+        "SK_SQL": 3,
+        "SK_JAVASCRIPT": 0
+      },
+      "last_review_date": "2026-08-15"
+    },
+    {
+      "employee_id": "E0024",
+      "full_name": "Demo Person 24",
+      "department": "Engineering",
+      "role": "HR Business Partner",
+      "grade": "Junior",
+      "manager_id": "E0001",
+      "hire_date": "2025-07-15",
+      "tenure_months": 36,
+      "work_format": "office",
+      "preferred_language": "kk",
+      "career_goal": {
+        "target_role": "HR Business Partner",
+        "target_grade": "Middle"
+      },
+      "skills": {
+        "SK_PUBLIC_SPEAKING": 1
+      },
+      "last_review_date": "2026-03-16"
+    },
+    {
+      "employee_id": "E0025",
+      "full_name": "Demo Person 25",
+      "department": "Engineering",
+      "role": "Backend Engineer",
+      "grade": "Middle",
+      "manager_id": "E0001",
+      "hire_date": "2021-08-15",
+      "tenure_months": 37,
+      "work_format": "hybrid",
+      "preferred_language": "ru",
+      "career_goal": null,
+      "skills": {
+        "SK_SYSTEM_DESIGN": 2,
+        "SK_API_DESIGN": 3,
+        "SK_CLOUD": 3,
+        "SK_CONTAINERS": 3,
+        "SK_OBSERVABILITY": 3,
+        "SK_PUBLIC_SPEAKING": 2
+      },
+      "last_review_date": "2026-04-17"
+    },
+    {
+      "employee_id": "E0026",
+      "full_name": "Demo Person 26",
+      "department": "Product",
+      "role": "Frontend Engineer",
+      "grade": "Middle",
+      "manager_id": "E0001",
+      "hire_date": "2022-09-15",
+      "tenure_months": 38,
+      "work_format": "remote",
+      "preferred_language": "en",
+      "career_goal": null,
+      "skills": {
+        "SK_JAVASCRIPT": 2,
+        "SK_TYPESCRIPT": 4,
+        "SK_REACT": 2,
+        "SK_WEB_PERFORMANCE": 1
+      },
+      "last_review_date": "2026-05-18"
+    },
+    {
+      "employee_id": "E0027",
+      "full_name": "Demo Person 27",
+      "department": "Data",
+      "role": "Data Analyst",
+      "grade": "Middle",
+      "manager_id": "E0001",
+      "hire_date": "2023-01-15",
+      "tenure_months": 39,
+      "work_format": "office",
+      "preferred_language": "kk",
+      "career_goal": null,
+      "skills": {
+        "SK_SQL": 5,
+        "SK_DATA_VIZ": 4
+      },
+      "last_review_date": "2026-06-10"
+    },
+    {
+      "employee_id": "E0028",
+      "full_name": "Demo Person 28",
+      "department": "Engineering",
+      "role": "Backend Engineer",
+      "grade": "Middle",
+      "manager_id": "E0001",
+      "hire_date": "2021-09-01",
+      "tenure_months": 52,
+      "work_format": "hybrid",
+      "preferred_language": "ru",
+      "career_goal": null,
+      "skills": {
+        "SK_SYSTEM_DESIGN": 2,
+        "SK_PUBLIC_SPEAKING": 2,
+        "SK_CLOUD": 1,
+        "SK_CONTAINERS": 1,
+        "SK_OBSERVABILITY": 1,
+        "SK_API_DESIGN": 4
+      },
+      "last_review_date": "2026-06-24"
+    },
+    {
+      "employee_id": "E0029",
+      "full_name": "Demo Person 29",
+      "department": "Product",
+      "role": "HR Business Partner",
+      "grade": "Middle",
+      "manager_id": "E0001",
+      "hire_date": "2025-03-15",
+      "tenure_months": 41,
+      "work_format": "remote",
+      "preferred_language": "en",
+      "career_goal": {
+        "target_role": "HR Business Partner",
+        "target_grade": "Senior"
+      },
+      "skills": {
+        "SK_PUBLIC_SPEAKING": 4
+      },
+      "last_review_date": "2026-08-12"
+    },
+    {
+      "employee_id": "E0030",
+      "full_name": "Demo Person 30",
+      "department": "Engineering",
+      "role": "Backend Engineer",
+      "grade": "Senior",
+      "manager_id": "E0001",
+      "hire_date": "2021-04-15",
+      "tenure_months": 42,
+      "work_format": "office",
+      "preferred_language": "kk",
+      "career_goal": {
+        "target_role": "Backend Engineer",
+        "target_grade": "Lead"
+      },
+      "skills": {
+        "SK_SYSTEM_DESIGN": 5,
+        "SK_API_DESIGN": 4,
+        "SK_CLOUD": 2,
+        "SK_CONTAINERS": 4,
+        "SK_OBSERVABILITY": 5,
+        "SK_PUBLIC_SPEAKING": 2
+      },
+      "last_review_date": "2026-03-13"
+    },
+    {
+      "employee_id": "E0031",
+      "full_name": "Demo Person 31",
+      "department": "Product",
+      "role": "Frontend Engineer",
+      "grade": "Senior",
+      "manager_id": "E0001",
+      "hire_date": "2022-05-15",
+      "tenure_months": 43,
+      "work_format": "hybrid",
+      "preferred_language": "ru",
+      "career_goal": {
+        "target_role": "Frontend Engineer",
+        "target_grade": "Lead"
+      },
+      "skills": {
+        "SK_JAVASCRIPT": 3,
+        "SK_TYPESCRIPT": 3,
+        "SK_REACT": 2,
+        "SK_WEB_PERFORMANCE": 4
+      },
+      "last_review_date": "2026-04-14"
+    },
+    {
+      "employee_id": "E0032",
+      "full_name": "Demo Person 32",
+      "department": "People",
+      "role": "Data Analyst",
+      "grade": "Senior",
+      "manager_id": "E0001",
+      "hire_date": "2023-06-15",
+      "tenure_months": 44,
+      "work_format": "remote",
+      "preferred_language": "en",
+      "career_goal": {
+        "target_role": "Data Analyst",
+        "target_grade": "Lead"
+      },
+      "skills": {
+        "SK_SQL": 5,
+        "SK_DATA_VIZ": 4
+      },
+      "last_review_date": "2026-05-15"
+    },
+    {
+      "employee_id": "E0033",
+      "full_name": "Demo Person 33",
+      "department": "Data",
+      "role": "QA Engineer",
+      "grade": "Senior",
+      "manager_id": "E0001",
+      "hire_date": "2024-07-15",
+      "tenure_months": 45,
+      "work_format": "office",
+      "preferred_language": "kk",
+      "career_goal": {
+        "target_role": "QA Engineer",
+        "target_grade": "Lead"
+      },
+      "skills": {
+        "SK_SQL": 3,
+        "SK_JAVASCRIPT": 3
+      },
+      "last_review_date": "2026-06-16"
+    },
+    {
+      "employee_id": "E0034",
+      "full_name": "Demo Person 34",
+      "department": "People",
+      "role": "HR Business Partner",
+      "grade": "Senior",
+      "manager_id": "E0001",
+      "hire_date": "2025-08-15",
+      "tenure_months": 46,
+      "work_format": "hybrid",
+      "preferred_language": "ru",
+      "career_goal": null,
+      "skills": {
+        "SK_PUBLIC_SPEAKING": 2
+      },
+      "last_review_date": "2026-07-17"
+    },
+    {
+      "employee_id": "E0035",
+      "full_name": "Demo Person 35",
+      "department": "Data",
+      "role": "Backend Engineer",
+      "grade": "Lead",
+      "manager_id": "E0001",
+      "hire_date": "2021-09-15",
+      "tenure_months": 47,
+      "work_format": "remote",
+      "preferred_language": "en",
+      "career_goal": null,
+      "skills": {
+        "SK_SYSTEM_DESIGN": 5,
+        "SK_API_DESIGN": 5,
+        "SK_CLOUD": 3,
+        "SK_CONTAINERS": 3,
+        "SK_OBSERVABILITY": 4,
+        "SK_PUBLIC_SPEAKING": 4
+      },
+      "last_review_date": "2026-08-18"
+    },
+    {
+      "employee_id": "E0036",
+      "full_name": "Demo Person 36",
+      "department": "Data",
+      "role": "Frontend Engineer",
+      "grade": "Lead",
+      "manager_id": "E0001",
+      "hire_date": "2022-01-15",
+      "tenure_months": 48,
+      "work_format": "office",
+      "preferred_language": "kk",
+      "career_goal": {
+        "target_role": "Frontend Engineer",
+        "target_grade": "Lead"
+      },
+      "skills": {
+        "SK_JAVASCRIPT": 3,
+        "SK_TYPESCRIPT": 5,
+        "SK_REACT": 5,
+        "SK_WEB_PERFORMANCE": 5
+      },
+      "last_review_date": "2026-03-10"
+    },
+    {
+      "employee_id": "E0037",
+      "full_name": "Demo Person 37",
+      "department": "Engineering",
+      "role": "Data Analyst",
+      "grade": "Lead",
+      "manager_id": "E0001",
+      "hire_date": "2023-02-15",
+      "tenure_months": 49,
+      "work_format": "hybrid",
+      "preferred_language": "ru",
+      "career_goal": null,
+      "skills": {
+        "SK_SQL": 5,
+        "SK_DATA_VIZ": 5
+      },
+      "last_review_date": "2026-04-11"
+    },
+    {
+      "employee_id": "E0038",
+      "full_name": "Demo Person 38",
+      "department": "People",
+      "role": "QA Engineer",
+      "grade": "Lead",
+      "manager_id": "E0001",
+      "hire_date": "2024-03-15",
+      "tenure_months": 50,
+      "work_format": "remote",
+      "preferred_language": "en",
+      "career_goal": null,
+      "skills": {
+        "SK_SQL": 2,
+        "SK_JAVASCRIPT": 2
+      },
+      "last_review_date": "2026-05-12"
+    },
+    {
+      "employee_id": "E0039",
+      "full_name": "Demo Person 39",
+      "department": "Engineering",
+      "role": "HR Business Partner",
+      "grade": "Lead",
+      "manager_id": "E0001",
+      "hire_date": "2025-04-15",
+      "tenure_months": 51,
+      "work_format": "office",
+      "preferred_language": "kk",
+      "career_goal": null,
+      "skills": {
+        "SK_PUBLIC_SPEAKING": 4
+      },
+      "last_review_date": "2026-06-13"
+    },
+    {
+      "employee_id": "E0040",
+      "full_name": "Demo Person 40",
+      "department": "People",
+      "role": "Backend Engineer",
+      "grade": "Junior",
+      "manager_id": "E0001",
+      "hire_date": "2021-05-15",
+      "tenure_months": 52,
+      "work_format": "hybrid",
+      "preferred_language": "ru",
+      "career_goal": null,
+      "skills": {
+        "SK_SYSTEM_DESIGN": 1,
+        "SK_API_DESIGN": 3,
+        "SK_CLOUD": 1,
+        "SK_CONTAINERS": 1,
+        "SK_OBSERVABILITY": 2,
+        "SK_PUBLIC_SPEAKING": 1
+      },
+      "last_review_date": "2026-07-14"
+    }
+  ]
+}

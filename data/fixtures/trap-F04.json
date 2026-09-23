@@ -1,0 +1,30 @@
+{
+  "meta": {
+    "as_of_date": "2026-10-01"
+  },
+  "employees": [
+    {
+      "employee_id": "T9004",
+      "full_name": "Test Trap-Four",
+      "department": "Product",
+      "role": "Frontend Engineer",
+      "grade": "Middle",
+      "manager_id": "E0001",
+      "hire_date": "2022-09-01",
+      "tenure_months": 36,
+      "work_format": "hybrid",
+      "preferred_language": "en",
+      "career_goal": {
+        "target_role": "Frontend Engineer",
+        "target_grade": "Senior"
+      },
+      "skills": {
+        "SK_TYPESCRIPT": 2,
+        "SK_WEB_PERFORMANCE": 3,
+        "SK_JAVASCRIPT": 3,
+        "SK_REACT": 2
+      },
+      "last_review_date": "2026-06-01"
+    }
+  ]
+}

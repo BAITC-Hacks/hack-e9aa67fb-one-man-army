@@ -20,7 +20,10 @@
     "checkpoint": "node scripts/checkpoint.mjs",
     "demo:seed": "node scripts/demo.mjs seed",
     "demo:reset": "node scripts/demo.mjs reset",
-    "screenshots": "node scripts/capture-screenshots.mjs"
+    "screenshots": "node scripts/capture-screenshots.mjs",
+    "gen:seed": "node scripts/gen-seed.mjs",
+    "data:import": "node scripts/import.mjs",
+    "start:demo": "pnpm build && pnpm start"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "4.0.58",

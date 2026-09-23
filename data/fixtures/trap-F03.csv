@@ -1,0 +1,2 @@
+record_id,employee_id,event_id,date,due_date,status,completion_pct,score,feedback_rating,assigned_by
+F03-H1,T9003,EV_007,2026-08-12,,completed,100,88,5,self

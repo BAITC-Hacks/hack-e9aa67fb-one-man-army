@@ -1,0 +1,455 @@
+{
+  "meta": {
+    "as_of_date": "2026-10-01"
+  },
+  "events": [
+    {
+      "event_id": "EV_001",
+      "title": "Onboarding Essentials",
+      "description": "Company onboarding (demo synthetic).",
+      "type": "onboarding",
+      "format": "online",
+      "duration_hours": 2,
+      "mandatory": true,
+      "target_roles": [
+        "Backend Engineer",
+        "Frontend Engineer",
+        "Data Analyst",
+        "QA Engineer",
+        "HR Business Partner"
+      ],
+      "target_grades": [
+        "Junior",
+        "Middle",
+        "Senior",
+        "Lead"
+      ],
+      "develops_skills": [],
+      "prerequisites": {},
+      "upcoming_sessions": [
+        "2026-10-05",
+        "2026-10-19"
+      ]
+    },
+    {
+      "event_id": "EV_002",
+      "title": "Code of Conduct",
+      "description": "Compliance training (demo synthetic).",
+      "type": "compliance",
+      "format": "self_paced",
+      "duration_hours": 1,
+      "mandatory": true,
+      "target_roles": [
+        "Backend Engineer",
+        "Frontend Engineer",
+        "Data Analyst",
+        "QA Engineer",
+        "HR Business Partner"
+      ],
+      "target_grades": [
+        "Junior",
+        "Middle",
+        "Senior",
+        "Lead"
+      ],
+      "develops_skills": [],
+      "prerequisites": {},
+      "upcoming_sessions": []
+    },
+    {
+      "event_id": "EV_003",
+      "title": "Security Basics",
+      "description": "Security awareness (demo synthetic).",
+      "type": "compliance",
+      "format": "self_paced",
+      "duration_hours": 1,
+      "mandatory": true,
+      "target_roles": [
+        "Backend Engineer",
+        "Frontend Engineer",
+        "Data Analyst",
+        "QA Engineer",
+        "HR Business Partner"
+      ],
+      "target_grades": [
+        "Junior",
+        "Middle",
+        "Senior",
+        "Lead"
+      ],
+      "develops_skills": [],
+      "prerequisites": {},
+      "upcoming_sessions": []
+    },
+    {
+      "event_id": "EV_004",
+      "title": "Data Privacy Basics",
+      "description": "Privacy compliance (demo synthetic).",
+      "type": "compliance",
+      "format": "self_paced",
+      "duration_hours": 1,
+      "mandatory": true,
+      "target_roles": [
+        "Backend Engineer",
+        "Frontend Engineer",
+        "Data Analyst",
+        "QA Engineer",
+        "HR Business Partner"
+      ],
+      "target_grades": [
+        "Junior",
+        "Middle",
+        "Senior",
+        "Lead"
+      ],
+      "develops_skills": [],
+      "prerequisites": {},
+      "upcoming_sessions": []
+    },
+    {
+      "event_id": "EV_005",
+      "title": "Confident Communication Workshop",
+      "description": "Public speaking practice (demo synthetic).",
+      "type": "workshop",
+      "format": "offline",
+      "duration_hours": 4,
+      "mandatory": false,
+      "target_roles": [
+        "Backend Engineer",
+        "Frontend Engineer",
+        "Data Analyst",
+        "QA Engineer",
+        "HR Business Partner"
+      ],
+      "target_grades": [
+        "Junior",
+        "Middle",
+        "Senior",
+        "Lead"
+      ],
+      "develops_skills": [
+        {
+          "skill_id": "SK_PUBLIC_SPEAKING",
+          "gain": 1,
+          "max_level": 3
+        }
+      ],
+      "prerequisites": {},
+      "upcoming_sessions": [
+        "2026-10-10"
+      ]
+    },
+    {
+      "event_id": "EV_006",
+      "title": "System Design Fundamentals",
+      "description": "Core system design course (demo synthetic).",
+      "type": "course",
+      "format": "online",
+      "duration_hours": 8,
+      "mandatory": false,
+      "target_roles": [
+        "Backend Engineer"
+      ],
+      "target_grades": [
+        "Middle",
+        "Senior"
+      ],
+      "develops_skills": [
+        {
+          "skill_id": "SK_SYSTEM_DESIGN",
+          "gain": 1,
+          "max_level": 4
+        }
+      ],
+      "prerequisites": {
+        "SK_SYSTEM_DESIGN": 2
+      },
+      "upcoming_sessions": [
+        "2026-10-08",
+        "2026-11-05"
+      ]
+    },
+    {
+      "event_id": "EV_007",
+      "title": "System Design Advanced",
+      "description": "Advanced distributed systems (demo synthetic).",
+      "type": "course",
+      "format": "online",
+      "duration_hours": 10,
+      "mandatory": false,
+      "target_roles": [
+        "Backend Engineer"
+      ],
+      "target_grades": [
+        "Middle",
+        "Senior"
+      ],
+      "develops_skills": [
+        {
+          "skill_id": "SK_SYSTEM_DESIGN",
+          "gain": 1,
+          "max_level": 5
+        }
+      ],
+      "prerequisites": {
+        "SK_SYSTEM_DESIGN": 2
+      },
+      "upcoming_sessions": [
+        "2026-10-15"
+      ]
+    },
+    {
+      "event_id": "EV_008",
+      "title": "API Design Practicum",
+      "description": "REST/GraphQL API design (demo synthetic).",
+      "type": "course",
+      "format": "online",
+      "duration_hours": 6,
+      "mandatory": false,
+      "target_roles": [
+        "Backend Engineer"
+      ],
+      "target_grades": [
+        "Middle",
+        "Senior"
+      ],
+      "develops_skills": [
+        {
+          "skill_id": "SK_API_DESIGN",
+          "gain": 1,
+          "max_level": 4
+        }
+      ],
+      "prerequisites": {
+        "SK_API_DESIGN": 2
+      },
+      "upcoming_sessions": [
+        "2026-10-12"
+      ]
+    },
+    {
+      "event_id": "EV_009",
+      "title": "Cloud Practitioner Bootcamp",
+      "description": "Cloud fundamentals (demo synthetic).",
+      "type": "course",
+      "format": "offline",
+      "duration_hours": 12,
+      "mandatory": false,
+      "target_roles": [
+        "Backend Engineer"
+      ],
+      "target_grades": [
+        "Junior",
+        "Middle"
+      ],
+      "develops_skills": [
+        {
+          "skill_id": "SK_CLOUD",
+          "gain": 1,
+          "max_level": 3
+        }
+      ],
+      "prerequisites": {},
+      "upcoming_sessions": [
+        "2026-10-20"
+      ]
+    },
+    {
+      "event_id": "EV_010",
+      "title": "Containers Workshop",
+      "description": "Docker/Kubernetes basics (demo synthetic).",
+      "type": "workshop",
+      "format": "offline",
+      "duration_hours": 6,
+      "mandatory": false,
+      "target_roles": [
+        "Backend Engineer"
+      ],
+      "target_grades": [
+        "Middle"
+      ],
+      "develops_skills": [
+        {
+          "skill_id": "SK_CONTAINERS",
+          "gain": 1,
+          "max_level": 3
+        }
+      ],
+      "prerequisites": {},
+      "upcoming_sessions": [
+        "2026-10-22"
+      ]
+    },
+    {
+      "event_id": "EV_011",
+      "title": "Observability Deep Dive",
+      "description": "Metrics, logs, traces (demo synthetic).",
+      "type": "course",
+      "format": "online",
+      "duration_hours": 5,
+      "mandatory": false,
+      "target_roles": [
+        "Backend Engineer"
+      ],
+      "target_grades": [
+        "Middle",
+        "Senior"
+      ],
+      "develops_skills": [
+        {
+          "skill_id": "SK_OBSERVABILITY",
+          "gain": 1,
+          "max_level": 4
+        }
+      ],
+      "prerequisites": {},
+      "upcoming_sessions": [
+        "2026-10-18"
+      ]
+    },
+    {
+      "event_id": "EV_013",
+      "title": "TypeScript for Frontend Teams",
+      "description": "TS unlock course (demo synthetic).",
+      "type": "course",
+      "format": "online",
+      "duration_hours": 6,
+      "mandatory": false,
+      "target_roles": [
+        "Frontend Engineer"
+      ],
+      "target_grades": [
+        "Middle",
+        "Senior"
+      ],
+      "develops_skills": [
+        {
+          "skill_id": "SK_TYPESCRIPT",
+          "gain": 2,
+          "max_level": 4
+        }
+      ],
+      "prerequisites": {
+        "SK_JAVASCRIPT": 2
+      },
+      "upcoming_sessions": [
+        "2026-10-09"
+      ]
+    },
+    {
+      "event_id": "EV_014",
+      "title": "TypeScript Expert Patterns",
+      "description": "Advanced TS (demo synthetic).",
+      "type": "course",
+      "format": "online",
+      "duration_hours": 6,
+      "mandatory": false,
+      "target_roles": [
+        "Frontend Engineer"
+      ],
+      "target_grades": [
+        "Senior",
+        "Lead"
+      ],
+      "develops_skills": [
+        {
+          "skill_id": "SK_TYPESCRIPT",
+          "gain": 1,
+          "max_level": 5
+        }
+      ],
+      "prerequisites": {
+        "SK_TYPESCRIPT": 3
+      },
+      "upcoming_sessions": [
+        "2026-11-01"
+      ]
+    },
+    {
+      "event_id": "EV_015",
+      "title": "Web Performance Basics",
+      "description": "Core web vitals (demo synthetic).",
+      "type": "workshop",
+      "format": "self_paced",
+      "duration_hours": 3,
+      "mandatory": false,
+      "target_roles": [
+        "Frontend Engineer"
+      ],
+      "target_grades": [
+        "Junior",
+        "Middle"
+      ],
+      "develops_skills": [
+        {
+          "skill_id": "SK_WEB_PERFORMANCE",
+          "gain": 1,
+          "max_level": 3
+        }
+      ],
+      "prerequisites": {},
+      "upcoming_sessions": []
+    },
+    {
+      "event_id": "EV_022",
+      "title": "SQL for Analysts",
+      "description": "Applied SQL (demo synthetic).",
+      "type": "course",
+      "format": "online",
+      "duration_hours": 8,
+      "mandatory": false,
+      "target_roles": [
+        "Data Analyst"
+      ],
+      "target_grades": [
+        "Junior",
+        "Middle"
+      ],
+      "develops_skills": [
+        {
+          "skill_id": "SK_SQL",
+          "gain": 2,
+          "max_level": 4
+        }
+      ],
+      "prerequisites": {},
+      "upcoming_sessions": [
+        "2026-10-14"
+      ]
+    },
+    {
+      "event_id": "EV_036",
+      "title": "Public Speaking Practice Circle",
+      "description": "Repeatable practice sessions (demo synthetic).",
+      "type": "workshop",
+      "format": "offline",
+      "duration_hours": 2,
+      "mandatory": false,
+      "target_roles": [
+        "Backend Engineer",
+        "Frontend Engineer",
+        "Data Analyst",
+        "QA Engineer",
+        "HR Business Partner"
+      ],
+      "target_grades": [
+        "Junior",
+        "Middle",
+        "Senior",
+        "Lead"
+      ],
+      "develops_skills": [
+        {
+          "skill_id": "SK_PUBLIC_SPEAKING",
+          "gain": 1,
+          "max_level": 5
+        }
+      ],
+      "prerequisites": {},
+      "upcoming_sessions": [
+        "2026-10-07",
+        "2026-10-21"
+      ]
+    }
+  ]
+}

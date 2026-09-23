@@ -1,0 +1,33 @@
+{
+  "meta": {
+    "as_of_date": "2026-10-01"
+  },
+  "employees": [
+    {
+      "employee_id": "T9006",
+      "full_name": "Test Trap-Six",
+      "department": "Engineering",
+      "role": "QA Engineer",
+      "grade": "Middle",
+      "manager_id": "E0001",
+      "hire_date": "2023-03-01",
+      "tenure_months": 30,
+      "work_format": "office",
+      "preferred_language": "en",
+      "career_goal": {
+        "target_role": "Backend Engineer",
+        "target_grade": "Middle"
+      },
+      "skills": {
+        "SK_SQL": 1,
+        "SK_JAVASCRIPT": 1,
+        "SK_SYSTEM_DESIGN": 0,
+        "SK_API_DESIGN": 0,
+        "SK_CLOUD": 0,
+        "SK_CONTAINERS": 0,
+        "SK_OBSERVABILITY": 0
+      },
+      "last_review_date": "2026-06-01"
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "meta": {
+    "as_of_date": "2026-10-01"
+  },
+  "employees": [
+    {
+      "employee_id": "T9003",
+      "full_name": "Test Trap-Three",
+      "department": "Engineering",
+      "role": "Backend Engineer",
+      "grade": "Middle",
+      "manager_id": "E0001",
+      "hire_date": "2021-05-01",
+      "tenure_months": 60,
+      "work_format": "hybrid",
+      "preferred_language": "en",
+      "career_goal": null,
+      "skills": {
+        "SK_SYSTEM_DESIGN": 3,
+        "SK_API_DESIGN": 3,
+        "SK_CLOUD": 1,
+        "SK_CONTAINERS": 1,
+        "SK_OBSERVABILITY": 1,
+        "SK_PUBLIC_SPEAKING": 2
+      },
+      "last_review_date": "2026-05-01"
+    }
+  ]
+}

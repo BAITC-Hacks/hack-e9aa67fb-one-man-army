@@ -1,0 +1,29 @@
+{
+  "meta": {
+    "as_of_date": "2026-10-01"
+  },
+  "employees": [
+    {
+      "employee_id": "T9002",
+      "full_name": "Test Trap-Two",
+      "department": "Data",
+      "role": "Data Analyst",
+      "grade": "Junior",
+      "manager_id": "E0001",
+      "hire_date": "2024-01-10",
+      "tenure_months": 20,
+      "work_format": "remote",
+      "preferred_language": "en",
+      "career_goal": {
+        "target_role": "Data Analyst",
+        "target_grade": "Middle"
+      },
+      "skills": {
+        "SK_REACT": 0,
+        "SK_SQL": 1,
+        "SK_DATA_VIZ": 1
+      },
+      "last_review_date": "2026-06-01"
+    }
+  ]
+}
