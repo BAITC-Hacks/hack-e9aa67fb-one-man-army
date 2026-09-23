@@ -237,14 +237,30 @@ describe("F6 format-switch signal (review-1430 #7, docs/domain.md §3)", () => {
 });
 
 describe("no-step classification on the career-quest kit (docs/domain.md §3)", () => {
-  it("LOW_FIT: eligible candidate exists but its score is <= 0, and it is traceable in blocked", async () => {
+  // Was asserted LOW_FIT: an eligible, score<=0 candidate (EV_036) existed,
+  // and the old classifier treated "any eligible candidate" as LOW_FIT
+  // regardless of whether it closed a real gap. Fixed (2026-09-23, operator
+  // decision): LOW_FIT now requires the eligible candidate to also close a
+  // real gap - EV_036 does not for E0029, so this correctly falls through
+  // to ALL_DONE. EV_036 is still traceable in `blocked` either way.
+  it("ALL_DONE (not LOW_FIT): the one eligible, score <= 0 candidate does not close a real gap, and it is still traceable in blocked", async () => {
     const ds = await getDataset();
     const result = recommend("E0029", ds);
     expect(result.recommendations).toEqual([]);
-    expect(result.noStep).toBe("LOW_FIT");
+    expect(result.noStep).toBe("ALL_DONE");
     const dropped = result.blocked.find((b) => b.event_id === "EV_036");
     expect(dropped).toBeDefined();
     expect(dropped?.failedRule).toBe("score-threshold");
+  });
+
+  it("LOW_FIT is never produced without a lowFit recommendation: every LOW_FIT-eligible candidate on the kit is either promoted to a lowFit rec or reclassified to a more specific reason (operator decision 2026-09-23)", async () => {
+    const ds = await getDataset();
+    let lowFitNoStepCount = 0;
+    for (const emp of ds.employees) {
+      const result = recommend(emp.employee_id, ds);
+      if (result.noStep === "LOW_FIT") lowFitNoStepCount += 1;
+    }
+    expect(lowFitNoStepCount).toBe(0);
   });
 
   it("lowFit: LOW_FIT employees with a gap-closing eligible candidate get exactly one lowFit recommendation, noStep null", async () => {

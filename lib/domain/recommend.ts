@@ -54,6 +54,24 @@ function usefulGainSkills(event: Event, effective: Record<string, number>): stri
     .map((d) => d.skill_id);
 }
 
+/** Not just "the skill_id is on the gap list" - the event must be able to
+ * actually move that skill past the employee's current effective level
+ * (same test scoring's F1/F2 use). An event capped at/below the current
+ * level lists the skill but closes nothing. Used both for the score>0
+ * relevance filter and for classifying/filling LOW_FIT (score<=0) below,
+ * so both agree on what counts as "eligible AND gap-closing" regardless of
+ * score sign. */
+function closesRealGap(
+  event: Event,
+  relevantGapSkillIds: Set<string>,
+  effective: Record<string, number>,
+): boolean {
+  return event.develops_skills.some((d) => {
+    if (!relevantGapSkillIds.has(d.skill_id)) return false;
+    return usefulGain(effective[d.skill_id] ?? 0, d.gain, d.max_level) > 0;
+  });
+}
+
 function classifyNoStep(
   emp: Employee,
   ds: Dataset,
@@ -174,15 +192,7 @@ export function recommend(empId: string, ds: Dataset): RecommendationResult {
   ]);
   const relevantCandidates: typeof eligibleAndUseful = [];
   for (const s of eligibleAndUseful) {
-    // Not just "the skill_id is on the gap list" - the event must be able to
-    // actually move that skill past the employee's current effective level
-    // (same test scoring's F1/F2 use). An event capped at/below the current
-    // level lists the skill but closes nothing.
-    const closesRealGap = s.event.develops_skills.some((d) => {
-      if (!relevantGapSkillIds.has(d.skill_id)) return false;
-      return usefulGain(effective[d.skill_id] ?? 0, d.gain, d.max_level) > 0;
-    });
-    if (closesRealGap) {
+    if (closesRealGap(s.event, relevantGapSkillIds, effective)) {
       relevantCandidates.push(s);
     } else {
       blocked.push({
@@ -240,10 +250,17 @@ export function recommend(empId: string, ds: Dataset): RecommendationResult {
 
   let recommendations: Recommendation[] = picked.map((s) => toRecommendation(s));
 
+  // classifyNoStep's LOW_FIT branch means "an eligible candidate exists that
+  // also closes a real gap" (not merely "an eligible candidate exists" -
+  // an eligible-but-irrelevant event, e.g. wrong-skill audience fit, must
+  // not itself justify LOW_FIT over the more specific catalogue/prereq/
+  // session/all-done reasons below).
+  const hasEligibleGapClosingCandidate = scored.some((s) => closesRealGap(s.event, relevantGapSkillIds, effective));
+
   let noStep: NoStepReason | null =
     recommendations.length > 0
       ? null
-      : classifyNoStep(emp, ds, traj.gaps.length === 0, traj.target.source, blocked, gapSkillIds, scored.length > 0);
+      : classifyNoStep(emp, ds, traj.gaps.length === 0, traj.target.source, blocked, gapSkillIds, hasEligibleGapClosingCandidate);
 
   // Operator decision (2026-09-23): an employee whose every eligible,
   // gap-closing candidate scores <= 0 (the LOW_FIT case) gets exactly one
@@ -252,13 +269,12 @@ export function recommend(empId: string, ds: Dataset): RecommendationResult {
   // classification is untouched; only candidates that already passed
   // eligibility AND close a real gap qualify.
   if (recommendations.length === 0 && noStep === "LOW_FIT") {
-    const lowFitCandidates = scored.filter((s) => {
-      if (s.score > 0) return false; // already covered by the normal path
-      return s.event.develops_skills.some((d) => {
-        if (!relevantGapSkillIds.has(d.skill_id)) return false;
-        return usefulGain(effective[d.skill_id] ?? 0, d.gain, d.max_level) > 0;
-      });
-    });
+    // By construction (hasEligibleGapClosingCandidate is true and no normal
+    // recommendation was produced), every gap-closing scored candidate here
+    // has score <= 0 - a score > 0 one would already be a normal pick.
+    const lowFitCandidates = scored.filter(
+      (s) => s.score <= 0 && closesRealGap(s.event, relevantGapSkillIds, effective),
+    );
     if (lowFitCandidates.length > 0) {
       lowFitCandidates.sort((a, b) => {
         if (b.score !== a.score) return b.score - a.score;
