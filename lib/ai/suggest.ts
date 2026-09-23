@@ -75,13 +75,14 @@ function buildInstructions(locale: Locale): string {
     "Allowed types: prerequisite_path (ONLY when DATA.noStep is PREREQ_BLOCKED, must cite a DATA.blockedEvents event_id, and skill_id must be that event's own missingPrereq.skill_id - the real blocker, not the gap skill it develops),",
     "mentoring, stretch_assignment, peer_learning, request_training (ask HR to add catalogue training),",
     "maintain_and_share (ONLY when DATA.noStep is ALL_DONE, must cite a DATA.masteredSkills skill_id).",
+    "Tailor each suggestion to the person: use DATA.profile (tenure, work format, career goal), DATA.participationByFormat (prefer formats they complete, avoid ones they keep skipping) and DATA.recentCompleted (what they already did). Critical gaps (DATA.gapSkills[].critical) come first.",
     "Each suggestion needs: type, skill_id, an event_ids array (use [] when no event applies), and a one-sentence rationale grounded in DATA.",
     "Do not invent any programme, course, workshop or club name. Do not name any skill or event other than the ones this suggestion is about.",
   ].join(" ");
 }
 
 function buildPrompt(context: SuggestContext, locale: Locale): string {
-  return `TASK: suggest_dev\nLOCALE: ${locale}\nDATA:\n${JSON.stringify(context)}`;
+  return `TASK: suggest_dev\nLOCALE: ${locale}\nDATA:\n${JSON.stringify({ ...context, allEventTitles: undefined, allSkillNames: undefined })}`;
 }
 
 const ID_PATTERN = /\b(?:SK|EV)_[A-Z0-9_]+\b/g;

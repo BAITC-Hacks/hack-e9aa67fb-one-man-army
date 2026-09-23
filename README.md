@@ -300,7 +300,7 @@ When the engine finds no eligible catalogue step (`ALL_DONE`,
 "AI suggestions — not in the catalogue" card instead of an empty section.
 The same rule applies: **the model proposes, code decides.**
 
-1. Code builds the context (`lib/domain/suggest.ts`): open gap skills,
+1. Code builds the context (`lib/domain/suggest.ts`): profile (tenure, work format, career goal, last review), participation by format, the 5 most recent completions, open gap skills,
    mastered skills, the no-step reason, and "unlockable" events — events that
    match the employee's role and grade, develop a gap skill, and are blocked
    *only* by a missing prerequisite (with the exact skill and levels).

@@ -219,3 +219,29 @@ suggestions dropped from 130 (first fixed run) to **107**: the guardrails
 removed 23 items that named something outside the context. Sample
 code-generated titles: "Mentor a colleague on "Mentoring"", "Take on a stretch
 assignment in "CRM Systems"", "Ask HR to add training for "API Design"".
+
+---
+
+## Re-run with the full employee context (2026-09-23, 17:45 Astana)
+
+The model now receives everything relevant about the employee that code can
+verify (`lib/domain/suggest.ts`):
+
+- role, grade, and the target role and grade
+- the no-step reason
+- gap skills (effective vs required, critical flag) and mastered skills
+- unlockable events and their exact missing prerequisite
+- participation totals
+- **profile:** tenure, work format, career goal, last review date
+- **participation by format:** completed vs skipped per format
+- **the 5 most recent completions:** type, format, date, skills raised
+
+Two things are left out on purpose. The employee's name is never sent. The
+full catalogue of event and skill names is not in the prompt; it is used only
+by the validation check.
+
+Same 44 calls on `openai:gpt-4o-mini`: **44/44 model output survived
+validation**, 92 validated suggestions, no empty results, p50 2359 ms,
+p95 3588 ms. The count fell from 107 to 92 because more specific rationales
+trip the strict name checks more often. That is the intended bias: fewer
+suggestions rather than invented ones.

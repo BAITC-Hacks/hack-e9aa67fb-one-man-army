@@ -1,3 +1,4 @@
+import { completedActivities } from "./completed";
 /**
  * Grounded context for AI development suggestions (operator-approved
  * extension, 2026-09-23). Shown only when `recommend()` returns NO catalogue
@@ -50,6 +51,19 @@ export interface SuggestContext {
   masteredSkills: SuggestMasteredSkill[];
   blockedEvents: SuggestBlockedEvent[];
   participation: { completed: number; inProgress: number; dropped: number };
+  /** Employee facts the model may use to tailor a suggestion (no name, no PII). */
+  profile?: {
+    tenure_months: number;
+    work_format: string;
+    career_goal: { target_role: string; target_grade: string } | null;
+    last_review_date: string;
+  };
+  /** Per activity format: how often the employee completed vs skipped
+   * (dropped / no-show / declined) - lets the model prefer formats they finish. */
+  participationByFormat?: Record<string, { completed: number; skipped: number }>;
+  /** Most recent completions, newest first. Titles are deliberately omitted:
+   * the rationale check rejects any event title outside the item's own set. */
+  recentCompleted?: { type: string; format: string; date: string; skills_raised: string[] }[];
   /** Every event title / skill name in the dataset, not just this context's
    * slice - lets the rationale-safety check in lib/ai/suggest.ts reject any
    * suggestion that names an event or skill outside its own allowed set,
@@ -146,6 +160,19 @@ export function buildSuggestContext(empId: string, ds: Dataset): SuggestContext 
     dropped: own.filter((h) => h.status === "dropped" || h.status === "no_show" || h.status === "declined").length,
   };
 
+  const formatOf = new Map(ds.events.map((e) => [e.event_id, e.format]));
+  const participationByFormat: Record<string, { completed: number; skipped: number }> = {};
+  for (const h of own) {
+    const f = formatOf.get(h.event_id);
+    if (!f) continue;
+    const row = (participationByFormat[f] ??= { completed: 0, skipped: 0 });
+    if (h.status === "completed") row.completed++;
+    else if (h.status === "dropped" || h.status === "no_show" || h.status === "declined") row.skipped++;
+  }
+  const recentCompleted = completedActivities(emp, ds)
+    .slice(0, 5)
+    .map((c) => ({ type: c.type, format: c.format, date: c.date, skills_raised: c.skills.map((k) => k.skill_id) }));
+
   return {
     employee_id: empId,
     role: emp.role,
@@ -157,6 +184,14 @@ export function buildSuggestContext(empId: string, ds: Dataset): SuggestContext 
     masteredSkills,
     blockedEvents,
     participation,
+    profile: {
+      tenure_months: emp.tenure_months,
+      work_format: emp.work_format,
+      career_goal: emp.career_goal,
+      last_review_date: emp.last_review_date,
+    },
+    participationByFormat,
+    recentCompleted,
     allEventTitles: ds.events.map((e) => e.title),
     allSkillNames: ds.skills.map((s) => s.name),
   };
