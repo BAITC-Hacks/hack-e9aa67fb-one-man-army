@@ -137,16 +137,22 @@ Why history is a penalty and not an exclusion (LIKELY): three no-shows on offlin
 Also: history rows with `assigned_by ∈ {manager, hr}` and status `declined` are a weaker signal than self-enrolled no-shows (UNKNOWN weighting; recommend ×0.5). Declining an imposed activity is not disengagement.
 
 ### "No recommended step" (the HR list, VERIFIED must-have)
-Every employee with an empty result gets exactly one reason code, computed by code:
+Every employee with an empty result gets exactly one reason code, computed by
+code (`classifyNoStep`, `lib/domain/recommend.ts`; enum: `lib/contracts.ts`
+`NoStepReason`). Codes are classified only against gap-relevant events — an
+unrelated event blocked for an irrelevant reason never pollutes the
+classification:
 
 | Code | Meaning | Suggested HR action (LIKELY) |
 |---|---|---|
 | `AT_TOP_NO_GAP` | Lead, no goal, all current requirements met | career conversation, goal setting |
 | `NO_GAP_TO_NEXT` | meets next-grade requirements already | promotion-readiness review (human) |
-| `PREREQ_BLOCKED` | gaps exist, but every relevant event needs a prerequisite they lack | foundation event missing from catalogue |
-| `NO_SESSION` | relevant events exist, none scheduled | schedule a session |
-| `CATALOGUE_GAP` | a critical skill has a gap and no event develops it for this role | build or buy content |
-| `DATA_INCOMPLETE` | profile fails validation (unknown role/grade, missing skills map) | fix the data, since the engine will not guess |
+| `LOW_FIT` | a gap-closing event passed every eligibility gate, but its score is at or below the minimum (0) — typically a heavy participation-history penalty (F5). Distinct from "no candidate exists": one exists but currently scores too low to recommend | review the participation penalty with the employee; a format switch may help |
+| `PREREQ_BLOCKED` | gaps exist, but every gap-relevant event needs a prerequisite the employee lacks | foundation event missing from catalogue |
+| `NO_SESSION` | gap-relevant events exist, none scheduled | schedule a session |
+| `CATALOGUE_GAP` | a skill with a real gap has no event that develops it for this role | build or buy content |
+| `ALL_DONE` | gaps exist, but every gap-relevant event is already completed, in progress, dismissed, or has no useful gain left (not a prerequisite/session/catalogue problem) | confirm the assessment is current; the catalogue has nothing further to offer right now |
+| `DATA_INCOMPLETE` | the employee profile itself fails validation (unknown role/grade, missing skills map) — reserved for that case only, never a generic fallback | fix the data, since the engine will not guess |
 
 A malformed or partially loaded profile is marked `DATA_INCOMPLETE` and sent to HR. The system never invents a recommendation from partial data.
 

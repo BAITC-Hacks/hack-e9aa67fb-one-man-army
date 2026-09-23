@@ -57,64 +57,80 @@ have"), quoted via `docs/requirements.md`:
 | R-01 | Employee profile: role, grade, skills, history, next steps | `app/employee/[id]/page.tsx`, `lib/domain/trajectory.ts` | `tests/trajectory.test.ts`, `tests/engine.test.ts` | ✅ |
 | R-02 | Career trajectory with per-skill gap | `lib/domain/trajectory.ts` | `tests/trajectory.test.ts` | ✅ |
 | R-03 | 1–3 eligible voluntary recommendations | `lib/domain/recommend.ts`, `lib/rules/eligibility.ts` | `tests/engine.test.ts` | ✅ |
-| R-04 | Rationale cites ≥ 3 distinct factors with numbers | `lib/rules/scoring.ts` (F1–F9), `lib/ai/explain.ts` | `tests/engine.test.ts`, `tests/explain.test.ts` | ✅ |
+| R-04 | Rationale cites ≥ 3 distinct factors with numbers, as human-readable sentences | `lib/ai/rationale.ts` (sentence builder), `lib/ai/template.ts`, `lib/ai/grounding.ts` (numeric grounding), `lib/ai/explain.ts` (honest `source: llm\|mock\|template` badge) | `tests/explain.test.ts` | ✅ |
 | R-05 | Complete → skill progress + trajectory move | `lib/domain/progress.ts`, `app/api/employees/[id]/complete/route.ts` | `tests/progress.test.ts` | ✅ |
 | R-06 | HR view: lagging skills, no-step list, participation | `lib/domain/hr.ts`, `app/hr/page.tsx` | `tests/hr.test.ts` | ✅ |
-| R-07 | "No recommended step" with a reason code | `lib/domain/recommend.ts` (`NoStepReason`) | `tests/engine.test.ts` (fixture F-05) | ✅ |
+| R-07 | "No recommended step" with a reason code, honestly classified (incl. `LOW_FIT`: an eligible candidate scored ≤ 0) | `lib/domain/recommend.ts` (`classifyNoStep`, `NoStepReason`) | `tests/engine.test.ts` (fixture F-05, `LOW_FIT`/`ALL_DONE` cases) | ✅ |
 | R-08 | Beats single-factor baselines on trap profiles | `lib/rules/scoring.ts`, fixtures `data/fixtures/trap-F01..F05` | `tests/engine.test.ts` (F-01..F-05 assertions) | ✅ |
-| R-09 | Import new profiles/history via UI (HR-only) | `lib/data/import.ts`, `app/api/hr/import/route.ts`, `app/hr/import/page.tsx` | `tests/import.test.ts` | ✅ — HR-only, per-row validated, 5 MB/file cap, atomic overlay write, audited, no restart. See [Known limitations](#19-known-limitations) for the skills.json role_profiles gap |
+| R-09 | Import new profiles/history via UI (HR-only), incl. `role_profiles` | `lib/data/import.ts`, `lib/data/load.ts` (overlay merge, keyed `role::grade`), `app/api/hr/import/route.ts`, `app/hr/import/page.tsx` | `tests/import.test.ts` | ✅ — HR-only, per-row validated, 5 MB/file cap, atomic overlay write, audited, no restart; uploaded `role_profiles` rows are now merged and consulted by eligibility, not just stored |
 | R-10 | Latency: UI ≤ 2 s, AI ≤ 10 s with 8 s fallback | `lib/ai/explain.ts` (`AbortSignal` timeout → template) | `tests/explain.test.ts` | ⚠️ partial — timeout/fallback exists; no dedicated timing benchmark test |
 | R-11 | Explainability: visible trace + progress formula | `components/TraceView.tsx`, `lib/rules/engine.ts` | `tests/engine.test.ts`; visible in UI | ✅ |
 | R-15 / R-16 | Employee/HR role separation, fails closed, no cross-employee data | `lib/auth/session.ts`, route guards | `tests/authz.test.ts` | ✅ |
 | R-17 | Voluntary; dismiss without penalty | `app/api/employees/[id]/dismiss/route.ts` | `tests/trajectory.test.ts` | ✅ |
-| R-18 | UI and rationale in kk/ru/en | `lib/i18n/dict.ts` | `tests/i18n-keys.test.ts` | ⚠️ partial — key sets match and `en` is complete; `kk`/`ru` are placeholder clones of `en`, not yet translated |
+| R-18 | UI and rationale in kk/ru/en | `lib/i18n/dict.ts` (independently written text per locale, not clones) | `tests/i18n-keys.test.ts` (key-set parity); spot-checked live for E0028 in `ru` — see [§5](#5-main-user-scenario--procedure-for-checking-it) | ✅ |
 | R-12 | Single-command launch, no keys | `Dockerfile`, `docker-compose.yml`, `pnpm start:demo` | `scripts/clean-room-test.sh` | ✅ |
 | R-13 | Testable with no personal account | `MODEL_REF=mock:demo` default, demo login picker | clean-room script runs offline | ✅ |
+| R-16b | Cross-origin state-changing requests rejected | `lib/http/origin.ts` (`crossOriginViolation`, wired in `withErrorHandling`) | confirmed live: mismatched `Origin` on POST → 403, same-origin/no-`Origin` (curl) → 200 | ✅ |
+| R-16c | HR individual-profile view is audited; deny on audit-write failure | `lib/audit/hr-access.ts` (`auditHrProfileView`), called from `app/employee/[id]/page.tsx` and `app/api/employees/[id]/route.ts` | confirmed in code; HR aggregates (`app/hr/page.tsx`, `/api/hr/aggregates`) are **not** separately audited — see [Known limitations](#19-known-limitations) | ⚠️ partial |
 
 ✅ complete and tested · ⚠️ partial · ❌ not implemented
 
 ## 5. Main user scenario — procedure for checking it
 
-Everything below is reproducible from a clean clone; run [Setup](#10-setup)
-first, then follow these steps.
+Runs on the **default dataset**, which is the organizer's committed kit
+(`docs/task/career_quest_dataset/`, 200 employees — see [§11](#11-environment-variables)),
+after [Setup](#10-setup). The UI at `http://localhost:3000` defaults to
+**Russian**, with a language switch (kk/ru/en) in the header. Every value
+below was read from this app while writing this README, via the same routes
+the UI calls (`app/api/**`) — not assumed.
 
-1. Open `http://localhost:3000` → **Log in** → pick employee **E0028** (Backend
-   Engineer, Middle grade — the case brief's own worked example) → submit.
-2. `/employee/E0028` loads. **Expected:** System Design shows *assessed 2 →
-   effective 3* (a pending gain from completed event EV_006, dated after the
-   last review), flagged critical for Senior (requires 4).
-3. The recommendation panel shows **1–3 cards**. **Expected:** each card has an
-   expandable trace with **≥ 3 distinct factor kinds** (e.g. grade,
-   skill_gap, next_level_requirement, participation_history), each with a
-   concrete number, plus a rule pass/fail list and the score. On the seeded
-   data the top pick is **"Architecture Review Mentoring"** (System Design,
-   critical for Senior), not the lowest raw skill on the profile.
-4. Click **Mark complete** on that recommendation. **Expected:** the page
-   re-renders from the server: System Design moves 3 → 4 via
-   `min(level + gain, max_level)`, which meets the Senior requirement, so its
-   row leaves the gap table; the completed step leaves the list and the next
-   recommendation takes the top slot.
-5. Log out, log back in as **HR** (button on the login page, no password).
-   `/hr` loads. **Expected:** three panels — lagging skills (counts, cells with
-   fewer than 5 employees show `<5` instead of a number), employees with no
-   recommended step (with a reason code), and participation by event.
-6. **Trap-profile check (R-08):** run `pnpm test tests/engine.test.ts`, which
-   asserts, against `data/fixtures/trap-F01..F05.json/.csv`, that the top
-   recommendation on each fixture differs from both the "lowest skill" and
-   "largest raw gap" baselines — the failure mode the case brief names
-   explicitly.
-7. **Jury profile upload (R-09):** log out, log in as **HR** → open
-   `/hr/import` → upload `data/fixtures/trap-F01.json` in the **employees**
-   field and `data/fixtures/trap-F01.csv` in the **activity_history** field →
-   submit. **Expected:** a per-row report (accepted/updated counts, and any
-   row error as `{file, row, field, message}`); this fixture has zero errors.
-   Log out and log in as employee **T9001** (the id the fixture uses).
-   **Expected:** the profile and its recommendations appear immediately —
-   no restart, because the import invalidates the in-memory dataset cache.
-   Limits: HR-only (fails closed for anyone else), 5 MB per file, every row
-   schema- and reference-validated (unknown employee/event/skill ids and bad
-   id formats are rejected row-by-row, valid rows still import), and the
-   action is recorded in the audit log.
+```bash
+source ~/.nvm/nvm.sh && nvm use >/dev/null
+pnpm build && pnpm start &            # background; http://localhost:3000
+curl -s http://localhost:3000/api/health   # {"status":"ok",...,"model":{"ref":"mock:demo","offline":true}}
+
+curl -sc /tmp/c.txt -H 'Content-Type: application/json' \
+  -X POST -d '{"role":"employee","employeeId":"E0028"}' http://localhost:3000/api/session
+curl -sb /tmp/c.txt http://localhost:3000/api/employees/E0028/recommendations
+curl -sb /tmp/c.txt -H 'Content-Type: application/json' -X POST \
+  -d '{"event_ids":["EV_037"],"locale":"ru"}' \
+  http://localhost:3000/api/employees/E0028/explanations
+kill %1                               # stop the server when done
+```
+
+**Observed** (this run, kit dataset, `asOf` 2026-10-01): employee **E0028** =
+Backend Engineer, Middle grade. System Design: assessed 2 → effective 3 (a
+pending gain from completed event `EV_006`, dated after `last_review_date`),
+required 4 for Senior, flagged critical, gap 1. Top recommendation:
+**`EV_037` "Mentor Track"**, score 3, citing **3 distinct factor kinds**
+(`grade`: Middle→Senior; `skill_gap`: closes 1 non-critical level;
+`next_level_requirement`: largest remaining gap 1), plus the full eligibility
+rule trace. Its explanation in `ru` is 3 grounded, human-readable sentences,
+e.g. *"Ваш грейд — Middle; это мероприятие соответствует ожиданиям уровня
+Senior."*, with `"source":"mock"` — the UI badges this as **"Demo model
+(offline, not a live AI)"**, because `MODEL_REF` defaults to `mock:demo` (no
+key); setting `MODEL_REF=openai:gpt-4o-mini` or `anthropic:...` with a key
+routes the same call to a live model and the badge becomes `"llm"`.
+
+Same flow in the UI: log in as **E0028** → the profile page shows the same
+gap and the same top card with an expandable trace → **Mark complete** moves
+System Design 3 → 4 and the next recommendation takes the top slot. Log out,
+log in as **HR** (no password) → `/hr` shows lagging skills (`<5`-suppressed
+cells), the no-step list with a reason code (now including `LOW_FIT`, see
+`docs/domain.md` §3), and participation by event.
+
+**Trap-profile check (R-08):** `pnpm test tests/engine.test.ts` asserts,
+against `data/fixtures/trap-F01..F05.json/.csv`, that the top pick on each
+fixture differs from both the "lowest skill" and "largest raw gap" baselines.
+
+**Jury profile upload (R-09):** log in as HR → `/hr/import` → upload
+`data/fixtures/trap-F01.json` (`employees`) and `data/fixtures/trap-F01.csv`
+(`activity_history`) → a per-row report, zero errors on this fixture → log in
+as employee **T9001** → the profile and recommendations appear immediately,
+no restart. An uploaded `role_profiles` row (e.g. inside `skills.json`) is now
+merged by `role::grade` and consulted by eligibility, not just stored. Limits:
+HR-only (fails closed), 5 MB/file, every row schema- and reference-validated,
+action recorded in the audit log.
 
 ## 6. Architecture
 
@@ -157,7 +173,8 @@ decision is code in `lib/rules/` and `lib/domain/`, each with a recorded trace.
   id in the text must already appear in the factors, and ≥ 3 distinct factor
   kinds must be cited. Any failure — timeout (8 s), provider error, ungrounded
   text — falls back to `lib/ai/template.ts`, and the UI badges the source
-  ("AI" vs "template") honestly.
+  honestly: `"llm"` for a real provider call, `"mock"` ("Demo model — offline,
+  not a live AI") for the default offline mode, or the template.
 - **Offline mode**: `MODEL_REF=mock:demo` (default) uses `lib/ai/scenarios.ts`,
   which echoes the real factors, so grounding passes identically offline.
 
@@ -181,7 +198,18 @@ decision is code in `lib/rules/` and `lib/domain/`, each with a recorded trace.
   (`tests/authz.test.ts`).
 - Session identity is a signed HttpOnly cookie (`cq_session`, HMAC-SHA256);
   the URL's `[id]` is never trusted on its own.
-- `complete`, `dismiss` and HR profile views emit `recordAudit` (`lib/audit/audit.ts`).
+- Cross-origin state-changing requests are rejected: `withErrorHandling`
+  checks `Sec-Fetch-Site`/`Origin` against the request host on every
+  POST/PUT/PATCH/DELETE (`lib/http/origin.ts`) — confirmed live: a POST with
+  `Origin: http://evil.example` returns 403, a same-origin/no-`Origin` request
+  (curl, tests) returns 200.
+- `complete`, `dismiss` and HR profile views emit `recordAudit`
+  (`lib/audit/audit.ts`). HR viewing one employee's profile is audited with
+  deny-on-audit-failure (`lib/audit/hr-access.ts`, `auditHrProfileView`),
+  wired into both the profile page (`app/employee/[id]/page.tsx`) and its API
+  route (`app/api/employees/[id]/route.ts`). **Not yet audited:** the HR
+  aggregates view (`app/hr/page.tsx`, `/api/hr/aggregates`) — see
+  [Known limitations](#19-known-limitations).
 - HR aggregate cells with fewer than 5 employees are suppressed (`{suppressed:true}`, `lib/domain/hr.ts`), not just hidden in the UI.
 - No leaderboards or cross-employee rankings exist as a route (case brief
   prohibition).
@@ -229,7 +257,7 @@ From `.env.example`:
 | `OPENAI_API_KEY` | only for `openai:*` | — | never committed |
 | `ANTHROPIC_API_KEY` | only for `anthropic:*` | — | never committed |
 | `DATA_DIR` | no | `./data` | file-backed store location (completions, dismissals) |
-| `DATASET_DIR` | no | — | override the seed dataset location; used to load the **organizer's kit** (`docs/task/career_quest_dataset/`) without committing it. If unset, resolution falls back to that path if present, else the committed `data/seed/` |
+| `DATASET_DIR` | no | — | override the dataset location. Resolution order: `DATASET_DIR` if set, else the **committed organizer's kit** `docs/task/career_quest_dataset/` (200 employees — this is the default a clean clone runs on), else the small `data/seed/` fallback used by unit tests |
 | `DEFAULT_LOCALE` | no | `ru` | `kk` \| `ru` \| `en` |
 | `PORT` | no | `3000` | |
 | `APP_VERSION` | no | `0.1.0` | shown on `/api/health` |
@@ -311,22 +339,13 @@ dataset — was written during the competition; commit history is the evidence.
 
 ## 19. Known limitations
 
-- **R-09, uploaded `skills.json` `role_profiles` are not yet applied by the
-  loader.** `importFiles()` (`lib/data/import.ts`) validates and stores
-  uploaded `skills` and `role_profiles` rows in the overlay, but
-  `lib/data/load.ts`'s merge only reads back `employees`, `history`, `events`
-  and `skills` from the overlay — a newly uploaded `role_profiles` row is
-  accepted (and shows in the report) but not yet consulted when evaluating
-  eligibility. Uploading `employees`/`activity_history`/`events`/`skills`
-  against existing role profiles (the documented main-scenario path) works
-  end to end with no restart.
+- **HR aggregate views are not audited.** Individual HR profile access
+  (page + API) is audited with deny-on-failure (`lib/audit/hr-access.ts`); the
+  HR aggregates view (`app/hr/page.tsx`, `/api/hr/aggregates`) is not yet
+  instrumented the same way.
 - **R-10 has no dedicated latency benchmark test.** The 8-second AI timeout and
   deterministic-template fallback exist and are covered by
   `tests/explain.test.ts`, but p95 response time is not separately measured.
-- **kk and ru UI/rationale text are placeholders**, not real translations —
-  `lib/i18n/dict.ts` clones the `en` dictionary for both. Key sets are
-  identical and tested (`tests/i18n-keys.test.ts`); the *content* is English
-  text under `kk`/`ru` keys.
 - **Out of scope by design** (`docs/architecture.md` §9): real SSO/auth, the
   manager-consent role (matrix documented in `docs/domain.md`, not built), HR
   scoring-config approval workflow, session booking, the LLM choosing/
@@ -334,18 +353,19 @@ dataset — was written during the competition; commit history is the evidence.
   RAG/embeddings, gamification, the HR event builder, .ics export, grade-
   transition simulation, and write concurrency safety in the file store —
   acceptable for a single-demo-instance judged artifact.
-- `pnpm test:e2e` and `pnpm eval` are configured but were not run as part of
-  writing this README; their current pass/fail state is unverified here.
+- `pnpm test:e2e` (Playwright) now runs against the committed kit dataset (the
+  default); `pnpm eval` (promptfoo) runs against `mock:demo`. Both are
+  configured in `package.json`; their current pass/fail state was not
+  re-verified in this README pass.
 
 ## 20. Future scalability
 
 | Step | Trigger | Change |
 | --- | --- | --- |
-| Apply uploaded `role_profiles` | jury wants to upload new role/grade requirements, not just profiles | extend `ImportsOverlay` and its merge in `lib/data/load.ts` to include `role_profiles` (schema and write path already exist in `lib/data/import.ts`) |
 | Postgres | > 200 employees or concurrent writes | swap `lib/store/jsonl.ts`, keep `getDataset()`'s interface |
 | Real identity | production pilot at Halyk | replace the demo login picker with SSO behind the same `lib/auth/session.ts` contract |
 | Manager consent flow | production pilot | the permission matrix is already documented in `docs/domain.md`; add the consent toggle and a manager route |
-| Real kk/ru translation | before any non-demo use | replace the placeholder clones in `lib/i18n/dict.ts`, key set already frozen |
+| Audit HR aggregate views | before any non-demo use | apply the same `recordAudit` pattern used for individual HR profile views (`lib/audit/hr-access.ts`) to `app/hr/page.tsx` and `/api/hr/aggregates` |
 
 Module boundaries (`lib/rules/` vs `lib/domain/` vs `lib/ai/`) were chosen so
 each of these is a contained change.
@@ -371,6 +391,11 @@ each of these is a contained change.
 nvm use && pnpm install --frozen-lockfile && pnpm build && pnpm start
 ```
 
-**Известное ограничение.** Загрузка тестовых профилей жюри через `/hr/import`
-(R-09, только для роли HR) работает; загруженные `role_profiles` пока не
-применяются загрузчиком. Тексты на kk/ru — пока заглушки (копия en).
+Приложение по умолчанию запускается на встроенном датасете организатора
+(`docs/task/career_quest_dataset/`, 200 сотрудников). Интерфейс по умолчанию
+на русском, есть переключатель языка (kk/ru/en) — тексты на kk/ru настоящие,
+не копии en. Загрузка профилей жюри через `/hr/import` (R-09, только HR)
+работает, включая `role_profiles`.
+
+**Известное ограничение.** Агрегированный вид HR (`/hr`) пока не аудируется
+(просмотр отдельного профиля — аудируется).
