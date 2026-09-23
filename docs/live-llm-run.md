@@ -115,4 +115,4 @@ changed.
 
 ## Later live runs
 
-Repeated, larger live runs are in [`docs/live-runs/`](live-runs/): 50 explanation calls ([`explanations.md`](live-runs/explanations.md)), the eval suite repeated on two models ([`eval.md`](live-runs/eval.md)), and AI suggestions for all 34 employees with no catalogue step ([`suggestions.md`](live-runs/suggestions.md)).
+Repeated, larger live runs are in [`docs/live-runs/`](live-runs/): 50 explanation calls ([`explanations.md`](live-runs/explanations.md)), the eval suite repeated on two models ([`eval.md`](live-runs/eval.md)), AI suggestions for all 34 employees with no catalogue step ([`suggestions.md`](live-runs/suggestions.md)), and a final end-to-end smoke test through the HTTP API ([`smoke-final.md`](live-runs/smoke-final.md)).

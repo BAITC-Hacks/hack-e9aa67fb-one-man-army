@@ -290,6 +290,8 @@ decision is code in `lib/rules/` and `lib/domain/`, each with a recorded trace.
   `gpt-4o-mini` ×3 → 7, 8, 7 of 10; `gpt-4.1-mini` ×2 → 6, 7 of 10. Failures are
   explained per case (mock-only assertion, keyword-based ru/kk checks, and one
   genuine finding listed under Known limitations).
+- [`smoke-final.md`](docs/live-runs/smoke-final.md) — final end-to-end smoke test
+  through the HTTP API on `gpt-4o-mini` (explanations and suggestions, en/ru/kk).
 - [`suggestions.md`](docs/live-runs/suggestions.md) — AI suggestions for every
   employee with no catalogue step (see below).
 

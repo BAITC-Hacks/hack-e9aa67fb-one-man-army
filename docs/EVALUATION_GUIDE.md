@@ -107,3 +107,7 @@ gamification, the HR event builder, `.ics` export, and write-concurrency
 safety in the file store. Full list and rationale:
 [README §19](../README.md#19-known-limitations),
 [`docs/architecture.md` §9](architecture.md).
+
+## Live-model evidence
+
+All live runs against OpenAI models are in `docs/live-runs/`: `explanations.md` (50 explanation calls), `eval.md` (eval suite repeated on two models), `suggestions.md` (AI suggestions for all 34 employees with no catalogue step, including the guardrail re-runs) and `smoke-final.md` (final end-to-end smoke test through the HTTP API). The app never needs a key: the default `MODEL_REF=mock:demo` is offline.
