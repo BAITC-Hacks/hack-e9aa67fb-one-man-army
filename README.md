@@ -297,7 +297,7 @@ decision is code in `lib/rules/` and `lib/domain/`, each with a recorded trace.
 
 When the engine finds no eligible catalogue step (`ALL_DONE`,
 `PREREQ_BLOCKED`, `CATALOGUE_GAP`), the profile shows a clearly labelled
-"AI suggestions — not in the catalogue" card instead of an empty section.
+"Other ways to grow: AI-generated ideas, not catalogue courses" card instead of an empty section.
 The same rule applies: **the model proposes, code decides.**
 
 1. Code builds the context (`lib/domain/suggest.ts`): profile (tenure, work format, career goal, last review), participation by format, the 5 most recent completions, open gap skills,

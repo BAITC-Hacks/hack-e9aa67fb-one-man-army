@@ -83,8 +83,8 @@ const en = {
 
   "recs.title": "Recommended next steps",
   "recs.subtitle": "Up to three, ranked by how much they close a real, critical gap - not by popularity.",
-  "recs.empty.title": "No step to recommend right now",
-  "recs.empty.body": "This isn't an error. See the reason below for why the engine found nothing to add.",
+  "recs.empty.title": "No catalogue course fits you right now",
+  "recs.empty.body": "None of the courses in the training catalogue closes your gaps at the moment. The reason is shown below.",
   "recs.noStep.AT_TOP_NO_GAP": "You're already at the top grade with no open gap.",
   "recs.noStep.NO_GAP_TO_NEXT": "Nothing in the catalogue closes a gap toward your next step.",
   "recs.noStep.PREREQ_BLOCKED": "Available events are blocked on a prerequisite you don't yet have.",
@@ -149,7 +149,7 @@ const en = {
   "explain.source.mock": "Demo model (offline, not a live AI)",
   "explain.source.template": "Template (no AI)",
 
-  "suggest.title": "AI suggestions — not in the catalogue",
+  "suggest.title": "Other ways to grow: AI-generated ideas, not catalogue courses",
   "suggest.disclaimer": "These are ideas to discuss with HR or your manager — voluntary.",
   "suggest.source.llm": "AI (live model)",
   "suggest.source.mock": "Demo model (offline, not a live AI)",
@@ -410,8 +410,8 @@ const ru: Dict = {
 
   "recs.title": "Рекомендованные следующие шаги",
   "recs.subtitle": "До трёх пунктов, ранжированных по тому, насколько они закрывают реальный критичный пробел, а не по популярности.",
-  "recs.empty.title": "Сейчас нет шага для рекомендации",
-  "recs.empty.body": "Это не ошибка. Причина, по которой система не нашла что добавить, указана ниже.",
+  "recs.empty.title": "Сейчас нет подходящего курса из каталога",
+  "recs.empty.body": "Ни один курс из каталога обучения сейчас не закрывает ваши пробелы. Причина указана ниже.",
   "recs.noStep.AT_TOP_NO_GAP": "Вы уже на высшем грейде, и открытых пробелов нет.",
   "recs.noStep.NO_GAP_TO_NEXT": "В каталоге нет ничего, что закрывало бы пробел на пути к следующему шагу.",
   "recs.noStep.PREREQ_BLOCKED": "Доступные мероприятия заблокированы предварительным условием, которого у вас пока нет.",
@@ -476,7 +476,7 @@ const ru: Dict = {
   "explain.source.mock": "Демо-модель (офлайн, не настоящий ИИ)",
   "explain.source.template": "Шаблон (без ИИ)",
 
-  "suggest.title": "Предложения ИИ — вне каталога",
+  "suggest.title": "Другие способы развития: идеи от ИИ, а не курсы из каталога",
   "suggest.disclaimer": "Это идеи для обсуждения с HR или руководителем — по желанию.",
   "suggest.source.llm": "ИИ (живая модель)",
   "suggest.source.mock": "Демо-модель (офлайн, не настоящий ИИ)",
@@ -735,8 +735,8 @@ const kk: Dict = {
 
   "recs.title": "Ұсынылатын келесі қадамдар",
   "recs.subtitle": "Ең көбі үш қадам, олар танымалдығы бойынша емес, нақты әрі маңызды олқылықты қаншалықты жабатынына қарай реттелген.",
-  "recs.empty.title": "Қазір ұсынатын қадам жоқ",
-  "recs.empty.body": "Бұл қате емес. Жүйенің ештеңе қоспау себебі төменде көрсетілген.",
+  "recs.empty.title": "Қазір каталогтан сізге сәйкес курс жоқ",
+  "recs.empty.body": "Қазір оқу каталогындағы бірде-бір курс сіздің олқылықтарыңызды жаппайды. Себебі төменде көрсетілген.",
   "recs.noStep.AT_TOP_NO_GAP": "Сіз қазірдің өзінде ең жоғарғы грейдтесіз, ашық олқылық жоқ.",
   "recs.noStep.NO_GAP_TO_NEXT": "Каталогта келесі қадамға дейінгі олқылықты жабатын ештеңе жоқ.",
   "recs.noStep.PREREQ_BLOCKED": "Қолжетімді іс-шаралар сізде әлі жоқ алғышартпен бұғатталған.",
@@ -801,7 +801,7 @@ const kk: Dict = {
   "explain.source.mock": "Демо-модель (офлайн, нақты ЖИ емес)",
   "explain.source.template": "Үлгі (ЖИ жоқ)",
 
-  "suggest.title": "ЖИ ұсыныстары — каталогта жоқ",
+  "suggest.title": "Дамудың басқа жолдары: каталог курстары емес, ЖИ ұсынған идеялар",
   "suggest.disclaimer": "Бұл HR немесе жетекшіңізбен талқылауға арналған идеялар — өз еркіңізбен.",
   "suggest.source.llm": "ЖИ (тірі модель)",
   "suggest.source.mock": "Демо-модель (офлайн, нақты ЖИ емес)",
