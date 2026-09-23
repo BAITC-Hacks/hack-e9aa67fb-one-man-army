@@ -41,7 +41,7 @@ export const POST = withErrorHandling(async (request: Request, context: RouteCon
   invalidateDataset();
 
   await recordAudit({
-    actor: { id, role: "citizen", label: id },
+    actor: { id, role: "employee", label: id },
     action: "recommendation.dismiss",
     subject: { type: "event", id: body.event_id },
     outcome: "allowed",

@@ -20,7 +20,7 @@ export async function auditHrProfileView(
 ): Promise<AuditEvent | null> {
   try {
     return await recordAudit({
-      actor: { id: "HR01", role: "officer", label: "HR" },
+      actor: { id: "HR01", role: "hr", label: "HR" },
       action: "employee.profile_view",
       subject: { type: "employee", id: employeeId },
       outcome: "allowed",

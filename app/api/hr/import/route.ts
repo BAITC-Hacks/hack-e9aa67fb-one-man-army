@@ -66,7 +66,7 @@ export const POST = withErrorHandling(async (request: Request) => {
 
   const totalAccepted = Object.values(report.accepted).reduce((sum, n) => sum + n, 0);
   await recordAudit({
-    actor: { id: "HR01", role: "officer", label: "HR" },
+    actor: { id: "HR01", role: "hr", label: "HR" },
     action: "dataset.import",
     subject: { type: "import", id: inputs.map((f) => f.kind).sort().join(",") },
     outcome: report.errors.length > 0 && totalAccepted === 0 ? "failed" : "completed",

@@ -68,7 +68,7 @@ describe("security: IDOR on state-changing routes (T2)", () => {
     expect(response.status).toBe(403);
   });
 
-  it("a role forged in the /complete request body is ignored - HR-on-behalf audit fires only for a real HR cookie", async () => {
+  it("a role forged in the /complete request body is ignored - only the signed cookie decides", async () => {
     const { POST: completePost } = await import("@/app/api/employees/[id]/complete/route");
     const cookie = encodeSession({ role: "employee", employeeId: "E0001" });
     const request = new Request("http://localhost/api/employees/E0002/complete", {
@@ -80,6 +80,27 @@ describe("security: IDOR on state-changing routes (T2)", () => {
     const response = await completePost(request, { params: Promise.resolve({ id: "E0002" }) });
     expect(response.status).toBe(403);
   });
+});
+
+describe("security: voluntariness - HR cannot act on an employee's behalf", () => {
+  const routes = {
+    complete: () => import("@/app/api/employees/[id]/complete/route"),
+    dismiss: () => import("@/app/api/employees/[id]/dismiss/route"),
+  };
+  for (const [route, load] of Object.entries(routes)) {
+    it(`an HR session POSTing /${route} for an employee -> 403 FORBIDDEN (fail closed)`, async () => {
+      const { POST } = await load();
+      const cookie = encodeSession({ role: "hr", id: "HR01" });
+      const request = new Request(`http://localhost/api/employees/E0028/${route}`, {
+        method: "POST",
+        headers: { ...cookieHeader(cookie), "content-type": "application/json" },
+        body: JSON.stringify({ event_id: "EV_005" }),
+      });
+      const response = await POST(request, { params: Promise.resolve({ id: "E0028" }) });
+      expect(response.status).toBe(403);
+      expect((await response.json()).error.code).toBe("FORBIDDEN");
+    });
+  }
 });
 
 describe("security: no leaderboard / ranking exposure (N-02, T14)", () => {

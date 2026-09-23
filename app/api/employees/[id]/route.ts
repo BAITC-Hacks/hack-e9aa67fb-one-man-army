@@ -31,7 +31,7 @@ export const GET = withErrorHandling(async (request: Request, context: RouteCont
 
   if (isHr) {
     await recordAudit({
-      actor: { id: "HR01", role: "officer", label: "HR" },
+      actor: { id: "HR01", role: "hr", label: "HR" },
       action: "employee.profile_view",
       subject: { type: "employee", id },
       outcome: "allowed",

@@ -1,8 +1,8 @@
 /**
  * Append-only audit trail for consequential actions.
  *
- * Government systems must be able to answer "who did what, on whose authority,
- * and on what evidence". Any state change a citizen or official can feel should
+ * The product must be able to answer "who did what, on whose authority,
+ * and on what evidence". Any state change an employee or HR can feel should
  * emit one of these events. The log is append-only by construction: there is no
  * update or delete API.
  */
@@ -12,7 +12,7 @@ import { appendJsonl, readJsonl } from "../store/jsonl";
 export const AuditActor = z.object({
   /** Stable pseudonymous id. Never a raw national ID number. */
   id: z.string().min(1),
-  role: z.enum(["citizen", "officer", "system", "ai-agent"]),
+  role: z.enum(["employee", "hr", "system", "ai-agent"]),
   /** Display label safe to show in a UI and safe to log. */
   label: z.string().min(1),
 });

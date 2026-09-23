@@ -1,7 +1,7 @@
 /**
  * Scripted behaviour for the offline provider.
  *
- * Replace these with scenarios for the real challenge. Keep them honest: a
+ * Scenarios for the career-development assistant. Keep them honest: a
  * scripted answer must be something the live model plausibly returns, because
  * the demo shows this output as the product's behaviour.
  *

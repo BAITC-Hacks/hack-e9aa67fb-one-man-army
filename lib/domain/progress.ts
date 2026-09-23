@@ -102,7 +102,7 @@ export async function completeEvent(
   await recordAudit({
     actor: {
       id: actor.id,
-      role: actor.role === "hr" ? "officer" : "citizen",
+      role: actor.role === "hr" ? "hr" : "employee",
       label: actor.role === "hr" ? "HR specialist" : `Employee ${actor.id}`,
     },
     action: "progress.event-completed",
