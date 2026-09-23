@@ -159,6 +159,27 @@ const en: Record<string, string> = {
   "lang.kk": "Қазақша",
   "lang.ru": "Русский",
   "lang.en": "English",
+
+  "import.title": "Upload activity data",
+  "import.subtitle": "Upload employees.json and/or activity_history.csv (events.json and skills.json are also accepted). Files appear immediately, no restart.",
+  "import.field.employees": "employees.json",
+  "import.field.activity_history": "activity_history.csv",
+  "import.field.events": "events.json (optional)",
+  "import.field.skills": "skills.json (optional)",
+  "import.submit": "Upload",
+  "import.submitting": "Uploading…",
+  "import.selectAtLeastOne": "Choose at least one file.",
+  "import.error.title": "Upload failed",
+  "import.error.body": "The server rejected the request. Check the file sizes (5 MB max each) and try again.",
+  "import.report.title": "Import report",
+  "import.report.accepted": "Accepted rows",
+  "import.report.updated": "Updated (already existed)",
+  "import.report.errors": "Row errors",
+  "import.report.noErrors": "No row errors.",
+  "import.report.file": "File",
+  "import.report.row": "Row",
+  "import.report.field": "Field",
+  "import.report.message": "Message",
 };
 
 export const dict: Record<Locale, Record<string, string>> = {
