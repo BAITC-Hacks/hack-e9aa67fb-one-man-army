@@ -262,6 +262,43 @@ const en = {
     "You skipped {count} similar session(s) before; take this one only if the format suits you - it's voluntary.",
   "rationale.lowFitCautionGeneric":
     "This step closes a real gap but scored low overall; take it only if the format suits you - it's voluntary.",
+
+  "rule.desc.not-mandatory": "Mandatory events are assigned by HR, never a recommendation target.",
+  "rule.desc.audience-role": "The event must target the employee's current role.",
+  "rule.desc.audience-grade": "The event must target the employee's current grade.",
+  "rule.desc.prereqs-met": "Every prerequisite skill must be at or above the required effective level.",
+  "rule.desc.not-completed": "No repeats, except EV_036 (recurring club).",
+  "rule.desc.not-in-progress": "An event already underway is offered as 'continue', not recommended again.",
+  "rule.desc.has-session": "Self-paced is always available; other formats need an upcoming session.",
+  "rule.desc.useful-gain": "The event must still be able to raise at least one developed skill.",
+  "rule.desc.not-dismissed": "The employee has not dismissed this event ('not useful for me').",
+
+  "table.searchPlaceholder.skills": "Search skills…",
+  "table.searchPlaceholder.employees": "Search employees…",
+  "table.searchPlaceholder.events": "Search events…",
+  "table.noMatches": "No matches for your search.",
+  "table.resultCount": "{n} results",
+
+  "hr.suppressedChip": "<5",
+  "hr.suppressedTitle": "hidden for privacy",
+  "hr.legend.suppressed": "<5 = hidden for privacy",
+  "hr.legend.noStepReason": "Label shows a short reason; hover or focus for the full explanation.",
+
+  "hr.participation.status.completed": "Completed",
+  "hr.participation.status.in_progress": "In progress",
+  "hr.participation.status.overdue": "Overdue",
+  "hr.participation.status.no_show": "No-show",
+  "hr.participation.status.dropped": "Dropped",
+  "hr.participation.status.declined": "Declined",
+
+  "recs.noStep.short.AT_TOP_NO_GAP": "All done",
+  "recs.noStep.short.NO_GAP_TO_NEXT": "No catalogue activity",
+  "recs.noStep.short.PREREQ_BLOCKED": "Prerequisite missing",
+  "recs.noStep.short.NO_SESSION": "No session",
+  "recs.noStep.short.CATALOGUE_GAP": "No catalogue activity",
+  "recs.noStep.short.ALL_DONE": "All done",
+  "recs.noStep.short.DATA_INCOMPLETE": "Data incomplete",
+  "recs.noStep.short.LOW_FIT": "Low fit",
 } satisfies Record<string, string>;
 
 type Dict = { [K in keyof typeof en]: string };
@@ -522,6 +559,43 @@ const ru: Dict = {
     "Ранее вы пропустили {count} похожих занятий; выбирайте этот шаг, только если формат вам подходит - это добровольно.",
   "rationale.lowFitCautionGeneric":
     "Этот шаг закрывает реальный пробел, но общая оценка низкая; выбирайте его, только если формат вам подходит - это добровольно.",
+
+  "rule.desc.not-mandatory": "Обязательные мероприятия назначает HR - они никогда не являются целью рекомендации.",
+  "rule.desc.audience-role": "Мероприятие должно быть предназначено для текущей роли сотрудника.",
+  "rule.desc.audience-grade": "Мероприятие должно быть предназначено для текущего грейда сотрудника.",
+  "rule.desc.prereqs-met": "Каждый предварительный навык должен быть на требуемом уровне или выше.",
+  "rule.desc.not-completed": "Повторы не допускаются, кроме EV_036 (регулярный клуб).",
+  "rule.desc.not-in-progress": "Мероприятие, уже начатое, предлагается как «продолжить», а не рекомендуется заново.",
+  "rule.desc.has-session": "Самостоятельный формат доступен всегда; для остальных форматов нужна ближайшая сессия.",
+  "rule.desc.useful-gain": "Мероприятие должно ещё повышать хотя бы один развиваемый навык.",
+  "rule.desc.not-dismissed": "Сотрудник не отклонял это мероприятие («не актуально для меня»).",
+
+  "table.searchPlaceholder.skills": "Поиск навыков…",
+  "table.searchPlaceholder.employees": "Поиск сотрудников…",
+  "table.searchPlaceholder.events": "Поиск мероприятий…",
+  "table.noMatches": "Нет совпадений по запросу.",
+  "table.resultCount": "Результатов: {n}",
+
+  "hr.suppressedChip": "<5",
+  "hr.suppressedTitle": "скрыто для конфиденциальности",
+  "hr.legend.suppressed": "<5 = скрыто для конфиденциальности",
+  "hr.legend.noStepReason": "Метка показывает краткую причину; полное объяснение - при наведении или фокусе.",
+
+  "hr.participation.status.completed": "Завершено",
+  "hr.participation.status.in_progress": "В процессе",
+  "hr.participation.status.overdue": "Просрочено",
+  "hr.participation.status.no_show": "Неявка",
+  "hr.participation.status.dropped": "Прервано",
+  "hr.participation.status.declined": "Отклонено",
+
+  "recs.noStep.short.AT_TOP_NO_GAP": "Всё выполнено",
+  "recs.noStep.short.NO_GAP_TO_NEXT": "Нет активности в каталоге",
+  "recs.noStep.short.PREREQ_BLOCKED": "Не хватает условия",
+  "recs.noStep.short.NO_SESSION": "Нет сессии",
+  "recs.noStep.short.CATALOGUE_GAP": "Нет активности в каталоге",
+  "recs.noStep.short.ALL_DONE": "Всё выполнено",
+  "recs.noStep.short.DATA_INCOMPLETE": "Неполные данные",
+  "recs.noStep.short.LOW_FIT": "Низкое соответствие",
 };
 
 const kk: Dict = {
@@ -780,6 +854,43 @@ const kk: Dict = {
     "Бұған дейін сіз {count} ұқсас сессияны өткізіп алдыңыз; форматы өзіңізге қолайлы болса ғана осы қадамды таңдаңыз - бұл ерікті.",
   "rationale.lowFitCautionGeneric":
     "Бұл қадам нақты олқылықты жабады, бірақ жалпы бағасы төмен; форматы өзіңізге қолайлы болса ғана таңдаңыз - бұл ерікті.",
+
+  "rule.desc.not-mandatory": "Міндетті іс-шараларды HR тағайындайды - олар ешқашан ұсыныс нысаны болмайды.",
+  "rule.desc.audience-role": "Іс-шара қызметкердің ағымдағы рөліне арналған болуы керек.",
+  "rule.desc.audience-grade": "Іс-шара қызметкердің ағымдағы грейдіне арналған болуы керек.",
+  "rule.desc.prereqs-met": "Әрбір алғышарт дағды талап етілетін деңгейде немесе одан жоғары болуы керек.",
+  "rule.desc.not-completed": "Қайталауға болмайды, EV_036-дан (тұрақты клуб) басқа.",
+  "rule.desc.not-in-progress": "Бұрыннан басталған іс-шара «жалғастыру» ретінде ұсынылады, қайта ұсынылмайды.",
+  "rule.desc.has-session": "Өздігінен оқу форматы әрдайым қолжетімді; басқа форматтарға жақын сессия қажет.",
+  "rule.desc.useful-gain": "Іс-шара кемінде бір дамытылатын дағдыны әлі де арттыра алуы керек.",
+  "rule.desc.not-dismissed": "Қызметкер бұл іс-шарадан бас тартпаған («маған қажет емес»).",
+
+  "table.searchPlaceholder.skills": "Дағдыларды іздеу…",
+  "table.searchPlaceholder.employees": "Қызметкерлерді іздеу…",
+  "table.searchPlaceholder.events": "Іс-шараларды іздеу…",
+  "table.noMatches": "Сұраныс бойынша сәйкестік жоқ.",
+  "table.resultCount": "Нәтижелер: {n}",
+
+  "hr.suppressedChip": "<5",
+  "hr.suppressedTitle": "құпиялылық үшін жасырылған",
+  "hr.legend.suppressed": "<5 = құпиялылық үшін жасырылған",
+  "hr.legend.noStepReason": "Белгіше қысқа себепті көрсетеді; толық түсіндірме үшін үстінен апарыңыз немесе фокус жасаңыз.",
+
+  "hr.participation.status.completed": "Аяқталды",
+  "hr.participation.status.in_progress": "Орындалуда",
+  "hr.participation.status.overdue": "Мерзімі өтті",
+  "hr.participation.status.no_show": "Келмеді",
+  "hr.participation.status.dropped": "Тоқтатылды",
+  "hr.participation.status.declined": "Бас тартылды",
+
+  "recs.noStep.short.AT_TOP_NO_GAP": "Барлығы дайын",
+  "recs.noStep.short.NO_GAP_TO_NEXT": "Каталогта белсенділік жоқ",
+  "recs.noStep.short.PREREQ_BLOCKED": "Алғышарт жетіспейді",
+  "recs.noStep.short.NO_SESSION": "Сессия жоқ",
+  "recs.noStep.short.CATALOGUE_GAP": "Каталогта белсенділік жоқ",
+  "recs.noStep.short.ALL_DONE": "Барлығы дайын",
+  "recs.noStep.short.DATA_INCOMPLETE": "Деректер толық емес",
+  "recs.noStep.short.LOW_FIT": "Сәйкестігі төмен",
 };
 
 export const dict: Record<Locale, Record<string, string>> = {

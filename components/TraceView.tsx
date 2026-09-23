@@ -78,7 +78,7 @@ export function TraceView({
               <span className={`font-medium ${STATUS_STYLE[rule.status]}`}>
                 {t(locale, `rule.status.${rule.status}`)}
               </span>
-              <span className="text-[var(--color-ink)]">{rule.description}</span>
+              <span className="text-[var(--color-ink)]">{t(locale, rule.description)}</span>
               {rule.detail && <span className="text-xs text-[var(--color-muted)]">— {rule.detail}</span>}
             </li>
           ))}

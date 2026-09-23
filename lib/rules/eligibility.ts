@@ -22,13 +22,13 @@ function usefulGainAny(event: Event, effective: Record<string, number>): boolean
 export const eligibilityRules: Rule<EligFacts>[] = [
   {
     id: "not-mandatory",
-    description: "Mandatory events are assigned by HR, never a recommendation target.",
+    description: "rule.desc.not-mandatory",
     evaluate: ({ facts }) =>
       facts.event.mandatory ? { status: "fail", detail: "mandatory: assigned by HR, not a recommendation target" } : { status: "pass" },
   },
   {
     id: "audience-role",
-    description: "The event must target the employee's current role.",
+    description: "rule.desc.audience-role",
     evaluate: ({ facts }) =>
       facts.event.target_roles.includes(facts.employee.role)
         ? { status: "pass" }
@@ -36,7 +36,7 @@ export const eligibilityRules: Rule<EligFacts>[] = [
   },
   {
     id: "audience-grade",
-    description: "The event must target the employee's current grade.",
+    description: "rule.desc.audience-grade",
     evaluate: ({ facts }) =>
       facts.event.target_grades.includes(facts.employee.grade)
         ? { status: "pass" }
@@ -44,7 +44,7 @@ export const eligibilityRules: Rule<EligFacts>[] = [
   },
   {
     id: "prereqs-met",
-    description: "Every prerequisite skill must be at or above the required effective level.",
+    description: "rule.desc.prereqs-met",
     evaluate: ({ facts }) => {
       for (const [skillId, min] of Object.entries(facts.event.prerequisites)) {
         const have = facts.effective[skillId] ?? 0;
@@ -55,7 +55,7 @@ export const eligibilityRules: Rule<EligFacts>[] = [
   },
   {
     id: "not-completed",
-    description: "No repeats, except EV_036 (recurring club).",
+    description: "rule.desc.not-completed",
     evaluate: ({ facts }) => {
       if (facts.event.event_id === "EV_036") return { status: "not-applicable", detail: "EV_036 is exempt (recurring)" };
       const completed = facts.history.some(
@@ -66,7 +66,7 @@ export const eligibilityRules: Rule<EligFacts>[] = [
   },
   {
     id: "not-in-progress",
-    description: "An event already underway is offered as 'continue', not recommended again.",
+    description: "rule.desc.not-in-progress",
     evaluate: ({ facts }) => {
       const inProgress = facts.history.some(
         (row) => row.employee_id === facts.employee.employee_id && row.event_id === facts.event.event_id && row.status === "in_progress",
@@ -76,7 +76,7 @@ export const eligibilityRules: Rule<EligFacts>[] = [
   },
   {
     id: "has-session",
-    description: "Self-paced is always available; other formats need an upcoming session.",
+    description: "rule.desc.has-session",
     evaluate: ({ facts }) => {
       if (facts.event.format === "self_paced") return { status: "pass" };
       const hasFuture = facts.event.upcoming_sessions.some((d) => d >= facts.ds.asOfDate);
@@ -85,13 +85,13 @@ export const eligibilityRules: Rule<EligFacts>[] = [
   },
   {
     id: "useful-gain",
-    description: "The event must still be able to raise at least one developed skill.",
+    description: "rule.desc.useful-gain",
     evaluate: ({ facts }) =>
       usefulGainAny(facts.event, facts.effective) ? { status: "pass" } : { status: "fail", detail: "no useful gain left on any developed skill" },
   },
   {
     id: "not-dismissed",
-    description: "The employee has not dismissed this event ('not useful for me').",
+    description: "rule.desc.not-dismissed",
     evaluate: ({ facts }) =>
       facts.dismissedEventIds.includes(facts.event.event_id) ? { status: "fail", detail: "dismissed by employee" } : { status: "pass" },
   },
