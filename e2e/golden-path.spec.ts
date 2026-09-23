@@ -71,7 +71,7 @@ test("golden path: E0137 assessment, top recommendation, complete, HR view", asy
   await expect(sdRow.locator("td").nth(2)).toHaveText("2"); // effective, before completion
 
   // Step 3: 1-3 recommendation cards (E0137 has 3: a critical-gap closer,
-  // a self-paced cert, and a format-switch alternative - docs/review-final-2.md #3).
+  // a self-paced cert, and a format-switch alternative - the final review #3).
   const recsSection = page.locator("section", { has: page.getByRole("heading", { name: "Recommended next steps" }) });
   const cards = recsSection.locator("> ul > li");
   const countBefore = await cards.count();

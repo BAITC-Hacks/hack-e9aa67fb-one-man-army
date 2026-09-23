@@ -1,5 +1,5 @@
 /**
- * Grade-transition path (O-01, review-1430 #O-01). Same authz shape as
+ * Grade-transition path (O-01). Same authz shape as
  * recommendations: self or HR, guard-first, fail closed.
  */
 import { getDataset } from "@/lib/data/load";

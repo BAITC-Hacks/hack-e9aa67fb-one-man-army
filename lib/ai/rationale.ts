@@ -135,7 +135,7 @@ export function buildExpectedProgress(
 ): string {
   if (expected.length === 0) return tf(locale, "rationale.expectedFallback", { title });
   // Always the human-readable skill name, never the raw SK_* id (R-04,
-  // review-final.md #4) - `name` is optional only for old producers; every
+  // the final review #4) - `name` is optional only for old producers; every
   // current caller (lib/domain/recommend.ts) fills it in.
   const rows = expected
     .map((item) => tf(locale, "recs.expectedRow", { skill: item.name ?? item.skill_id, from: item.from, to: item.to, max: item.max_level }))

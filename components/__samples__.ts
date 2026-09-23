@@ -1,5 +1,5 @@
 /**
- * Contract-valid sample data (docs/plan.md, T4 row): lets UI be developed
+ * Contract-valid sample data (the build plan, T4 row): lets UI be developed
  * and reviewed before T1's engine and T3's API land. Not imported by any
  * page - pages call the real domain functions and render designed loading /
  * empty / error states while those are not ready. Kept here for component

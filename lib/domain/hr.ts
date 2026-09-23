@@ -97,7 +97,7 @@ function noStepList(ds: Dataset): HrAggregates["noStep"] {
       });
     }
   }
-  // Never by score: employee_id order only (docs/plan.md T2 acceptance).
+  // Never by score: employee_id order only (the build plan T2 acceptance).
   return rows.sort((a, b) => a.employee_id.localeCompare(b.employee_id));
 }
 

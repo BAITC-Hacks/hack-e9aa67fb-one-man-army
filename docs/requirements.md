@@ -23,7 +23,7 @@ Source: spec §10 "Deliverables". Weights are published explicitly, so there is 
 | Development potential and originality: "further development … broader scale … well-founded unconventional or original approaches" | **10** | A path to scale (grade-transition modelling, HR event builder). Non-obvious signals such as pending gains after review, avoidance patterns and session availability. | O-01…O-06 |
 | **Total** | **100** | | |
 
-Operational inference (LIKELY): an AI judge reads the repo (see `docs/case-selection.md`). So README claims, test names and traces will be read literally.
+Operational inference (LIKELY): an AI judge reads the repo. So README claims, test names and traces will be read literally.
 
 ---
 

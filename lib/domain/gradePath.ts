@@ -1,5 +1,5 @@
 /**
- * gradePath(emp, ds) -> GradePath (O-01 originality item, review-1430 #O-01).
+ * gradePath(emp, ds) -> GradePath (O-01 originality item).
  *
  * A deterministic "path to next grade": per required skill of the employee's
  * next grade, effective vs required level, plus a minimal ORDERED set of

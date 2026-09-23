@@ -1,5 +1,5 @@
 /**
- * Import tests (docs/plan.md T5; docs/threat-model.md T7-T10; R-09).
+ * Import tests (the build plan T5; docs/threat-model.md T7-T10; R-09).
  *
  * Forces DATASET_DIR to the committed seed (as engine.test.ts does, since the
  * trap fixtures were authored against its small role profiles) and DATA_DIR
@@ -107,7 +107,7 @@ describe("importFiles: per-row validation report", () => {
   });
 });
 
-describe("importFiles: role_profiles overlay merge (review-1430 #1)", () => {
+describe("importFiles: role_profiles overlay merge", () => {
   it("uploading a new role_profile + an employee in that role gives the employee a trajectory and recommendations", async () => {
     const skillsPayload = {
       role_profiles: [

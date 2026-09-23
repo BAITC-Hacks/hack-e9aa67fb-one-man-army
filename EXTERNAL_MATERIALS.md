@@ -10,67 +10,14 @@ Author: the participant. Not generated from any third-party template.
 
 | Path | Source | Category | Purpose | Added | SHA-256 (first 16) |
 | --- | --- | --- | --- | --- | --- |
-| `.claude/agents/agent-engineer.md` | HackAlem prep kit | agent config | Specialist subagent definitions | 2026-09-23T07:58Z | `744b71c3f595c1af` |
-| `.claude/agents/ai-evaluator.md` | HackAlem prep kit | agent config | Specialist subagent definitions | 2026-09-23T07:58Z | `8664e85201f27851` |
-| `.claude/agents/architect.md` | HackAlem prep kit | agent config | Specialist subagent definitions | 2026-09-23T07:58Z | `02c11a80548c2e09` |
-| `.claude/agents/backend-engineer.md` | HackAlem prep kit | agent config | Specialist subagent definitions | 2026-09-23T07:58Z | `e84eac631df21707` |
-| `.claude/agents/challenge-analyst.md` | HackAlem prep kit | agent config | Specialist subagent definitions | 2026-09-23T07:58Z | `4369175e40864416` |
-| `.claude/agents/demo-engineer.md` | HackAlem prep kit | agent config | Specialist subagent definitions | 2026-09-23T07:58Z | `fde1d6e7541fb707` |
-| `.claude/agents/devops-engineer.md` | HackAlem prep kit | agent config | Specialist subagent definitions | 2026-09-23T07:58Z | `b4110491deee0b1b` |
-| `.claude/agents/final-reviewer.md` | HackAlem prep kit | agent config | Specialist subagent definitions | 2026-09-23T07:58Z | `11aefc750877d423` |
-| `.claude/agents/fintech-domain-analyst.md` | HackAlem prep kit | agent config | Specialist subagent definitions | 2026-09-23T07:58Z | `7f01ce9a23eb1ed5` |
-| `.claude/agents/frontend-engineer.md` | HackAlem prep kit | agent config | Specialist subagent definitions | 2026-09-23T07:58Z | `8126ab963ac70b6e` |
-| `.claude/agents/implementation-planner.md` | HackAlem prep kit | agent config | Specialist subagent definitions | 2026-09-23T07:58Z | `d598ca911d86d41f` |
-| `.claude/agents/qa-engineer.md` | HackAlem prep kit | agent config | Specialist subagent definitions | 2026-09-23T07:58Z | `5d5eb4b3493623de` |
-| `.claude/agents/security-engineer.md` | HackAlem prep kit | agent config | Specialist subagent definitions | 2026-09-23T07:58Z | `03e24faf6fe7c9ee` |
-| `.claude/agents/technical-writer.md` | HackAlem prep kit | agent config | Specialist subagent definitions | 2026-09-23T07:58Z | `0f2caa0c897a28fd` |
-| `.claude/skills/agent-tool-design/SKILL.md` | HackAlem prep kit | skill config | Reusable procedure skills | 2026-09-23T07:58Z | `6078f119c3f9f81c` |
-| `.claude/skills/ai-evaluation/SKILL.md` | HackAlem prep kit | skill config | Reusable procedure skills | 2026-09-23T07:58Z | `e6a5aa669f4c44d7` |
-| `.claude/skills/challenge-decomposition/SKILL.md` | HackAlem prep kit | skill config | Reusable procedure skills | 2026-09-23T07:58Z | `646d8a562681f2c2` |
-| `.claude/skills/deployment-reproducibility/SKILL.md` | HackAlem prep kit | skill config | Reusable procedure skills | 2026-09-23T07:58Z | `8ebe5129e299799f` |
-| `.claude/skills/deterministic-rules-engine/SKILL.md` | HackAlem prep kit | skill config | Reusable procedure skills | 2026-09-23T07:58Z | `ac0412d68a9ba817` |
-| `.claude/skills/final-submission-review/SKILL.md` | HackAlem prep kit | skill config | Reusable procedure skills | 2026-09-23T07:58Z | `d66ae51310b428d8` |
-| `.claude/skills/fintech-security/SKILL.md` | HackAlem prep kit | skill config | Reusable procedure skills | 2026-09-23T07:58Z | `e65c29ccb459dd27` |
-| `.claude/skills/fintech-workflow-design/SKILL.md` | HackAlem prep kit | skill config | Reusable procedure skills | 2026-09-23T07:58Z | `23312c0c0d260d14` |
-| `.claude/skills/frontend-demo-quality/SKILL.md` | HackAlem prep kit | skill config | Reusable procedure skills | 2026-09-23T07:58Z | `8ce063c5088b0ae3` |
-| `.claude/skills/hackalem-rules/SKILL.md` | HackAlem prep kit | skill config | Reusable procedure skills | 2026-09-23T07:58Z | `d31ce9d8db510cdf` |
-| `.claude/skills/hackalem-start/SKILL.md` | HackAlem prep kit | skill config | Reusable procedure skills | 2026-09-23T07:58Z | `5df7cb6cf43f3d9c` |
-| `.claude/skills/hackathon-readme/SKILL.md` | HackAlem prep kit | skill config | Reusable procedure skills | 2026-09-23T07:58Z | `9219027a7b4c42ae` |
-| `.claude/skills/hour-checkpoint/SKILL.md` | HackAlem prep kit | skill config | Reusable procedure skills | 2026-09-23T07:58Z | `53a094a77a8ad883` |
-| `.claude/skills/playwright-demo-generation/SKILL.md` | HackAlem prep kit | skill config | Reusable procedure skills | 2026-09-23T07:58Z | `01cbda264464555a` |
-| `.claude/skills/rag-decision-guide/SKILL.md` | HackAlem prep kit | skill config | Reusable procedure skills | 2026-09-23T07:58Z | `e1305721ef1cece6` |
-| `.claude/hooks/commit-cadence.sh` | HackAlem prep kit | hook scripts | Safety and verification hooks | 2026-09-23T07:58Z | `2bcb59c5d678cd53` |
-| `.claude/hooks/guard-bash.sh` | HackAlem prep kit | hook scripts | Safety and verification hooks | 2026-09-23T07:58Z | `f5d30141ced0dbba` |
-| `.claude/hooks/post-edit-check.sh` | HackAlem prep kit | hook scripts | Safety and verification hooks | 2026-09-23T07:58Z | `9a82ee11619d6ed4` |
-| `.claude/hooks/protect-secrets.sh` | HackAlem prep kit | hook scripts | Safety and verification hooks | 2026-09-23T07:58Z | `d7eeaee2f807de00` |
-| `.claude/hooks/record-verify.sh` | HackAlem prep kit | hook scripts | Safety and verification hooks | 2026-09-23T07:58Z | `0680f5e24d80ca3b` |
-| `.claude/hooks/stop-guard.sh` | HackAlem prep kit | hook scripts | Safety and verification hooks | 2026-09-23T07:58Z | `ef405e98c5020302` |
-| `.claude/hooks/subagent-handback.sh` | HackAlem prep kit | hook scripts | Safety and verification hooks | 2026-09-23T07:58Z | `54f6d670092801a4` |
-| `.claude/settings.json` | HackAlem prep kit | config | Hook registration | 2026-09-23T07:58Z | `debeea3e2b0b734f` |
-| `CLAUDE.md` | HackAlem prep kit | instructions | Project instructions for Claude Code | 2026-09-23T07:58Z | `8ed2075b0665f8bb` |
-| `docs/HACKALEM_RULES.md` | HackAlem prep kit | docs | Competition rules reference | 2026-09-23T07:58Z | `b97828345a79b662` |
-| `docs/FINTECH_CONTEXT.md` | HackAlem prep kit | docs | Kazakhstan financial-sector priors | 2026-09-23T07:58Z | `e174976c5adb7af4` |
-| `docs/AI_DEVELOPMENT.md` | HackAlem prep kit | docs | MCP and agent workflow setup | 2026-09-23T07:58Z | `e4055503dec4f6da` |
-| `docs/REQUIREMENT_TEMPLATE.md` | HackAlem prep kit | template | Requirement traceability matrix | 2026-09-23T07:58Z | `7d8aca1d11d03e59` |
-| `docs/ARCHITECTURE_TEMPLATE.md` | HackAlem prep kit | template | Architecture document scaffold | 2026-09-23T07:58Z | `0b740a228432ce03` |
-| `docs/README_TEMPLATE.md` | HackAlem prep kit | template | Scoring-optimised README scaffold | 2026-09-23T07:58Z | `85a0fbd844270e9f` |
-| `docs/DEMO_CHECKLIST.md` | HackAlem prep kit | checklist | Demo readiness checklist | 2026-09-23T07:58Z | `42e28a2fc91d0b9f` |
-| `docs/SUBMISSION_CHECKLIST.md` | HackAlem prep kit | checklist | Final submission checklist | 2026-09-23T07:58Z | `6e77c5a655a2bfcb` |
-| `docs/DEMO_SCRIPT_TEMPLATE.md` | HackAlem prep kit | template | 3-minute demo script scaffold | 2026-09-23T07:58Z | `0c649a3111e1c042` |
-| `docs/THREAT_MODEL_TEMPLATE.md` | HackAlem prep kit | template | One-page threat model scaffold | 2026-09-23T07:58Z | `d4b845ba307d1d63` |
-| `docs/PLAN_TEMPLATE.md` | HackAlem prep kit | template | Dependency graph and scope ladder scaffold | 2026-09-23T07:58Z | `b5de35a6e901822c` |
-| `docs/adr/0000-template.md` | HackAlem prep kit | template | ADR-lite scaffold | 2026-09-23T07:58Z | `a212379c4fbd312b` |
 | `docs/adr/0001-stack.md` | HackAlem prep kit | docs | ADR: validated stack and its known incompatibilities | 2026-09-23T07:58Z | `a36dd941f44623fd` |
 | `docs/adr/0002-offline-model.md` | HackAlem prep kit | docs | ADR: deterministic offline model as the default | 2026-09-23T07:58Z | `9217143225843d11` |
 | `docs/adr/0003-storage.md` | HackAlem prep kit | docs | ADR: file-backed storage | 2026-09-23T07:58Z | `2a95d3430d14a89d` |
 | `docs/adr/0004-no-auth-provider.md` | HackAlem prep kit | docs | ADR: seeded roles instead of an auth provider | 2026-09-23T07:58Z | `cf98538bfd58e254` |
 | `docs/adr/0005-no-rag-by-default.md` | HackAlem prep kit | docs | ADR: no retrieval until a requirement forces it | 2026-09-23T07:58Z | `9838817f1b440b5a` |
-| `HACKATHON_MODE.md` | HackAlem prep kit | docs | Five-hour clock playbook | 2026-09-23T07:58Z | `112dad23fad56767` |
 | `SECURITY.md` | HackAlem prep kit | docs | Security policy and threat model base | 2026-09-23T07:58Z | `c85cff2d84485a40` |
-| `scripts/checkpoint.mjs` | HackAlem prep kit | script | Hourly progress checkpoint generator | 2026-09-23T07:58Z | `3da61c62cde680f4` |
 | `scripts/clean-room-test.sh` | HackAlem prep kit | script | Clean-environment reproducibility check | 2026-09-23T07:58Z | `cbf943f34fc6fa5c` |
 | `scripts/verify.sh` | HackAlem prep kit | script | Final validation sequence | 2026-09-23T07:58Z | `37d52ddde040525f` |
-| `scripts/what-ships.sh` | HackAlem prep kit | script | Shows what reaches the graded repo vs stays local | 2026-09-23T07:58Z | `bec20bc59b65c715` |
 | `scripts/capture-screenshots.mjs` | HackAlem prep kit | script | Playwright demo screenshot capture | 2026-09-23T07:58Z | `2ee87ca101f251fc` |
 | `scripts/demo.mjs` | HackAlem prep kit | script | Demo seed and reset | 2026-09-23T07:58Z | `b1881d1d0c43637a` |
 | `.github/workflows/ci.yml` | HackAlem prep kit | ci | Install, lint, typecheck, test, build | 2026-09-23T07:58Z | `0e7c5e46cc7e7016` |
@@ -78,9 +25,7 @@ Author: the participant. Not generated from any third-party template.
 | `.github/workflows/security.yml` | HackAlem prep kit | ci | Manual dependency and ZAP scan | 2026-09-23T07:58Z | `e537f65e9be9c02f` |
 | `.env.example` | HackAlem prep kit | config | Documented environment variables | 2026-09-23T07:58Z | `5f191cd68aab4119` |
 | `.dockerignore` | HackAlem prep kit | config | Docker build context exclusions | 2026-09-23T07:58Z | `c83009df3bbe6231` |
-| `.mcp.json` | HackAlem prep kit | config | Playwright MCP server (no credentials) | 2026-09-23T07:58Z | `388cb5132f16d852` |
 | `promptfoo.yaml` | HackAlem prep kit | config | AI evaluation suite config | 2026-09-23T07:58Z | `9cc6d25002f85aeb` |
-| `eval/cases/example.yaml` | HackAlem prep kit | template | Evaluation case starter with patterns to copy | 2026-09-23T07:58Z | `dbba9fc3c2ad5143` |
 | `Dockerfile` | HackAlem prep kit | config | Multi-stage production image | 2026-09-23T07:58Z | `e514dec385b5335f` |
 | `docker-compose.yml` | HackAlem prep kit | config | One-command run for judges | 2026-09-23T07:58Z | `19f7ab5b61ab27a4` |
 | `vitest.config.ts` | HackAlem prep kit | config | Test config with @/ alias and offline model | 2026-09-23T07:58Z | `02258ad8819f5710` |
@@ -143,12 +88,13 @@ Development history in this repository is the evidence.
 
 | Name | Provider | Usage | Notes |
 | --- | --- | --- | --- |
-| _fill in after choosing a model_ | | | |
+| gpt-4o-mini (optional) | OpenAI | Phrases explanations only when `MODEL_REF=openai:gpt-4o-mini` and a key are set; default is the offline mock | Verification run: `docs/live-llm-run.md` |
+| Career Quest starter kit | Halyk Bank / HackAlem organizers | Default dataset | See the organizer section below |
 
 All demo data in this repository is synthetic and fictional.
-No real citizen personal data is present.
+No real personal data is present.
 
-## B. Provided by the organizer during the competition
+## E. Provided by the organizer during the competition
 
 | Path | Source | Category | Purpose | Added |
 | --- | --- | --- | --- | --- |

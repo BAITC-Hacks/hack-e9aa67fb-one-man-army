@@ -38,7 +38,7 @@ function careerGoalSkillIds(emp: Employee, ds: Dataset): Set<string> {
  * "the" gap for ranking purposes). Used only to feed `scoreEvent`'s F1/F2/F3
  * so a candidate that only closes a CURRENT-grade shortfall still earns real
  * skill_gap/next_level_requirement citation evidence, not just grade/session
- * (review-final.md #2: relevance and rationale must agree on what counts as
+ * (the final review #2: relevance and rationale must agree on what counts as
  * a real gap).
  */
 function mergeGapRows(targetGaps: GapRow[], currentGaps: GapRow[]): GapRow[] {

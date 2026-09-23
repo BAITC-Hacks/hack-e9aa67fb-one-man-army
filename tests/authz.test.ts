@@ -1,5 +1,5 @@
 /**
- * Security acceptance tests for T3 (docs/plan.md, docs/threat-model.md T1/T2).
+ * Security acceptance tests for T3 (the build plan, docs/threat-model.md T1/T2).
  *
  * `lib/data/load` is mocked to throw if touched, so "401 before data is
  * touched" is a real assertion, not a guess: if a guard ever moved after the

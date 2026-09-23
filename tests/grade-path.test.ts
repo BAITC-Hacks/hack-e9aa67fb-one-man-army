@@ -1,6 +1,6 @@
 /**
  * lib/domain/gradePath.ts (O-01) - unit tests on the real dataset, plus a
- * route-level happy path and a cross-employee denial (docs/review-1430.md
+ * route-level happy path and a cross-employee denial (the final review
  * O-01 / item review, same authz shape as recommendations).
  */
 import { describe, it, expect } from "vitest";
@@ -180,7 +180,7 @@ describe("gradePath()", () => {
   });
 });
 
-describe("E0028 trap (avoidance-aware, docs/review-final.md item 3)", () => {
+describe("E0028 trap (avoidance-aware, the final review item 3)", () => {
   it("if EV_009 (dropped twice) is still proposed, it must carry the previously_skipped note", async () => {
     const ds = await getDataset();
     const emp = ds.employees.find((e) => e.employee_id === "E0028");

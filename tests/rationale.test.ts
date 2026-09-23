@@ -1,5 +1,5 @@
 /**
- * R-04 rationale coverage (review-final.md #2/#4): every SHOWN
+ * R-04 rationale coverage (the final review #2/#4): every SHOWN
  * recommendation's template explanation cites >=3 distinct factor kinds
  * (checked the same way explain.ts decides mock/llm vs fallback -
  * groundingCheck) and never leaks a raw SK_* id, in en/ru/kk.

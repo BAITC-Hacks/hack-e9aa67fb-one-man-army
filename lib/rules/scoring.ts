@@ -43,7 +43,7 @@ export interface ScoreFacts {
 /** Exported so `lib/domain/recommend.ts`'s relevance filter uses the exact
  * same "can this event actually move this skill" test scoring does - a gap
  * skill an event lists but is capped at/below the employee's current
- * effective level closes nothing real (review-final.md #2). */
+ * effective level closes nothing real (the final review #2). */
 export function usefulGain(effectiveLevel: number, gain: number, maxLevel: number): number {
   return Math.max(0, Math.min(effectiveLevel + gain, maxLevel) - effectiveLevel);
 }

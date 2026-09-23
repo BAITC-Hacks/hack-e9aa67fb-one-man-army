@@ -152,7 +152,7 @@ describe("trap profiles (R-08, N-01)", () => {
   });
 });
 
-describe("F6 format-switch signal (review-1430 #7, docs/domain.md §3)", () => {
+describe("F6 format-switch signal (docs/domain.md §3)", () => {
   const employee = Employee.parse({
     employee_id: "T9010",
     full_name: "Test Trap-Six",
@@ -317,7 +317,7 @@ describe("no-step classification on the career-quest kit (docs/domain.md §3)", 
     }
   });
 
-  it("no recommendation closes zero gaps, across every employee in the shipped kit (review-final.md #2)", async () => {
+  it("no recommendation closes zero gaps, across every employee in the shipped kit (the final review #2)", async () => {
     const ds = await getDataset();
     let checkedRecs = 0;
     for (const emp of ds.employees) {
