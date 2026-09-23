@@ -67,7 +67,7 @@ have"), quoted via `docs/requirements.md`:
 | R-04 | Rationale cites ≥ 3 distinct factors with numbers, as human-readable sentences | `lib/ai/rationale.ts` (sentence builder), `lib/ai/template.ts`, `lib/ai/grounding.ts` (numeric grounding), `lib/ai/explain.ts` (honest `source: llm\|mock\|template` badge) | `tests/explain.test.ts` | ✅ |
 | R-05 | Complete → skill progress + trajectory move | `lib/domain/progress.ts`, `app/api/employees/[id]/complete/route.ts` | `tests/progress.test.ts` | ✅ |
 | R-06 | HR view: lagging skills, no-step list, participation | `lib/domain/hr.ts`, `app/hr/page.tsx` | `tests/hr.test.ts` | ✅ |
-| R-07 | "No recommended step" with a reason code, honestly classified (incl. `LOW_FIT`: an eligible candidate scored ≤ 0) | `lib/domain/recommend.ts` (`classifyNoStep`, `NoStepReason`) | `tests/engine.test.ts` (fixture F-05, `LOW_FIT`/`ALL_DONE` cases) | ✅ |
+| R-07 | "No recommended step" with a reason code, honestly classified; low-fit employees get one flagged step instead of a `LOW_FIT` no-step | `lib/domain/recommend.ts` (`classifyNoStep`, `NoStepReason`) | `tests/engine.test.ts` (`ALL_DONE`/`PREREQ_BLOCKED`/`CATALOGUE_GAP` cases) | ✅ |
 | R-08 | Beats single-factor baselines on trap profiles | `lib/rules/scoring.ts`, fixtures `data/fixtures/trap-F01..F05` | `tests/engine.test.ts` (F-01..F-05 assertions) | ✅ |
 | R-09 | Import new profiles/history via UI (HR-only), incl. `role_profiles` | `lib/data/import.ts`, `lib/data/load.ts` (overlay merge, keyed `role::grade`), `app/api/hr/import/route.ts`, `app/hr/import/page.tsx` | `tests/import.test.ts` | ✅ — HR-only, per-row validated, 5 MB/file cap, atomic overlay write, audited, no restart; uploaded `role_profiles` rows are now merged and consulted by eligibility, not just stored |
 | R-10 | Latency: UI ≤ 2 s, AI ≤ 10 s with 8 s fallback | `lib/ai/explain.ts` (`AbortSignal` timeout → template) | `tests/latency.test.ts` — measured on the operator's machine: getDataset 16.6 ms, per-employee read over all 200 kit employees p95=1.94 ms/max=9.98 ms (budget 2000 ms), `hrAggregates` 401 ms, hanging-provider fallback 227 ms (production timeout 8000 ms). Run `pnpm vitest run tests/latency.test.ts` to reproduce | ✅ |
@@ -132,15 +132,17 @@ System Design 3→4 gap) and `EV_036` (2) — the highest-scoring remaining card
 takes the top slot; this is what was observed on this run, not a promise
 about every profile. Only events that close a real skill gap are shown as
 recommendations at all; if none do, the reason is shown instead of an
-invented card (e.g. **E0028**, the spec's worked example, has 1 card
-"Mentor Track", then goes empty with `LOW_FIT` after completing it — see
-[§19](#19-known-limitations)). Completion is **employee-only**
+invented card. Across the 200-employee seed: 84 employees get 3 cards, 31
+get 2, 51 get 1 (3 of those are the single-flagged "Low fit" case — every
+eligible, gap-closing candidate scored ≤ 0 — see [§19](#19-known-limitations)),
+and 34 get no card at all (`ALL_DONE` 28, `PREREQ_BLOCKED` 5, `CATALOGUE_GAP`
+1). Completion is **employee-only**
 (`requireEmployeeSelf`); HR never completes on an
 employee's behalf and only sees aggregates read-only. Log out, log in as
 **HR** (no password) → `/hr` shows lagging skills (`<5`-suppressed cells),
-the no-step list with an honest reason code per employee (e.g. `LOW_FIT` —
-an eligible candidate scored ≤ 0 — or `ALL_DONE`, see `docs/domain.md` §3),
-and participation by event.
+the no-step list with an honest reason code per employee (`ALL_DONE`,
+`PREREQ_BLOCKED` or `CATALOGUE_GAP` — `LOW_FIT` no longer appears here, see
+`docs/domain.md` §3), and participation by event.
 
 **Trap-profile check (R-08):** `pnpm test tests/engine.test.ts` asserts,
 against `data/fixtures/trap-F01..F05.json/.csv`, that the top pick on each
@@ -397,14 +399,14 @@ dataset — was written during the competition; commit history is the evidence.
 
 ## 19. Known limitations
 
-- **LOW_FIT recommendation behaviour is being changed as of this edit.**
-  Today, an employee whose only eligible candidates all score ≤ 0 sees no
-  card and the `LOW_FIT` reason (`lib/domain/recommend.ts`,
-  `classifyNoStep`). A change in progress will instead surface the
-  best-scoring low-fit candidate as one recommendation, flagged with an
-  honest caution, so these employees get a card rather than nothing. Verify
-  current behaviour against `lib/domain/recommend.ts` before relying on
-  either description.
+- **Low-fit employees get one flagged card, not an empty list.** When every
+  eligible, gap-closing candidate scores ≤ 0, the engine surfaces the single
+  best-scoring one as a recommendation with a "Low fit" pill and an honest
+  caution in its rationale, instead of the old `LOW_FIT` no-step reason
+  (`lib/domain/recommend.ts`, `Recommendation.lowFit`). `LOW_FIT` stays in
+  the `NoStepReason` enum for schema compatibility but is no longer produced
+  by `classifyNoStep`. On the 200-employee seed, 3 employees fall into this
+  case.
 - **Out of scope by design** (`docs/architecture.md` §9): real SSO/auth, the
   manager-consent role (matrix documented in `docs/domain.md`, not built), HR
   scoring-config approval workflow, session booking, the LLM choosing/
@@ -413,11 +415,10 @@ dataset — was written during the competition; commit history is the evidence.
   concurrency safety in the file store — acceptable for a single-demo-instance
   judged artifact.
 - **Only events that close a real skill gap are recommended.** Some
-  employees get 1–2 cards or none (`LOW_FIT`, `ALL_DONE`), with the reason
-  shown instead of an invented step — e.g. E0028 (the spec's worked example)
-  has 1 card ("Mentor Track"), then goes empty with `LOW_FIT` after
-  completing it, even though a critical gap remains, because no eligible
-  event in the kit catalogue closes it. See [§5](#5-main-user-scenario--procedure-for-checking-it).
+  employees get 1–3 cards, some get none, with the reason shown instead of
+  an invented step (`ALL_DONE`, `PREREQ_BLOCKED`, `CATALOGUE_GAP`) — a
+  critical gap can remain uncovered because no eligible event in the kit
+  catalogue closes it. See [§5](#5-main-user-scenario--procedure-for-checking-it).
 
 ## 20. Future scalability
 
