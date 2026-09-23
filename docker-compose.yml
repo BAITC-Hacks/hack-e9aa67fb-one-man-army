@@ -1,0 +1,22 @@
+# Optional. `docker compose up --build` gives a judge a one-command run.
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      # Offline by default: no credential needed to see the product work.
+      MODEL_REF: ${MODEL_REF:-mock:demo}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      DEFAULT_LOCALE: ${DEFAULT_LOCALE:-ru}
+    volumes:
+      - demo-data:/app/data
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+
+volumes:
+  demo-data:

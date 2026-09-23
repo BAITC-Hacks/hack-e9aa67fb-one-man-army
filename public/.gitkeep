@@ -1,0 +1,3 @@
+Keeps public/ in git. The Dockerfile COPYs /app/public, and git does not track
+empty directories, so without this file `docker build` fails on a clean clone
+with: COPY /app/public: not found.

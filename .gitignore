@@ -1,0 +1,20 @@
+.env
+.env.local
+node_modules/
+.next/
+data/*.jsonl
+*.tsbuildinfo
+
+# Preparation-kit tooling: local only, not part of the Project.
+.claude/
+HACKATHON_MODE.md
+docs/HACKALEM_RULES.md
+docs/FINTECH_CONTEXT.md
+docs/AI_DEVELOPMENT.md
+docs/ORGANIZER_QUESTIONS.md
+docs/*_TEMPLATE.md
+scripts/checkpoint.mjs
+scripts/sync-spine.sh
+CLAUDE.md
+docs/DEMO_CHECKLIST.md
+docs/SUBMISSION_CHECKLIST.md

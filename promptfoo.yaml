@@ -1,0 +1,48 @@
+# AI evaluation suite.
+#
+# Evaluates the WHOLE pipeline through the running app's HTTP API, not the model
+# in isolation - that is what actually ships, and it is the only way to prove the
+# deterministic rules still decide after the model speaks.
+#
+#   pnpm demo:reset && pnpm build && pnpm start &   # app on :3000
+#   pnpm eval
+#
+# Runs against MODEL_REF=mock:demo, so it needs no credentials and a judge can
+# reproduce the numbers you report.
+#
+# Two config traps, both of which fail with an unhelpful internal TypeError:
+#   * the provider id must be the endpoint URL, NOT `id: https` + `config.url`
+#   * `body` must be a raw JSON string; a YAML map renders numbers as strings,
+#     which a z.number() schema then rejects
+
+description: AI behaviour - correctness, grounding, injection, refusal
+
+providers:
+  - id: http://localhost:3000/api/health
+    config:
+      method: GET
+      transformResponse: json
+
+tests:
+  - file://eval/cases/example.yaml
+
+# Once the real endpoint exists, replace the provider above with something like:
+#
+# providers:
+#   - id: http://localhost:3000/api/<your-route>
+#     config:
+#       method: POST
+#       headers: { content-type: application/json }
+#       body: |
+#         {
+#           "text": "{{input}}",
+#           "locale": "{{locale}}",
+#           "count": {{count}}
+#         }
+#       transformResponse: json
+#
+# defaultTest:
+#   vars: { locale: ru, count: 1 }
+#   assert:
+#     - type: javascript
+#       value: "typeof output.category === 'string'"

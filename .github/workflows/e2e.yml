@@ -1,0 +1,64 @@
+# Slow checks, run on demand so the fast loop stays fast.
+name: E2E and AI evaluation
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 3 * * *"
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Install Chromium only
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Seed deterministic demo data
+        run: pnpm run --if-present demo:seed
+
+      - name: Build
+        env: { MODEL_REF: mock:demo }
+        run: pnpm run --if-present build
+
+      - name: E2E
+        env: { MODEL_REF: mock:demo }
+        run: pnpm run --if-present test:e2e
+
+      # Playwright starts the app itself via its webServer config and stops it
+      # when the run ends, so the eval needs its own server.
+      - name: Start app for evaluation
+        env: { MODEL_REF: mock:demo }
+        run: |
+          pnpm start &
+          for i in $(seq 1 30); do
+            curl -fsS http://localhost:3000/api/health >/dev/null 2>&1 && exit 0
+            sleep 1
+          done
+          echo "::error::app did not become healthy"; exit 1
+
+      - name: AI evaluation (offline model)
+        env:
+          MODEL_REF: mock:demo
+          PROMPTFOO_DISABLE_TELEMETRY: "1"
+          PROMPTFOO_DISABLE_UPDATE: "1"
+        run: pnpm run --if-present eval
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: e2e-results
+          path: |
+            playwright-report/
+            test-results/
+            artifacts/screenshots/
+          retention-days: 7

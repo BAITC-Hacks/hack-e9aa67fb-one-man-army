@@ -1,0 +1,64 @@
+# Fast feedback on every push. Target: under 3 minutes.
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm run --if-present lint
+
+      - name: Typecheck
+        run: pnpm run --if-present typecheck
+
+      - name: Unit and integration tests
+        # No credentials in CI: the app runs against the deterministic offline model.
+        env:
+          MODEL_REF: mock:demo
+        run: pnpm run --if-present test
+
+      - name: Build
+        env:
+          MODEL_REF: mock:demo
+        run: pnpm run --if-present build
+
+      - name: Environment variables are documented
+        run: |
+          [ -f .env.example ] || { echo "::error::.env.example is missing"; exit 1; }
+          missing=0
+          for v in $(git grep -hoE 'process\.env\.[A-Z0-9_]+' -- lib app src 2>/dev/null \
+                     | sed 's/process\.env\.//' | sort -u); do
+            grep -qE "^#?[[:space:]]*$v=" .env.example || { echo "::error::$v is read by the code but absent from .env.example"; missing=1; }
+          done
+          exit $missing
+
+      - name: No credentials committed
+        run: |
+          if git grep -nIE '(sk-[A-Za-z0-9_-]{20,}|ghp_[A-Za-z0-9]{36}|AKIA[0-9A-Z]{16})' \
+               -- ':!*.test.*' ':!tests/*' ':!docs/*' ':!*.md'; then
+            echo "::error::possible credential committed"; exit 1
+          fi

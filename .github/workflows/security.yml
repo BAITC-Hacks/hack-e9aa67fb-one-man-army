@@ -1,0 +1,51 @@
+# Security scanning. Manual, because active scanning is far too slow for the
+# five-hour edit loop.
+name: Security
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_url:
+        description: "Deployed URL for the ZAP baseline scan (optional)"
+        required: false
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  dependencies:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with: { node-version: 24, cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - name: Audit dependencies
+        run: pnpm audit --audit-level=high || echo "::warning::vulnerabilities found - triage before submitting"
+
+  secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with: { fetch-depth: 0 }
+      - name: Scan history for credentials
+        run: |
+          if git log -p | grep -nIE '(sk-[A-Za-z0-9_-]{20,}|ghp_[A-Za-z0-9]{36}|AKIA[0-9A-Z]{16})'; then
+            echo "::error::a credential appears in git history"; exit 1
+          fi
+          echo "no credentials found in history"
+
+  zap:
+    runs-on: ubuntu-latest
+    if: inputs.target_url != ''
+    steps:
+      - uses: actions/checkout@v5
+      - name: OWASP ZAP baseline scan
+        uses: zaproxy/action-baseline@v0.15.0
+        with:
+          target: ${{ inputs.target_url }}
+          # Passive baseline only: an active scan against a live demo is both
+          # slow and risky during a competition.
+          cmd_options: "-a -T 5"

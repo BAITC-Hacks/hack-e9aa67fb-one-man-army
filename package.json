@@ -1,0 +1,47 @@
+{
+  "name": "CHANGE-ME",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@12.4.2",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "biome lint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "eval": "promptfoo eval -c promptfoo.yaml",
+    "verify": "bash scripts/verify.sh",
+    "checkpoint": "node scripts/checkpoint.mjs",
+    "demo:seed": "node scripts/demo.mjs seed",
+    "demo:reset": "node scripts/demo.mjs reset",
+    "screenshots": "node scripts/capture-screenshots.mjs"
+  },
+  "dependencies": {
+    "@ai-sdk/anthropic": "4.0.58",
+    "@ai-sdk/openai": "4.0.71",
+    "@ai-sdk/provider": "4.0.17",
+    "ai": "7.0.107",
+    "next": "16.3.5",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "zod": "4.6.5"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.14",
+    "@playwright/test": "1.63.0",
+    "@tailwindcss/postcss": "4.3.3",
+    "@types/node": "26.6.2",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "promptfoo": "0.123.1",
+    "tailwindcss": "4.3.3",
+    "typescript": "7.0.2",
+    "vitest": "5.0.1"
+  }
+}
