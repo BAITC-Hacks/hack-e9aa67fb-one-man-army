@@ -1,0 +1,11 @@
+# Kept so `promptfoo.yaml` stays runnable (`pnpm exec promptfoo eval -c promptfoo.yaml`)
+# against the one HTTP route this pipeline actually exposes today. The real
+# AI-behaviour suite (grounding, injection, refusal, language, trap profiles)
+# is eval/run.mjs - see eval/README.md for why.
+
+- description: "App reports healthy and offline - a judge can run this with no API key"
+  assert:
+    - type: javascript
+      value: "output.status === 'ok'"
+    - type: javascript
+      value: "output.model.offline === true"

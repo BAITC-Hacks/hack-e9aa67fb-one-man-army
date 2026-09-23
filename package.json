@@ -15,7 +15,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:e2e": "playwright test",
-    "eval": "promptfoo eval -c promptfoo.yaml",
+    "eval": "node --experimental-transform-types --experimental-loader ./eval/lib/ts-loader.mjs eval/run.mjs",
     "verify": "bash scripts/verify.sh",
     "checkpoint": "node scripts/checkpoint.mjs",
     "demo:seed": "node scripts/demo.mjs seed",
