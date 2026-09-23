@@ -84,6 +84,11 @@ export function GradePath({
                   {t(locale, "gradePath.stepMoves")}:{" "}
                   {step.closes.map((c) => `${nameOf(c.skill_id)} ${c.from} → ${c.to}`).join(", ")}
                 </p>
+                {step.note?.kind === "previously_skipped" && (
+                  <p className="mt-1 text-xs text-[var(--color-muted)]">
+                    {tf(locale, "gradePath.stepPreviouslySkipped", { n: String(step.note.count) })}
+                  </p>
+                )}
               </li>
             ))}
           </ol>

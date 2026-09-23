@@ -201,6 +201,7 @@ const en = {
 
   "recs.noStep.LOW_FIT": "There are eligible steps, but none score well enough right now (often due to past no-shows or declines).",
 
+  "gradePath.stepPreviouslySkipped": "You left similar sessions {n} times before - no alternative format was found for this step, so skip it if the format doesn't suit you.",
   "gradePath.title": "Path to {grade}",
   "gradePath.subtitle": "A voluntary plan - not a requirement or a deadline. Follow it at whatever pace suits you.",
   "gradePath.current": "Current",
@@ -430,6 +431,7 @@ const ru: Dict = {
 
   "recs.noStep.LOW_FIT": "Есть подходящие шаги, но ни один пока не набирает нужный балл (часто из-за прошлых пропусков или отказов).",
 
+  "gradePath.stepPreviouslySkipped": "Вы уже {n} раз не завершали похожие занятия - альтернативного формата для этого шага не нашлось, поэтому смело пропустите его, если формат не подходит.",
   "gradePath.title": "Путь к грейду {grade}",
   "gradePath.subtitle": "Это добровольный план - не требование и не дедлайн. Следуйте ему в удобном для вас темпе.",
   "gradePath.current": "Текущий",
@@ -657,6 +659,7 @@ const kk: Dict = {
 
   "recs.noStep.LOW_FIT": "Қолайлы қадамдар бар, бірақ олардың ешқайсысы әзірге жеткілікті балл жинамайды (көбіне бұрынғы қатыспаулар немесе бас тартулар себебінен).",
 
+  "gradePath.stepPreviouslySkipped": "Ұқсас сабақтарды бұрын {n} рет аяқтамадыңыз - бұл қадам үшін балама формат табылмады, формат сәйкес келмесе, оны өткізіп жіберуге болады.",
   "gradePath.title": "{grade} грейдіне дейінгі жол",
   "gradePath.subtitle": "Бұл ерікті жоспар - талап немесе мерзім емес. Өзіңізге ыңғайлы қарқынмен жүріңіз.",
   "gradePath.current": "Ағымдағы",
