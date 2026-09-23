@@ -70,7 +70,7 @@ have"), quoted via `docs/requirements.md`:
 | R-07 | "No recommended step" with a reason code, honestly classified (incl. `LOW_FIT`: an eligible candidate scored ≤ 0) | `lib/domain/recommend.ts` (`classifyNoStep`, `NoStepReason`) | `tests/engine.test.ts` (fixture F-05, `LOW_FIT`/`ALL_DONE` cases) | ✅ |
 | R-08 | Beats single-factor baselines on trap profiles | `lib/rules/scoring.ts`, fixtures `data/fixtures/trap-F01..F05` | `tests/engine.test.ts` (F-01..F-05 assertions) | ✅ |
 | R-09 | Import new profiles/history via UI (HR-only), incl. `role_profiles` | `lib/data/import.ts`, `lib/data/load.ts` (overlay merge, keyed `role::grade`), `app/api/hr/import/route.ts`, `app/hr/import/page.tsx` | `tests/import.test.ts` | ✅ — HR-only, per-row validated, 5 MB/file cap, atomic overlay write, audited, no restart; uploaded `role_profiles` rows are now merged and consulted by eligibility, not just stored |
-| R-10 | Latency: UI ≤ 2 s, AI ≤ 10 s with 8 s fallback | `lib/ai/explain.ts` (`AbortSignal` timeout → template) | `tests/explain.test.ts` | ⚠️ partial — timeout/fallback exists; no dedicated timing benchmark test |
+| R-10 | Latency: UI ≤ 2 s, AI ≤ 10 s with 8 s fallback | `lib/ai/explain.ts` (`AbortSignal` timeout → template) | `tests/latency.test.ts` — measured on the operator's machine: getDataset 16.6 ms, per-employee read over all 200 kit employees p95=1.94 ms/max=9.98 ms (budget 2000 ms), `hrAggregates` 401 ms, hanging-provider fallback 227 ms (production timeout 8000 ms). Run `pnpm vitest run tests/latency.test.ts` to reproduce | ✅ |
 | R-11 | Explainability: visible trace + progress formula | `components/TraceView.tsx`, `lib/rules/engine.ts` | `tests/engine.test.ts`; visible in UI | ✅ |
 | R-15 / R-16 | Employee/HR role separation, fails closed, no cross-employee data | `lib/auth/session.ts`, route guards | `tests/authz.test.ts` | ✅ |
 | R-17 | Voluntary; dismiss without penalty | `app/api/employees/[id]/dismiss/route.ts` | `tests/trajectory.test.ts` | ✅ |
@@ -78,7 +78,7 @@ have"), quoted via `docs/requirements.md`:
 | R-12 | Single-command launch, no keys | `Dockerfile`, `docker-compose.yml`, `pnpm start:demo` | `scripts/clean-room-test.sh` | ✅ |
 | R-13 | Testable with no personal account | `MODEL_REF=mock:demo` default, demo login picker | clean-room script runs offline | ✅ |
 | R-16b | Cross-origin state-changing requests rejected | `lib/http/origin.ts` (`crossOriginViolation`, wired in `withErrorHandling`) | confirmed live: mismatched `Origin` on POST → 403, same-origin/no-`Origin` (curl) → 200 | ✅ |
-| R-16c | HR individual-profile view is audited; deny on audit-write failure | `lib/audit/hr-access.ts` (`auditHrProfileView`), called from `app/employee/[id]/page.tsx` and `app/api/employees/[id]/route.ts` | confirmed in code; HR aggregates (`app/hr/page.tsx`, `/api/hr/aggregates`) are **not** separately audited — see [Known limitations](#19-known-limitations) | ⚠️ partial |
+| R-16c | HR individual-profile and HR aggregates views are both audited; deny on audit-write failure | `lib/audit/hr-access.ts` (`auditHrProfileView`, `auditHrAggregatesView`), wired into `app/employee/[id]/page.tsx`, `app/api/employees/[id]/route.ts`, `app/hr/page.tsx`, `app/api/hr/aggregates/route.ts` | confirmed in code; both fail closed (`AUDIT_UNAVAILABLE`, 503, on audit-write failure) | ✅ |
 
 ✅ complete and tested · ⚠️ partial · ❌ not implemented
 
@@ -198,8 +198,20 @@ decision is code in `lib/rules/` and `lib/domain/`, each with a recorded trace.
   text — falls back to `lib/ai/template.ts`, and the UI badges the source
   honestly: `"llm"` for a real provider call, `"mock"` ("Demo model — offline,
   not a live AI") for the default offline mode, or the template.
-- **Offline mode**: `MODEL_REF=mock:demo` (default) uses `lib/ai/scenarios.ts`,
-  which echoes the real factors, so grounding passes identically offline.
+- **Offline mode**: `MODEL_REF=mock:demo` (default, no key needed) uses
+  `lib/ai/scenarios.ts`, which echoes the real factors, so grounding passes
+  identically offline. This is what runs in [§5](#5-main-user-scenario--procedure-for-checking-it),
+  tests, `pnpm eval` and the clean-room check.
+- **Live-model verification** (not the default; a key is required to
+  reproduce): `openai:gpt-4o-mini` served real `explain()` calls end-to-end
+  with `source: "llm"` in ~2.0–2.1 s for both `en` and `ru`, well inside the
+  10 s budget, and `pnpm eval` scored 6/9 against it — the 3 failures are
+  explained (one asserts `source === "mock"` literally, two are `ru`/`kk`
+  keyword regexes tuned to the mock template's exact wording that a
+  correctly-grounded live reply doesn't match). `openai:gpt-5-mini`
+  (reasoning model) exceeded the 8 s `EXPLAIN_TIMEOUT_MS` and correctly fell
+  back to the template — the fallback working as designed, not a bug. Full
+  transcript and reasoning: [`docs/live-llm-run.md`](docs/live-llm-run.md).
 
 | Concern | Handled by |
 | --- | --- |
@@ -226,13 +238,13 @@ decision is code in `lib/rules/` and `lib/domain/`, each with a recorded trace.
   POST/PUT/PATCH/DELETE (`lib/http/origin.ts`) — confirmed live: a POST with
   `Origin: http://evil.example` returns 403, a same-origin/no-`Origin` request
   (curl, tests) returns 200.
-- `complete`, `dismiss` and HR profile views emit `recordAudit`
-  (`lib/audit/audit.ts`). HR viewing one employee's profile is audited with
-  deny-on-audit-failure (`lib/audit/hr-access.ts`, `auditHrProfileView`),
-  wired into both the profile page (`app/employee/[id]/page.tsx`) and its API
-  route (`app/api/employees/[id]/route.ts`). **Not yet audited:** the HR
-  aggregates view (`app/hr/page.tsx`, `/api/hr/aggregates`) — see
-  [Known limitations](#19-known-limitations).
+- `complete`, `dismiss`, HR individual-profile views and the HR aggregates
+  view all emit `recordAudit` (`lib/audit/audit.ts`). Both HR views are
+  audited with deny-on-audit-failure (`lib/audit/hr-access.ts`,
+  `auditHrProfileView` and `auditHrAggregatesView`), wired into the profile
+  page/API (`app/employee/[id]/page.tsx`, `app/api/employees/[id]/route.ts`)
+  and the HR overview page/API (`app/hr/page.tsx`,
+  `app/api/hr/aggregates/route.ts`) respectively.
 - HR aggregate cells with fewer than 5 employees are suppressed (`{suppressed:true}`, `lib/domain/hr.ts`), not just hidden in the UI.
 - No leaderboards or cross-employee rankings exist as a route (case brief
   prohibition).
@@ -348,11 +360,22 @@ pnpm dev
 
 Then follow [§5](#5-main-user-scenario--procedure-for-checking-it).
 
-![Employee E0137 profile: trajectory, top recommendation with grounded rationale, and grade-transition path](docs/assets/employee-e0137.png)
+The UI uses the Halyk Bank visual language (palette and typography only — no
+logo, `app/globals.css`): a readiness progress bar on the profile header, a
+"Best next step" card, a colour legend (critical / open gap / met / info,
+each with an icon and text label, not colour alone), plain-language column
+names ("Last review", "Current (incl. completed courses)", "Match"), a
+dismissible first-visit onboarding hint, HR KPI tiles (employees covered,
+have a step, most-lagging skill, completion rate), and privacy chips on
+suppressed HR cells (`<5, hidden for privacy`).
 
-![HR dashboard: lagging skills, no-step list with reason codes, participation by event](docs/assets/hr-dashboard.png)
+![Demo login picker: choose an employee id or HR, no password](docs/assets/login.png)
 
-Both captured live from `pnpm screenshots` against the app described in
+![Employee E0137 profile: readiness bar, best-next-step card, trajectory, grounded rationale, and grade-transition path](docs/assets/employee-e0137.png)
+
+![HR dashboard: KPI tiles, lagging skills, no-step list with reason codes, participation by event](docs/assets/hr-dashboard.png)
+
+All three captured live from `pnpm screenshots` against the app described in
 [§5](#5-main-user-scenario--procedure-for-checking-it); not mockups.
 
 ## 17. Deployment
@@ -374,13 +397,14 @@ dataset — was written during the competition; commit history is the evidence.
 
 ## 19. Known limitations
 
-- **HR aggregate views are not audited.** Individual HR profile access
-  (page + API) is audited with deny-on-failure (`lib/audit/hr-access.ts`); the
-  HR aggregates view (`app/hr/page.tsx`, `/api/hr/aggregates`) is not yet
-  instrumented the same way.
-- **R-10 has no dedicated latency benchmark test.** The 8-second AI timeout and
-  deterministic-template fallback exist and are covered by
-  `tests/explain.test.ts`, but p95 response time is not separately measured.
+- **LOW_FIT recommendation behaviour is being changed as of this edit.**
+  Today, an employee whose only eligible candidates all score ≤ 0 sees no
+  card and the `LOW_FIT` reason (`lib/domain/recommend.ts`,
+  `classifyNoStep`). A change in progress will instead surface the
+  best-scoring low-fit candidate as one recommendation, flagged with an
+  honest caution, so these employees get a card rather than nothing. Verify
+  current behaviour against `lib/domain/recommend.ts` before relying on
+  either description.
 - **Out of scope by design** (`docs/architecture.md` §9): real SSO/auth, the
   manager-consent role (matrix documented in `docs/domain.md`, not built), HR
   scoring-config approval workflow, session booking, the LLM choosing/
@@ -402,7 +426,6 @@ dataset — was written during the competition; commit history is the evidence.
 | Postgres | > 200 employees or concurrent writes | swap `lib/store/jsonl.ts`, keep `getDataset()`'s interface |
 | Real identity | production pilot at Halyk | replace the demo login picker with SSO behind the same `lib/auth/session.ts` contract |
 | Manager consent flow | production pilot | the permission matrix is already documented in `docs/domain.md`; add the consent toggle and a manager route |
-| Audit HR aggregate views | before any non-demo use | apply the same `recordAudit` pattern used for individual HR profile views (`lib/audit/hr-access.ts`) to `app/hr/page.tsx` and `/api/hr/aggregates` |
 
 Module boundaries (`lib/rules/` vs `lib/domain/` vs `lib/ai/`) were chosen so
 each of these is a contained change.
