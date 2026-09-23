@@ -423,7 +423,12 @@ each with an icon and text label, not colour alone), plain-language column
 names ("Last review", "Current (incl. completed courses)", "Match"), a
 dismissible first-visit onboarding hint, HR KPI tiles (employees covered,
 have a step, most-lagging skill, completion rate), and privacy chips on
-suppressed HR cells (`<5, hidden for privacy`).
+suppressed HR cells (`<5, hidden for privacy`). The three HR tables use one
+reusable client component (`components/DataTable.tsx`): a search box
+(skills, employees or events), headers that sort ascending/descending
+(`aria-sort`), and a match count. Participation statuses are split into
+separate numeric columns, and no-step reasons are short colour-coded labels
+with the full explanation on hover.
 
 ![Demo login picker: choose an employee id or HR, no password](docs/assets/login.png)
 
