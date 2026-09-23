@@ -1,3 +1,5 @@
+> **Historical snapshot.** This is an internal mid-build review written during the competition. The findings listed here were addressed in later commits (see `git log`); the current state is described in `README.md` and `docs/EVALUATION_GUIDE.md`.
+
 # Final review, about 15:35 Astana (HEAD 3535294)
 
 This review assumes every claim is unproven until it is executed. Every row below was either run or read in code during this review. The only file changed is this one.

@@ -1,3 +1,5 @@
+> **Historical snapshot.** This is an internal mid-build review written during the competition. The findings listed here were addressed in later commits (see `git log`); the current state is described in `README.md` and `docs/EVALUATION_GUIDE.md`.
+
 # Final review 2, 15:37 Astana (HEAD ea8af94)
 
 Read-only audit. The only file changed is this one. The server ran on port 3391 with `DATA_DIR` in a scratch directory, so repo `data/` was not touched. It was killed by PID afterwards and the tree is clean.

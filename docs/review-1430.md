@@ -1,3 +1,5 @@
+> **Historical snapshot.** This is an internal mid-build review written during the competition. The findings listed here were addressed in later commits (see `git log`); the current state is described in `README.md` and `docs/EVALUATION_GUIDE.md`.
+
 # Independent review, 14:31 Astana (HEAD fe87dd5)
 
 Reviewer stance: every claim is treated as unproven until it is executed. Everything below was either run or read in code during this review.
