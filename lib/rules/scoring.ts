@@ -23,6 +23,7 @@ export const SCORING_CONFIG = {
     F3_gap_severity: 1,
     F4_career_goal: 1,
     F5_participation: -1.5,
+    F6_format_switch: 1,
     F_grade_fit: 1,
     F9_session: 0.5,
   },
@@ -75,6 +76,37 @@ export function scoreEvent(facts: ScoreFacts): { score: number; factors: Factor[
 
   const gradeFitRaw = facts.event.target_grades.includes(facts.targetGrade) ? 1 : 0.5;
   const negativeCapped = Math.min(facts.engagement.negativeCount, 3);
+
+  // F6 (docs/domain.md §3): repeated no-show/decline/drop on similar events of
+  // one format demotes a candidate in that *same* format, and favours a
+  // candidate developing the same skill in a *different* format. Both branches
+  // carry concrete numbers ({skipped, format}) into the trace so the
+  // rationale layer can cite them (never "because you skipped 3 times" -
+  // domain.md is explicit that the tone stays neutral).
+  const negByFormat = facts.engagement.negativeByFormat;
+  const candidateFormat = facts.event.format;
+  const sameFormatNegative = negByFormat[candidateFormat] ?? 0;
+  let worstOtherFormat: string | null = null;
+  let worstOtherCount = 0;
+  for (const [fmt, count] of Object.entries(negByFormat)) {
+    if (fmt === candidateFormat) continue;
+    if (count > worstOtherCount) {
+      worstOtherFormat = fmt;
+      worstOtherCount = count;
+    }
+  }
+  let formatSwitchRaw = 0;
+  let formatSwitchValues: Record<string, string | number> = {};
+  if (sameFormatNegative > 0) {
+    // Demote: this candidate repeats the format the employee keeps skipping.
+    formatSwitchRaw = -Math.min(sameFormatNegative, 3);
+    formatSwitchValues = { skipped: sameFormatNegative, format: candidateFormat };
+  } else if (worstOtherFormat && worstOtherCount > 0) {
+    // Favour: same skill, a format the employee hasn't been skipping.
+    formatSwitchRaw = 1;
+    formatSwitchValues = { skipped: worstOtherCount, format: worstOtherFormat, altFormat: candidateFormat };
+  }
+
   const hasSoonSession =
     facts.event.format === "self_paced" ||
     facts.event.upcoming_sessions.some((d) => {
@@ -122,6 +154,14 @@ export function scoreEvent(facts: ScoreFacts): { score: number; factors: Factor[
       raw: negativeCapped,
       contribution: w.F5_participation * negativeCapped,
       values: { negativeRecords: facts.engagement.negativeCount, positiveOnTime: facts.engagement.positiveOnTime },
+    },
+    {
+      kind: "participation_history",
+      code: "F6",
+      weight: w.F6_format_switch,
+      raw: formatSwitchRaw,
+      contribution: w.F6_format_switch * formatSwitchRaw,
+      values: formatSwitchValues,
     },
     {
       kind: "grade",

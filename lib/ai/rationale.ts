@@ -52,8 +52,18 @@ function lineForKind(locale: Locale, kind: FactorKind, group: Factor[]): string 
       return tf(locale, "rationale.nextLevel", { target: f.values.target ?? "", gap: f.values.largestGap ?? 0 });
     }
     case "participation_history": {
-      const f = first;
-      return tf(locale, "rationale.participation", { count: f.values.negativeRecords ?? f.raw });
+      // F6 (format-switch signal) takes precedence when it fired: it is the
+      // more actionable, neutrally-worded fact (docs/domain.md §3 F6).
+      const f6 = group.find((f) => f.code === "F6");
+      if (f6 && typeof f6.raw === "number" && f6.raw > 0) {
+        return tf(locale, "rationale.participationFormatSwitch", {
+          skipped: f6.values.skipped ?? 0,
+          format: f6.values.format ?? "",
+          altFormat: f6.values.altFormat ?? "",
+        });
+      }
+      const f5 = group.find((f) => f.code === "F5") ?? first;
+      return tf(locale, "rationale.participation", { count: f5.values.negativeRecords ?? f5.raw });
     }
     case "career_goal":
       return t(locale, "rationale.careerGoal");

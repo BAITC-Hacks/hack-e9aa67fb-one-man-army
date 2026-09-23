@@ -11,6 +11,8 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { getDataset, invalidateDataset, type Dataset } from "@/lib/data/load";
 import { parseCsv, emptyToUndefined } from "@/lib/data/csv";
 import { Employee, HistoryRow } from "@/lib/data/schemas";
+import type { Event } from "@/lib/data/schemas";
+import type { GapRow } from "@/lib/contracts";
 import { effectiveSkills, isProfileIncomplete } from "@/lib/domain/effective";
 import { engagement } from "@/lib/domain/history";
 import { recommend } from "@/lib/domain/recommend";
@@ -147,6 +149,90 @@ describe("trap profiles (R-08, N-01)", () => {
     } finally {
       SCORING_CONFIG.weights.F5_participation = savedWeight;
     }
+  });
+});
+
+describe("F6 format-switch signal (review-1430 #7, docs/domain.md §3)", () => {
+  const employee = Employee.parse({
+    employee_id: "T9010",
+    full_name: "Test Trap-Six",
+    department: "Engineering",
+    role: "Backend Engineer",
+    grade: "Middle",
+    manager_id: "E0001",
+    hire_date: "2022-02-01",
+    tenure_months: 40,
+    work_format: "office",
+    preferred_language: "en",
+    career_goal: null,
+    skills: { SK_X: 1 },
+    last_review_date: "2026-06-01",
+  });
+  const gap: GapRow = {
+    skill_id: "SK_X",
+    name: "X",
+    assessed: 1,
+    effective: 1,
+    required: 3,
+    gap: 2,
+    critical: true,
+    pendingFrom: [],
+  };
+  const baseEvent: Omit<Event, "format" | "event_id"> = {
+    title: "X workshop",
+    description: "",
+    type: "workshop",
+    duration_hours: 2,
+    mandatory: false,
+    target_roles: ["Backend Engineer"],
+    target_grades: ["Middle"],
+    develops_skills: [{ skill_id: "SK_X", gain: 1, max_level: 5 }],
+    prerequisites: {},
+    upcoming_sessions: [],
+  };
+  const offlineCandidate: Event = { ...baseEvent, event_id: "EV_OFFLINE", format: "offline" };
+  const selfPacedCandidate: Event = { ...baseEvent, event_id: "EV_SELF", format: "self_paced" };
+
+  function facts(event: Event, negativeByFormat: Record<string, number>) {
+    return {
+      employee,
+      event,
+      effective: { SK_X: 1 },
+      gaps: [gap],
+      targetGrade: "Middle" as const,
+      careerGoalSkillIds: new Set<string>(),
+      engagement: { negativeCount: 0, positiveOnTime: 0, negativeByFormat },
+      asOfDate: "2026-10-01",
+    };
+  }
+
+  it("no signal: F6 contributes 0 when there is no negative history", () => {
+    const { factors } = scoreEvent(facts(offlineCandidate, {}));
+    const f6 = factors.find((f) => f.code === "F6");
+    expect(f6?.raw).toBe(0);
+    expect(f6?.contribution).toBe(0);
+  });
+
+  it("demotes a candidate that repeats the format the employee keeps skipping, with concrete numbers in the trace", () => {
+    const { factors } = scoreEvent(facts(offlineCandidate, { offline: 3 }));
+    const f6 = factors.find((f) => f.code === "F6");
+    expect(f6?.raw).toBeLessThan(0);
+    expect(f6?.contribution).toBeLessThan(0);
+    expect(f6?.values).toEqual({ skipped: 3, format: "offline" });
+  });
+
+  it("favours an alternative-format candidate for the same skill, citing skipped count and both formats", () => {
+    const { factors } = scoreEvent(facts(selfPacedCandidate, { offline: 3 }));
+    const f6 = factors.find((f) => f.code === "F6");
+    expect(f6?.raw).toBeGreaterThan(0);
+    expect(f6?.contribution).toBeGreaterThan(0);
+    expect(f6?.values).toEqual({ skipped: 3, format: "offline", altFormat: "self_paced" });
+  });
+
+  it("net effect: the self-paced alternative outscores the repeated-offline option, all else equal", () => {
+    const offlineScore = scoreEvent(facts(offlineCandidate, { offline: 3 })).score;
+    const selfPacedScore = scoreEvent(facts(selfPacedCandidate, { offline: 3 })).score;
+    expect(selfPacedScore).toBeGreaterThan(offlineScore);
   });
 });
 
