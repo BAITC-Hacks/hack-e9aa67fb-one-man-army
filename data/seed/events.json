@@ -199,6 +199,36 @@
       ]
     },
     {
+      "event_id": "EV_016",
+      "title": "Architecture Review Mentoring",
+      "description": "Pair with a senior architect on live design reviews (demo synthetic).",
+      "type": "mentoring",
+      "format": "offline",
+      "duration_hours": 6,
+      "mandatory": false,
+      "target_roles": [
+        "Backend Engineer"
+      ],
+      "target_grades": [
+        "Middle",
+        "Senior"
+      ],
+      "develops_skills": [
+        {
+          "skill_id": "SK_SYSTEM_DESIGN",
+          "gain": 1,
+          "max_level": 4
+        }
+      ],
+      "prerequisites": {
+        "SK_SYSTEM_DESIGN": 2
+      },
+      "upcoming_sessions": [
+        "2026-10-12",
+        "2026-11-09"
+      ]
+    },
+    {
       "event_id": "EV_008",
       "title": "API Design Practicum",
       "description": "REST/GraphQL API design (demo synthetic).",
