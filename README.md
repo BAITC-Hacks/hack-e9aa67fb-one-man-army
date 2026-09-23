@@ -74,7 +74,7 @@ have"), quoted via `docs/requirements.md`:
 | R-11 | Explainability: visible trace + progress formula | `components/TraceView.tsx`, `lib/rules/engine.ts` | `tests/engine.test.ts`; visible in UI | ✅ |
 | R-15 / R-16 | Employee/HR role separation, fails closed, no cross-employee data | `lib/auth/session.ts`, route guards | `tests/authz.test.ts` | ✅ |
 | R-17 | Voluntary; dismiss without penalty | `app/api/employees/[id]/dismiss/route.ts` | `tests/trajectory.test.ts` | ✅ |
-| R-18 | UI and rationale in kk/ru/en | `lib/i18n/dict.ts` (independently written text per locale, not clones) | `tests/i18n-keys.test.ts` (key-set parity); spot-checked live for E0028 in `ru` — see [§5](#5-main-user-scenario--procedure-for-checking-it) | ✅ |
+| R-18 | UI and rationale in kk/ru/en | `lib/i18n/dict.ts` (independently written text per locale, not clones) | `tests/i18n-keys.test.ts` (key-set parity); spot-checked live for E0137 in `ru` — see [§5](#5-main-user-scenario--procedure-for-checking-it) | ✅ |
 | R-12 | Single-command launch, no keys | `Dockerfile`, `docker-compose.yml`, `pnpm start:demo` | `scripts/clean-room-test.sh` | ✅ |
 | R-13 | Testable with no personal account | `MODEL_REF=mock:demo` default, demo login picker | clean-room script runs offline | ✅ |
 | R-16b | Cross-origin state-changing requests rejected | `lib/http/origin.ts` (`crossOriginViolation`, wired in `withErrorHandling`) | confirmed live: mismatched `Origin` on POST → 403, same-origin/no-`Origin` (curl) → 200 | ✅ |
@@ -97,36 +97,45 @@ pnpm build && pnpm start &            # background; http://localhost:3000
 curl -s http://localhost:3000/api/health   # {"status":"ok",...,"model":{"ref":"mock:demo","offline":true}}
 
 curl -sc /tmp/c.txt -H 'Content-Type: application/json' \
-  -X POST -d '{"role":"employee","employeeId":"E0028"}' http://localhost:3000/api/session
-curl -sb /tmp/c.txt http://localhost:3000/api/employees/E0028/recommendations
+  -X POST -d '{"role":"employee","employeeId":"E0137"}' http://localhost:3000/api/session
+curl -sb /tmp/c.txt http://localhost:3000/api/employees/E0137/recommendations
 curl -sb /tmp/c.txt -H 'Content-Type: application/json' -X POST \
-  -d '{"event_ids":["EV_037"],"locale":"ru"}' \
-  http://localhost:3000/api/employees/E0028/explanations
+  -d '{"event_ids":["EV_006"],"locale":"ru"}' \
+  http://localhost:3000/api/employees/E0137/explanations
 kill %1                               # stop the server when done
 ```
 
-**Observed** (this run, kit dataset, `asOf` 2026-10-01): employee **E0028** =
-Backend Engineer, Middle grade. System Design: assessed 2 → effective 3 (a
-pending gain from completed event `EV_006`, dated after `last_review_date`),
-required 4 for Senior, flagged critical, gap 1. Top recommendation:
-**`EV_037` "Mentor Track"**, score 3, citing **3 distinct factor kinds**
-(`grade`: Middle→Senior; `skill_gap`: closes 1 non-critical level;
-`next_level_requirement`: largest remaining gap 1), plus the full eligibility
-rule trace. Its explanation in `ru` is 3 grounded, human-readable sentences,
-e.g. *"Ваш грейд — Middle; это мероприятие соответствует ожиданиям уровня
-Senior."*, with `"source":"mock"` — the UI badges this as **"Demo model
-(offline, not a live AI)"**, because `MODEL_REF` defaults to `mock:demo` (no
-key); setting `MODEL_REF=openai:gpt-4o-mini` or `anthropic:...` with a key
-routes the same call to a live model and the badge becomes `"llm"`.
+**Observed** (kit dataset, `asOf` 2026-10-01): employee **E0137** = Backend
+Engineer, Middle grade (target Senior). Recommendations return 3 cards:
+**`EV_006`** "Designing High-Load Systems" (offline), score 8, closing
+**2 critical** skill levels (System Design 2→3, API Design 3→4) plus one
+non-critical (Observability 2→3); **`EV_009`** "Cloud Certification Prep"
+(self_paced), score 6.5, Cloud 0→1 and CI/CD 1→2; **`EV_007`** "Architecture
+Review Circle" (online), score 6, closing the same critical System Design
+gap and flagged as a **format switch** — E0137 skipped a similar offline
+session before, so this card is offered online instead. All 3 explanations
+return `"source":"mock"` with 4–5 grounded sentences each (no template
+fallback) — the UI badges this **"Demo model (offline, not a live AI)"**,
+because `MODEL_REF` defaults to `mock:demo` (no key); setting
+`MODEL_REF=openai:gpt-4o-mini` or `anthropic:...` with a key routes the same
+call to a live model and the badge becomes `"llm"`. Honest caveat: `EV_006`
+is the event E0137 no-showed on 2026-06-22 (`activity_history` record
+`R002489`); its own rationale says a skipped/no-show record was weighed and
+a penalty is applied, and it is still the top-ranked card.
 
-Same flow in the UI: log in as **E0028** → the profile page shows the same
-gap and the same top card (**"Mentor Track"**) with an expandable trace →
-**Mark complete** moves that card's skill up by its gain, capped at
-`max_level`, and the completed step leaves the recommendation list, so the
-next eligible card takes the top slot. (Cards 2–3 are not named here:
-relevance filtering is being tightened so a card that closes no gap is
-dropped — only the top card is stable enough to document.) Completion is
-**employee-only** (`requireEmployeeSelf`); HR never completes on an
+Same flow in the UI: log in as **E0137** → the profile page shows the same
+3 cards, each with an expandable trace → **Mark complete** on `EV_006` moves
+System Design to 3, API Design to 4 and Observability to 3 (capped at
+`max_level`), and `EV_006` leaves the recommendation list. Observed result:
+the list re-ranks to `EV_009` (6.5), `EV_007` (5, still closing the critical
+System Design 3→4 gap) and `EV_036` (2) — the highest-scoring remaining card
+takes the top slot; this is what was observed on this run, not a promise
+about every profile. Only events that close a real skill gap are shown as
+recommendations at all; if none do, the reason is shown instead of an
+invented card (e.g. **E0028**, the spec's worked example, has 1 card
+"Mentor Track", then goes empty with `LOW_FIT` after completing it — see
+[§19](#19-known-limitations)). Completion is **employee-only**
+(`requireEmployeeSelf`); HR never completes on an
 employee's behalf and only sees aggregates read-only. Log out, log in as
 **HR** (no password) → `/hr` shows lagging skills (`<5`-suppressed cells),
 the no-step list with an honest reason code per employee (e.g. `LOW_FIT` —
@@ -379,10 +388,12 @@ dataset — was written during the competition; commit history is the evidence.
   RAG/embeddings, gamification, the HR event builder, .ics export, and write
   concurrency safety in the file store — acceptable for a single-demo-instance
   judged artifact.
-- **Recommendation-card relevance is being tightened.** The top card is
-  stable and documented in [§5](#5-main-user-scenario--procedure-for-checking-it);
-  cards 2–3 may currently include one that closes no real gap — an engineer
-  is actively filtering these out so a card is only shown if it closes a gap.
+- **Only events that close a real skill gap are recommended.** Some
+  employees get 1–2 cards or none (`LOW_FIT`, `ALL_DONE`), with the reason
+  shown instead of an invented step — e.g. E0028 (the spec's worked example)
+  has 1 card ("Mentor Track"), then goes empty with `LOW_FIT` after
+  completing it, even though a critical gap remains, because no eligible
+  event in the kit catalogue closes it. See [§5](#5-main-user-scenario--procedure-for-checking-it).
 
 ## 20. Future scalability
 

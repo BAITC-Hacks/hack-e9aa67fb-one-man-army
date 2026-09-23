@@ -29,37 +29,36 @@ as separate HR notifications with deadlines; the employee can't see where a
 step leads, so training gets done as a formality and voluntary turnout stays
 low even though the budget is spent — and coercion is the named cause."
 
-**0:20–1:10 — E0028's profile: effective vs assessed skill.** `/login` →
-"I am an employee" → pick **E0028** → "Continue as employee". On the profile,
-point at System Design: **assessed 2 → effective 3**, labelled as a pending
-gain from a completed event dated after the last review — before any
-recommendation is shown, this proves the engine reads history, not just the
-stale assessment field. Required 4 for Senior, flagged critical, gap 1.
+**0:20–1:10 — E0137's profile: effective vs assessed skill.** `/login` →
+"I am an employee" → pick **E0137** (Backend Engineer, Middle → Senior) →
+"Continue as employee". On the profile, point at System Design: gap to the
+Senior requirement, flagged critical.
 
-**1:10–2:20 — Top recommendation + "Why this step".** Point at the top
-recommendation card, then click **"Why this step"** to expand the trace.
-Read the ≥3 distinct factor kinds out loud (grade, skill gap, next-level
-requirement) with their numbers, and the source badge under the rationale
-text: **"Demo model (offline, not a live AI)"** — say plainly that this badge
-is honest: `MODEL_REF=mock:demo` by default, so the rationale text is a
-scripted echo of the same factor trace, not a live model call.
+**1:10–2:20 — 3 cards + "Why this step".** Point at the 3 recommendation
+cards: `EV_006` "Designing High-Load Systems" (offline, score 8, closes 2
+critical levels: System Design 2→3 and API Design 3→4, plus Observability
+2→3); `EV_009` "Cloud Certification Prep" (self-paced, 6.5); `EV_007`
+"Architecture Review Circle" (online, 6, closes the same critical System
+Design gap). Click **"Why this step"** on card 1 to expand the trace and
+read the grounded rationale out loud, and the source badge under it: **"Demo
+model (offline, not a live AI)"** — say plainly that this badge is honest:
+`MODEL_REF=mock:demo` by default, so the rationale text is a scripted echo
+of the same factor trace, not a live model call. Optional honest aside: card
+1 is an event E0137 previously no-showed; the rationale itself says a
+skipped/no-show record was weighed, and it is still the top-ranked card.
 
-**2:20–3:00 — Avoidance / format-switch signal.** Open the profile's **"Path
-to {grade}"** panel (grade-transition plan). If a step repeats a format the
-employee previously left, it's flagged inline: *"You left similar sessions
-{n} times before — no alternative format was found for this step, so skip it
-if the format doesn't suit you."* Say this is deterministic, computed from
-`activity_history` no-show/dropped counts, not modelled by the LLM. (If
-E0028's own plan has no such step this run, name it instead: fixture **T9001**
-from `data/fixtures/trap-F01`, whose avoided event — repeated no-shows on a
-public-speaking session — is demonstrably not the top pick; its top pick
-targets the critical System Design gap instead.)
+**2:20–3:00 — Format-switch signal.** Point at card 3, `EV_007`: it is
+flagged inline as a **format switch** — E0137 skipped a similar offline
+session before, so this event is offered online instead. Say this is a
+deterministic scoring factor, computed from `activity_history` no-show/
+dropped counts, not modelled by the LLM.
 
-**3:00–3:30 — Mark complete.** Click **"Mark complete"** on the top card.
-Say what actually happens: the card's skill(s) move by their gain, capped at
-`max_level`; the completed event drops out of the recommendation list; the
-next eligible card takes its place. Point at the trajectory panel updating
-below the card.
+**3:00–3:30 — Mark complete.** Click **"Mark complete"** on card 1
+(`EV_006`). Say what actually happens: System Design moves to 3, API Design
+to 4, Observability to 3 (capped at `max_level`); `EV_006` drops out of the
+recommendation list. Point at the list re-ranking to `EV_009` (6.5) and
+`EV_007` (5, still closing the critical System Design 3→4 gap) — the
+highest-scoring remaining card takes the top slot.
 
 **3:30–3:50 — Path to next grade (voluntary).** Scroll to the grade-path
 panel: "A voluntary plan — not a requirement or a deadline." Any gap no
