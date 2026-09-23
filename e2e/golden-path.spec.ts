@@ -84,7 +84,7 @@ test("golden path: E0137 assessment, top recommendation, complete, HR view", asy
   expect(topTitle).toBeTruthy();
 
   // Explanation trace: >=3 factor kinds and a source badge (mock, offline).
-  await topCard.getByRole("button", { name: "Why this step" }).click();
+  await topCard.getByRole("button", { name: "How was this chosen?" }).click();
   const factorRows = topCard.locator("table tbody tr");
   await expect(factorRows.first()).toBeVisible();
   expect(await factorRows.count()).toBeGreaterThanOrEqual(3);

@@ -8,12 +8,15 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getSession } from "@/lib/auth/session";
+import { auditHrAggregatesView } from "@/lib/audit/hr-access";
 import { getDataset } from "@/lib/data/load";
 import { hrAggregates } from "@/lib/domain/hr";
 import type { Count } from "@/lib/contracts";
 import { DEFAULT_LOCALE, isLocale, type Locale } from "@/lib/i18n/i18n";
 import { t, tf } from "@/lib/i18n/dict";
 import { RoleBar } from "@/components/RoleBar";
+import { KpiTile } from "@/components/KpiTile";
+import { Pill } from "@/components/Pill";
 
 async function readLocale(): Promise<Locale> {
   const store = await cookies();
@@ -62,7 +65,11 @@ function StatePage({ locale, title, body, showRetry }: { locale: Locale; title: 
 
 function CountCell({ value, locale }: { value: Count; locale: Locale }) {
   if (typeof value === "object") {
-    return <span className="italic text-[var(--color-muted)]">{t(locale, "hr.suppressed")}</span>;
+    return (
+      <span className="inline-flex items-center rounded-[var(--radius-pill)] bg-[var(--color-neutral-bg)] px-2 py-0.5 text-xs font-medium text-[var(--color-neutral-text)]">
+        {t(locale, "hr.suppressed")}
+      </span>
+    );
   }
   return <span className="tabular-nums">{value}</span>;
 }
@@ -81,6 +88,16 @@ export default async function HrPage() {
     return <StatePage locale={locale} title={t(locale, "error.forbidden.title")} body={t(locale, "error.forbidden.body")} />;
   }
 
+  // T5: every HR read of the aggregate analytics view is audited before any
+  // data is rendered; if the audit write fails the view is denied (fail closed).
+  try {
+    await auditHrAggregatesView(session.id);
+  } catch {
+    return (
+      <StatePage locale={locale} title={t(locale, "error.unavailable.title")} body={t(locale, "error.unavailable.body")} showRetry />
+    );
+  }
+
   let aggregates: ReturnType<typeof hrAggregates>;
   try {
     const ds = await getDataset();
@@ -90,6 +107,15 @@ export default async function HrPage() {
       <StatePage locale={locale} title={t(locale, "error.unavailable.title")} body={t(locale, "error.unavailable.body")} showRetry />
     );
   }
+
+  const withStepCount = aggregates.n - aggregates.noStep.length;
+  const withStepPercent = aggregates.n > 0 ? Math.round((withStepCount / aggregates.n) * 100) : null;
+  const mostLaggingSkill = aggregates.laggingSkills[0]?.name ?? null;
+  const voluntaryRates = aggregates.participation.filter((row) => !row.mandatory && row.completionRate !== null);
+  const voluntaryCompletion =
+    voluntaryRates.length > 0
+      ? Math.round((voluntaryRates.reduce((sum, row) => sum + (row.completionRate ?? 0), 0) / voluntaryRates.length) * 100)
+      : null;
 
   return (
     <>
@@ -106,6 +132,19 @@ export default async function HrPage() {
           >
             {t(locale, "hr.importLink")}
           </Link>
+        </section>
+
+        <section aria-label={t(locale, "hr.title")} className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <KpiTile label={t(locale, "hr.kpi.covered")} value={String(aggregates.n)} />
+          <KpiTile
+            label={t(locale, "hr.kpi.withStep")}
+            value={withStepPercent === null ? t(locale, "hr.kpi.notAvailable") : `${withStepPercent}%`}
+          />
+          <KpiTile label={t(locale, "hr.kpi.laggingSkill")} value={mostLaggingSkill ?? t(locale, "hr.kpi.notAvailable")} />
+          <KpiTile
+            label={t(locale, "hr.kpi.completion")}
+            value={voluntaryCompletion === null ? t(locale, "hr.kpi.notAvailable") : `${voluntaryCompletion}%`}
+          />
         </section>
 
         <section aria-labelledby="lagging-heading">
@@ -189,7 +228,9 @@ export default async function HrPage() {
                       </td>
                       <td className="px-3 py-2">{row.role}</td>
                       <td className="px-3 py-2">{row.grade}</td>
-                      <td className="py-2 pl-3">{t(locale, `recs.noStep.${row.reason}`)}</td>
+                      <td className="py-2 pl-3">
+                        <Pill tone="neutral">{t(locale, `recs.noStep.${row.reason}`)}</Pill>
+                      </td>
                     </tr>
                   ))}
                 </tbody>

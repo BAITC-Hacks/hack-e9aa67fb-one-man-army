@@ -1,7 +1,8 @@
-/** Assessed → effective → required skill gap table. Pure presentation. */
+/** Last review -> current -> required skill gap table. Pure presentation. */
 import type { GapRow } from "@/lib/contracts";
 import type { Locale } from "@/lib/i18n/i18n";
 import { t } from "@/lib/i18n/dict";
+import { Pill } from "./Pill";
 
 export function GapTable({ rows, locale, title }: { rows: GapRow[]; locale: Locale; title: string }) {
   if (rows.length === 0) {
@@ -61,10 +62,10 @@ export function GapTable({ rows, locale, title }: { rows: GapRow[]; locale: Loca
                 <td className="px-3 py-2 tabular-nums">{row.required}</td>
                 <td className="px-3 py-2 tabular-nums">{row.gap}</td>
                 <td className="py-2 pl-3">
-                  {row.critical && (
-                    <span className="inline-flex items-center rounded-full bg-[var(--color-accent)]/10 px-2 py-0.5 text-xs font-medium text-[var(--color-accent)]">
-                      {t(locale, "gaps.criticalYes")}
-                    </span>
+                  {row.critical ? (
+                    <Pill tone="critical">{t(locale, "gaps.criticalYes")}</Pill>
+                  ) : (
+                    <Pill tone="regular">{t(locale, "gaps.regular")}</Pill>
                   )}
                 </td>
               </tr>

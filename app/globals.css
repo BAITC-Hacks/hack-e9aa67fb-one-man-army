@@ -1,15 +1,62 @@
 @import "tailwindcss";
 
 /*
- * A restrained, institutional palette. Adjust the hues to suit the challenge,
- * but keep one accent used sparingly for the primary action - an internal
- * HR tool should read as calm and credible, not as a generated dashboard.
+ * Halyk Bank visual language (palette / typography / shape only - no logo,
+ * no trademark imagery). Institutional and calm: one accent (brand green)
+ * for the primary action, gold reserved for a secondary accent, generous
+ * whitespace. Names are kept from the original theme (--color-ink,
+ * --color-muted, --color-line, --color-accent, --color-surface,
+ * --color-canvas) so every existing `var(--color-*)` reference in the app
+ * repaints automatically; new tokens are added alongside them.
  */
 @theme {
-  --color-ink: #16202c;
-  --color-muted: #5b6b7c;
-  --color-line: #dfe5ec;
-  --color-accent: #1f5c9e;
+  --font-sans: var(--font-inter), system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  /* Text */
+  --color-ink: #1f2937; /* headings - darker than body for hierarchy */
+  --color-muted: #525252; /* body text */
+  --color-line: #f1f2f6; /* hairline borders, dividers */
+  --color-border: #d4d4d4; /* stronger borders (inputs, cards on white-on-white) */
+
+  /* Surfaces */
   --color-surface: #ffffff;
-  --color-canvas: #f6f8fa;
+  --color-canvas: #fafafa;
+
+  /* Brand */
+  --color-accent: #008060; /* UI green - primary action */
+  --color-accent-hover: #00654b;
+  --color-brand-green: #00896b; /* logo green - decorative only */
+  --color-icon-green: #2aa65c;
+  --color-gold: #faae17; /* secondary accent */
+  --color-gold-hover: #e39802;
+  --color-gold-ink: #1f2937; /* dark text on gold */
+  --color-error: #da262e;
+
+  /* Semantic tints (gap severity, status) */
+  --color-critical-bg: #fdecec;
+  --color-critical-border: #f3c6c6;
+  --color-critical-text: #a3231f;
+  --color-regular-bg: #fef3e0;
+  --color-regular-border: #f5dba3;
+  --color-regular-text: #8a5a05;
+  --color-met-bg: #e8f5ef;
+  --color-met-border: #b8e0cc;
+  --color-met-text: #146c43;
+  --color-neutral-bg: #f1f2f6;
+  --color-neutral-text: #525252;
+
+  /* Shape */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 20px;
+  --radius-pill: 9999px;
+
+  --shadow-card: 0 12px 16px rgba(0, 0, 0, 0.05);
+}
+
+@layer base {
+  ::selection {
+    background: color-mix(in srgb, var(--color-accent) 25%, transparent);
+  }
 }

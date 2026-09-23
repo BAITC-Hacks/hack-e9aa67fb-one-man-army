@@ -76,93 +76,98 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="mx-auto flex min-h-dvh max-w-md flex-col justify-center px-4 py-12">
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-xl font-semibold tracking-tight text-[var(--color-ink)]">
-          {t(locale, "login.title")}
-        </h1>
+    <main className="mx-auto flex min-h-dvh max-w-2xl flex-col justify-center px-4 py-12">
+      <div className="mb-2 flex items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight text-[var(--color-ink)]">
+            {t(locale, "login.title")}
+          </h1>
+          <p className="mt-1 text-sm text-[var(--color-muted)]">{t(locale, "app.tagline")}</p>
+        </div>
         <LangSwitch locale={locale} />
       </div>
-      <p className="mb-6 text-sm text-[var(--color-muted)]">{t(locale, "login.subtitle")}</p>
+      <p className="mt-4 mb-6 text-sm text-[var(--color-muted)]">{t(locale, "login.subtitle")}</p>
 
-      <section className="rounded-lg border border-[var(--color-line)] bg-[var(--color-surface)] p-4">
-        <h2 className="text-sm font-semibold text-[var(--color-ink)]">{t(locale, "login.employeeLabel")}</h2>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <section className="rounded-[var(--radius-lg)] border border-[var(--color-line)] bg-[var(--color-surface)] p-5 shadow-[var(--shadow-card)]">
+          <h2 className="text-sm font-semibold text-[var(--color-ink)]">{t(locale, "login.employeeLabel")}</h2>
 
-        {state === "loading" && (
-          <div className="mt-3 animate-pulse space-y-2" aria-hidden="true">
-            <div className="h-10 rounded-md bg-[var(--color-canvas)]" />
-            <div className="h-11 w-40 rounded-md bg-[var(--color-canvas)]" />
-          </div>
-        )}
-
-        {state === "empty" && (
-          <div className="mt-3 text-sm text-[var(--color-muted)]">
-            <p className="font-medium text-[var(--color-ink)]">{t(locale, "login.empty.title")}</p>
-            <p className="mt-1">{t(locale, "login.empty.body")}</p>
-          </div>
-        )}
-
-        {state === "error" && (
-          <div className="mt-3 text-sm">
-            <p className="font-medium text-red-700">{t(locale, "login.error.title")}</p>
-            <p className="mt-1 text-[var(--color-muted)]">{t(locale, "login.error.body")}</p>
-          </div>
-        )}
-
-        {state === "ready" && (
-          <form
-            className="mt-3 space-y-3"
-            onSubmit={(e) => {
-              e.preventDefault();
-              if (selected) void signIn({ role: "employee", employeeId: selected });
-            }}
-          >
-            <div>
-              <label htmlFor="employee-id" className="block text-sm text-[var(--color-muted)]">
-                {t(locale, "login.employeeSelectLabel")}
-              </label>
-              <select
-                id="employee-id"
-                value={selected}
-                onChange={(e) => setSelected(e.target.value)}
-                className="mt-1 min-h-[44px] w-full rounded-md border border-[var(--color-line)] bg-[var(--color-surface)] px-3 text-sm text-[var(--color-ink)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
-              >
-                {employees.map((emp) => (
-                  <option key={emp.employee_id} value={emp.employee_id}>
-                    {emp.employee_id} — {emp.role} ({emp.grade})
-                  </option>
-                ))}
-              </select>
-              <p className="mt-1 text-xs text-[var(--color-muted)]">{t(locale, "login.employeeSelectHint")}</p>
+          {state === "loading" && (
+            <div className="mt-3 animate-pulse space-y-2" aria-hidden="true">
+              <div className="h-10 rounded-[var(--radius-md)] bg-[var(--color-canvas)]" />
+              <div className="h-11 w-40 rounded-[var(--radius-md)] bg-[var(--color-canvas)]" />
             </div>
-            <button
-              type="submit"
-              disabled={submitting !== null}
-              className="min-h-[44px] w-full rounded-md bg-[var(--color-accent)] px-3 text-sm font-medium text-white hover:opacity-90 disabled:opacity-60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
-            >
-              {submitting === "employee" ? t(locale, "common.loading") : t(locale, "login.employeeButton")}
-            </button>
-          </form>
-        )}
-      </section>
+          )}
 
-      <div className="my-4 flex items-center gap-3 text-xs text-[var(--color-muted)]" role="separator">
-        <span className="h-px flex-1 bg-[var(--color-line)]" />
-        {t(locale, "login.hrLabel")}
-        <span className="h-px flex-1 bg-[var(--color-line)]" />
+          {state === "empty" && (
+            <div className="mt-3 text-sm text-[var(--color-muted)]">
+              <p className="font-medium text-[var(--color-ink)]">{t(locale, "login.empty.title")}</p>
+              <p className="mt-1">{t(locale, "login.empty.body")}</p>
+            </div>
+          )}
+
+          {state === "error" && (
+            <div className="mt-3 text-sm">
+              <p className="font-medium text-[var(--color-error)]">{t(locale, "login.error.title")}</p>
+              <p className="mt-1 text-[var(--color-muted)]">{t(locale, "login.error.body")}</p>
+            </div>
+          )}
+
+          {state === "ready" && (
+            <form
+              className="mt-3 space-y-3"
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (selected) void signIn({ role: "employee", employeeId: selected });
+              }}
+            >
+              <div>
+                <label htmlFor="employee-id" className="block text-sm text-[var(--color-muted)]">
+                  {t(locale, "login.employeeSelectLabel")}
+                </label>
+                <select
+                  id="employee-id"
+                  value={selected}
+                  onChange={(e) => setSelected(e.target.value)}
+                  className="mt-1 min-h-[44px] w-full rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface)] px-3 text-sm text-[var(--color-ink)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
+                >
+                  {employees.map((emp) => (
+                    <option key={emp.employee_id} value={emp.employee_id}>
+                      {emp.employee_id} — {emp.role} ({emp.grade})
+                    </option>
+                  ))}
+                </select>
+                <p className="mt-1 text-xs text-[var(--color-muted)]">{t(locale, "login.employeeSelectHint")}</p>
+              </div>
+              <button
+                type="submit"
+                disabled={submitting !== null}
+                className="min-h-[44px] w-full rounded-[var(--radius-md)] bg-[var(--color-accent)] px-3 text-sm font-medium text-white hover:bg-[var(--color-accent-hover)] disabled:opacity-60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
+              >
+                {submitting === "employee" ? t(locale, "common.loading") : t(locale, "login.employeeButton")}
+              </button>
+            </form>
+          )}
+        </section>
+
+        <section className="flex flex-col justify-between rounded-[var(--radius-lg)] border border-[var(--color-line)] bg-[var(--color-surface)] p-5 shadow-[var(--shadow-card)]">
+          <div>
+            <h2 className="text-sm font-semibold text-[var(--color-ink)]">{t(locale, "login.hrLabel")}</h2>
+            <p className="mt-1 text-xs text-[var(--color-muted)]">{t(locale, "login.employeeSelectHint")}</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => void signIn({ role: "hr" })}
+            disabled={submitting !== null}
+            className="mt-4 min-h-[44px] w-full rounded-[var(--radius-md)] bg-[var(--color-gold)] px-3 text-sm font-semibold text-[var(--color-gold-ink)] hover:bg-[var(--color-gold-hover)] disabled:opacity-60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
+          >
+            {submitting === "hr" ? t(locale, "common.loading") : t(locale, "login.hrButton")}
+          </button>
+        </section>
       </div>
 
-      <button
-        type="button"
-        onClick={() => void signIn({ role: "hr" })}
-        disabled={submitting !== null}
-        className="min-h-[44px] w-full rounded-md border border-[var(--color-line)] px-3 text-sm font-medium text-[var(--color-ink)] hover:border-[var(--color-accent)] disabled:opacity-60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
-      >
-        {submitting === "hr" ? t(locale, "common.loading") : t(locale, "login.hrButton")}
-      </button>
-
       <div aria-live="polite">
-        {submitError && <p className="mt-3 text-sm text-red-700">{t(locale, "login.error.body")}</p>}
+        {submitError && <p className="mt-3 text-sm text-[var(--color-error)]">{t(locale, "login.error.body")}</p>}
       </div>
     </main>
   );

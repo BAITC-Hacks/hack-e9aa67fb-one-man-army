@@ -19,6 +19,9 @@ import { RoleBar } from "@/components/RoleBar";
 import { GapTable } from "@/components/GapTable";
 import { RecCard } from "@/components/RecCard";
 import { GradePath } from "@/components/GradePath";
+import { ProgressBar } from "@/components/ProgressBar";
+import { Legend } from "@/components/Legend";
+import { OnboardingHint } from "@/components/OnboardingHint";
 
 async function readLocale(): Promise<Locale> {
   const store = await cookies();
@@ -185,43 +188,32 @@ export default async function EmployeePage({ params }: { params: Promise<{ id: s
     <>
       <RoleBar locale={locale} identityLabel={identityLabel} />
       <main className="mx-auto max-w-3xl space-y-8 px-4 py-8 sm:px-6">
-        <section>
+        <OnboardingHint locale={locale} />
+
+        {/* 1. Header summary: who, current -> target grade, readiness bar, plain explanation. */}
+        <section className="rounded-[var(--radius-lg)] border border-[var(--color-line)] bg-[var(--color-surface)] p-5 shadow-[var(--shadow-card)]">
           <h1 className="text-xl font-semibold tracking-tight text-[var(--color-ink)]">{employee.full_name}</h1>
           <p className="mt-1 text-sm text-[var(--color-muted)]">
             {employee.role} · {employee.grade}
-          </p>
-        </section>
-
-        <section aria-labelledby="trajectory-heading">
-          <h2 id="trajectory-heading" className="text-base font-semibold text-[var(--color-ink)]">
-            {t(locale, "employee.trajectory.title")}
-          </h2>
-          <p className="mt-2 text-sm text-[var(--color-ink)]">
-            {t(locale, "employee.trajectory.current")}: {traj.current.role} · {traj.current.grade}
             {" → "}
-            {t(locale, "employee.trajectory.target")}: {traj.target.role} · {traj.target.grade} ({targetLabel})
+            {traj.target.grade} ({targetLabel})
           </p>
-          <p className="mt-1 text-sm text-[var(--color-muted)]">
-            {t(locale, "employee.trajectory.percentMet")}: {traj.percentMet}%
+          <div className="mt-4">
+            <ProgressBar
+              percent={traj.percentMet}
+              label={tf(locale, "employee.readiness", { grade: traj.target.grade, percent: traj.percentMet })}
+            />
+          </div>
+          <p className="mt-3 text-sm text-[var(--color-muted)]">
+            {tf(locale, "employee.readinessExplain", { grade: traj.target.grade, percent: traj.percentMet })}
           </p>
         </section>
 
-        {gp ? (
-          <GradePath path={gp} locale={locale} skillNames={skillNames} />
-        ) : (
-          <section aria-labelledby="grade-path-unavailable-heading">
-            <h2 id="grade-path-unavailable-heading" className="text-base font-semibold text-[var(--color-ink)]">
-              {tf(locale, "gradePath.title", { grade: employee.grade })}
-            </h2>
-            <p className="mt-2 text-sm text-[var(--color-muted)]">{t(locale, "gradePath.unavailable")}</p>
-          </section>
-        )}
+        <div className="rounded-[var(--radius-lg)] border border-[var(--color-line)] bg-[var(--color-surface)] p-3">
+          <Legend locale={locale} />
+        </div>
 
-        <GapTable rows={traj.gaps} locale={locale} title={t(locale, "gaps.title")} />
-        {traj.currentGradeGaps.length > 0 && (
-          <GapTable rows={traj.currentGradeGaps} locale={locale} title={t(locale, "gaps.currentGradeTitle")} />
-        )}
-
+        {/* 2. Your next step: the top recommendation is visually primary. */}
         <section aria-labelledby="recs-heading">
           <h2 id="recs-heading" className="text-base font-semibold text-[var(--color-ink)]">
             {t(locale, "recs.title")}
@@ -229,7 +221,7 @@ export default async function EmployeePage({ params }: { params: Promise<{ id: s
           <p className="mt-1 text-sm text-[var(--color-muted)]">{t(locale, "recs.subtitle")}</p>
 
           {recs.recommendations.length === 0 ? (
-            <div className="mt-3 rounded-lg border border-[var(--color-line)] bg-[var(--color-surface)] p-4">
+            <div className="mt-3 rounded-[var(--radius-lg)] border border-[var(--color-line)] bg-[var(--color-surface)] p-4">
               <p className="font-medium text-[var(--color-ink)]">{t(locale, "recs.empty.title")}</p>
               <p className="mt-1 text-sm text-[var(--color-muted)]">{t(locale, "recs.empty.body")}</p>
               {recs.noStep && (
@@ -238,7 +230,7 @@ export default async function EmployeePage({ params }: { params: Promise<{ id: s
             </div>
           ) : (
             <ul className="mt-3 space-y-3">
-              {recs.recommendations.map((rec) => (
+              {recs.recommendations.map((rec, index) => (
                 <RecCard
                   key={rec.event_id}
                   rec={rec}
@@ -246,6 +238,7 @@ export default async function EmployeePage({ params }: { params: Promise<{ id: s
                   locale={locale}
                   readOnly={session.role === "hr"}
                   skillNames={skillNames}
+                  topPick={index === 0}
                 />
               ))}
             </ul>
@@ -269,6 +262,24 @@ export default async function EmployeePage({ params }: { params: Promise<{ id: s
             </details>
           )}
         </section>
+
+        {/* 3. Path to <grade>: the voluntary plan. */}
+        {gp ? (
+          <GradePath path={gp} locale={locale} skillNames={skillNames} />
+        ) : (
+          <section aria-labelledby="grade-path-unavailable-heading">
+            <h2 id="grade-path-unavailable-heading" className="text-base font-semibold text-[var(--color-ink)]">
+              {tf(locale, "gradePath.title", { grade: employee.grade })}
+            </h2>
+            <p className="mt-2 text-sm text-[var(--color-muted)]">{t(locale, "gradePath.unavailable")}</p>
+          </section>
+        )}
+
+        {/* 4. Skill gaps table. */}
+        <GapTable rows={traj.gaps} locale={locale} title={t(locale, "gaps.title")} />
+        {traj.currentGradeGaps.length > 0 && (
+          <GapTable rows={traj.currentGradeGaps} locale={locale} title={t(locale, "gaps.currentGradeTitle")} />
+        )}
       </main>
     </>
   );

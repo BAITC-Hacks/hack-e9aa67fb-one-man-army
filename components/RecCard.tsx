@@ -22,6 +22,7 @@ export function RecCard({
   locale,
   readOnly = false,
   skillNames,
+  topPick = false,
 }: {
   rec: Recommendation;
   employeeId: string;
@@ -31,6 +32,8 @@ export function RecCard({
   readOnly?: boolean;
   /** skill_id -> display name, so "Expected skill change" never shows a raw id. */
   skillNames: Record<string, string>;
+  /** The top-ranked recommendation gets a visible gold accent and badge. */
+  topPick?: boolean;
 }) {
   const router = useRouter();
   const [traceOpen, setTraceOpen] = useState(false);
@@ -93,7 +96,16 @@ export function RecCard({
   }
 
   return (
-    <li className="rounded-lg border border-[var(--color-line)] bg-[var(--color-surface)] p-4">
+    <li
+      className={`rounded-[var(--radius-lg)] border bg-[var(--color-surface)] p-4 shadow-[var(--shadow-card)] ${
+        topPick ? "border-[var(--color-gold)] border-2" : "border-[var(--color-line)]"
+      }`}
+    >
+      {topPick && (
+        <span className="mb-2 inline-flex items-center gap-1 rounded-[var(--radius-pill)] bg-[var(--color-gold)] px-2.5 py-1 text-xs font-semibold text-[var(--color-gold-ink)]">
+          {t(locale, "recs.bestNextStep")}
+        </span>
+      )}
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
           <h3 className="text-base font-semibold text-[var(--color-ink)]">{rec.title}</h3>
