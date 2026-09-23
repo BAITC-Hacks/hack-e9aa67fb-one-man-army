@@ -37,8 +37,11 @@ export default defineConfig({
     url: "http://localhost:3000/api/health",
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
-    // Pin the committed seed so local runs match a judge's clean clone (the
-    // organizer kit, when present locally, would otherwise be preferred).
-    env: { MODEL_REF: "mock:demo", DATASET_DIR: "data/seed", DATA_DIR: "data/e2e-store" },
+    // No DATASET_DIR override: the app's own default resolution
+    // (lib/data/load.ts) picks up the committed organizer kit at
+    // docs/task/career_quest_dataset/, which is what a judge's clean clone
+    // runs. DATA_DIR keeps completions/dismissals/imports isolated from any
+    // dev-server overlay.
+    env: { MODEL_REF: "mock:demo", DATA_DIR: "data/e2e-store" },
   },
 });
