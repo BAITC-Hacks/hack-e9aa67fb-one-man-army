@@ -3,10 +3,10 @@ import { cookies } from "next/headers";
 import { DEFAULT_LOCALE, isLocale } from "@/lib/i18n/i18n";
 import "./globals.css";
 
-// Replace with the real product name once the challenge is known.
 export const metadata: Metadata = {
-  title: "HackAlem submission",
-  description: "Replace with a one-sentence description of the solution.",
+  title: "Career Quest",
+  description:
+    "Explainable next-step navigator for employee development: deterministic multi-factor recommendations with a visible trace.",
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
