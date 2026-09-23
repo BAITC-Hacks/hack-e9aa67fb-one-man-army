@@ -190,7 +190,7 @@ employees.push(e0028);
 history.push(
   { record_id: `H${String(recordSeq++).padStart(5, "0")}`, employee_id: "E0028", event_id: "EV_006", date: "2026-09-08", due_date: "", status: "completed", completion_pct: 100, score: 90, feedback_rating: 5, assigned_by: "self" },
   { record_id: `H${String(recordSeq++).padStart(5, "0")}`, employee_id: "E0028", event_id: "EV_007", date: "2026-05-01", due_date: "2026-05-01", status: "no_show", completion_pct: 0, score: "", feedback_rating: "", assigned_by: "manager" },
-  { record_id: `H${String(recordSeq++).padStart(5, "0")}`, employee_id: "E0028", event_id: "EV_007", date: "2026-07-10", due_date: "", status: "completed", completion_pct: 100, score: 80, feedback_rating: 4, assigned_by: "self" },
+  { record_id: `H${String(recordSeq++).padStart(5, "0")}`, employee_id: "E0028", event_id: "EV_007", date: "2026-06-10", due_date: "", status: "completed", completion_pct: 100, score: 80, feedback_rating: 4, assigned_by: "self" },
   { record_id: `H${String(recordSeq++).padStart(5, "0")}`, employee_id: "E0028", event_id: "EV_009", date: "2026-04-02", due_date: "", status: "dropped", completion_pct: 20, score: "", feedback_rating: "", assigned_by: "manager" },
   { record_id: `H${String(recordSeq++).padStart(5, "0")}`, employee_id: "E0028", event_id: "EV_009", date: "2026-08-05", due_date: "", status: "dropped", completion_pct: 10, score: "", feedback_rating: "", assigned_by: "self" },
   { record_id: `H${String(recordSeq++).padStart(5, "0")}`, employee_id: "E0028", event_id: "EV_010", date: "2026-06-01", due_date: "", status: "dropped", completion_pct: 15, score: "", feedback_rating: "", assigned_by: "manager" },

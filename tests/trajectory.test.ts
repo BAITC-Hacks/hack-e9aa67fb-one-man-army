@@ -103,7 +103,7 @@ describe("trajectory()", () => {
 
 describe("trajectory() on the golden-path employee (E0028)", () => {
   it("SD assessed 2 -> effective 3, a critical gap vs Senior 4", async () => {
-    delete process.env.DATASET_DIR;
+    process.env.DATASET_DIR = "data/seed"; // judges run on the committed seed, not the local kit
     invalidateDataset();
     const ds = await getDataset();
     const e0028 = ds.employees.find((e) => e.employee_id === "E0028");
