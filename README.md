@@ -89,9 +89,11 @@ first, then follow these steps.
    concrete number, plus a rule pass/fail list and the score. On the seeded
    data the top pick is **"Architecture Review Mentoring"** (System Design,
    critical for Senior), not the lowest raw skill on the profile.
-4. Click **Complete** on that recommendation. **Expected:** a before → after
-   panel shows System Design moving via `min(level + gain, max_level)`, the
-   trajectory gap shrinks, and the recommendation list refreshes.
+4. Click **Mark complete** on that recommendation. **Expected:** the page
+   re-renders from the server: System Design moves 3 → 4 via
+   `min(level + gain, max_level)`, which meets the Senior requirement, so its
+   row leaves the gap table; the completed step leaves the list and the next
+   recommendation takes the top slot.
 5. Log out, log back in as **HR** (button on the login page, no password).
    `/hr` loads. **Expected:** three panels — lagging skills (counts, cells with
    fewer than 5 employees show `<5` instead of a number), employees with no

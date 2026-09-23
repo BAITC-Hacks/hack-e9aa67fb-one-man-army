@@ -97,11 +97,7 @@ interface ImportsOverlay {
   skills?: unknown[];
 }
 
-let cached: Dataset | null = null;
-
 export async function getDataset(): Promise<Dataset> {
-  if (cached) return cached;
-
   const dir = resolveDatasetDir();
   const skillsRaw = await readJsonFile(join(dir, "skills.json"));
   const employeesRaw = await readJsonFile(join(dir, "employees.json"));
@@ -167,11 +163,21 @@ export async function getDataset(): Promise<Dataset> {
   }
 
   const dataset: Dataset = { asOfDate, skills, roleProfiles, employees, events, history, dismissals };
-  cached = dataset;
   return dataset;
 }
 
-/** Clears the in-memory cache. Call after any mutation (import, completion, dismissal). */
+/**
+ * No-op kept for call-site compatibility (docs/architecture.md still calls
+ * this out as "invalidate after any mutation"). `getDataset()` used to
+ * memoize in a module-scope variable, but Next.js bundles route handlers and
+ * server components into separate chunks in production (`output: standalone`),
+ * each getting its own copy of that module-scope variable - so a completion
+ * written by the API route never invalidated the copy the page's render read
+ * from, and a just-completed skill level appeared to "not update" (observed:
+ * effective stuck at the pre-completion value after `router.refresh()`).
+ * `getDataset()` now always reads straight from disk, so there is nothing to
+ * invalidate; every reader sees the latest overlay on every call.
+ */
 export function invalidateDataset(): void {
-  cached = null;
+  // intentionally empty
 }
