@@ -214,8 +214,23 @@ const en = {
   "gradePath.stepMoves": "Moves",
   "gradePath.unresolvedTitle": "Gaps nothing in the catalogue closes yet",
   "gradePath.unresolvedBody": "no activity in the catalogue closes this yet - talk to HR",
+  "gradePath.stillOpenTitle": "Still open after these steps",
+  "gradePath.stillOpenRow": "{projected} of {required} required after these steps",
   "gradePath.unavailable": "A path can't be computed for this profile yet.",
   "gradePath.critical": "Critical",
+
+  "recs.availableLaterEmptyGroups": "Nothing is currently blocked.",
+  "recs.blockedReason.not-mandatory": "Mandatory - assigned by HR",
+  "recs.blockedReason.audience-role": "Not for your role",
+  "recs.blockedReason.audience-grade": "Not for your grade",
+  "recs.blockedReason.prereqs-met": "Prerequisite not yet met",
+  "recs.blockedReason.not-completed": "Already completed",
+  "recs.blockedReason.not-in-progress": "Already in progress",
+  "recs.blockedReason.has-session": "No upcoming session",
+  "recs.blockedReason.useful-gain": "No further gain available",
+  "recs.blockedReason.not-dismissed": "Dismissed by you",
+  "recs.blockedReason.score-threshold": "Low fit",
+  "recs.blockedCount": "{label} ({count})",
 } satisfies Record<string, string>;
 
 type Dict = { [K in keyof typeof en]: string };
@@ -428,8 +443,23 @@ const ru: Dict = {
   "gradePath.stepMoves": "Изменяет",
   "gradePath.unresolvedTitle": "Пробелы, которые пока ничего в каталоге не закрывает",
   "gradePath.unresolvedBody": "в каталоге пока нет мероприятия, закрывающего это - обратитесь в HR",
+  "gradePath.stillOpenTitle": "Остаётся открытым после этих шагов",
+  "gradePath.stillOpenRow": "{projected} из {required} требуемых после этих шагов",
   "gradePath.unavailable": "Для этого профиля пока нельзя рассчитать путь.",
   "gradePath.critical": "Критично",
+
+  "recs.availableLaterEmptyGroups": "Сейчас ничего не заблокировано.",
+  "recs.blockedReason.not-mandatory": "Обязательное - назначено HR",
+  "recs.blockedReason.audience-role": "Не для вашей роли",
+  "recs.blockedReason.audience-grade": "Не для вашего грейда",
+  "recs.blockedReason.prereqs-met": "Предварительное условие ещё не выполнено",
+  "recs.blockedReason.not-completed": "Уже пройдено",
+  "recs.blockedReason.not-in-progress": "Уже в процессе",
+  "recs.blockedReason.has-session": "Нет ближайшей сессии",
+  "recs.blockedReason.useful-gain": "Дальнейший прирост недоступен",
+  "recs.blockedReason.not-dismissed": "Отклонено вами",
+  "recs.blockedReason.score-threshold": "Низкое соответствие",
+  "recs.blockedCount": "{label} ({count})",
 };
 
 const kk: Dict = {
@@ -640,8 +670,23 @@ const kk: Dict = {
   "gradePath.stepMoves": "Өзгертеді",
   "gradePath.unresolvedTitle": "Каталогта әзірге ештеңе жаппайтын олқылықтар",
   "gradePath.unresolvedBody": "каталогта мұны жабатын іс-шара әзірге жоқ - HR-ға хабарласыңыз",
+  "gradePath.stillOpenTitle": "Осы қадамдардан кейін де ашық қалады",
+  "gradePath.stillOpenRow": "осы қадамдардан кейін талап етілетін {required}-дің {projected}-і",
   "gradePath.unavailable": "Бұл профиль үшін жол әзірге есептелмейді.",
   "gradePath.critical": "Маңызды",
+
+  "recs.availableLaterEmptyGroups": "Қазір ештеңе бұғатталмаған.",
+  "recs.blockedReason.not-mandatory": "Міндетті - HR тағайындаған",
+  "recs.blockedReason.audience-role": "Сіздің рөліңіз үшін емес",
+  "recs.blockedReason.audience-grade": "Сіздің грейдіңіз үшін емес",
+  "recs.blockedReason.prereqs-met": "Алғышарт әлі орындалмаған",
+  "recs.blockedReason.not-completed": "Аяқталды",
+  "recs.blockedReason.not-in-progress": "Қазір орындалуда",
+  "recs.blockedReason.has-session": "Жақын арада сессия жоқ",
+  "recs.blockedReason.useful-gain": "Одан әрі өсім жоқ",
+  "recs.blockedReason.not-dismissed": "Сіз бас тарттыңыз",
+  "recs.blockedReason.score-threshold": "Сәйкестігі төмен",
+  "recs.blockedCount": "{label} ({count})",
 };
 
 export const dict: Record<Locale, Record<string, string>> = {

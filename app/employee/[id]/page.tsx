@@ -159,6 +159,16 @@ export default async function EmployeePage({ params }: { params: Promise<{ id: s
     if (!(error instanceof GradePathProfileIncompleteError)) throw error;
   }
 
+  const skillNames: Record<string, string> = Object.fromEntries(ds.skills.map((s) => [s.skill_id, s.name]));
+
+  // Group blocked candidates by the rule that stopped them, so the UI shows
+  // "Not for your role (28)" instead of dozens of raw per-event rows.
+  const blockedGroups = new Map<string, number>();
+  for (const b of recs.blocked) {
+    blockedGroups.set(b.failedRule, (blockedGroups.get(b.failedRule) ?? 0) + 1);
+  }
+  const blockedGroupRows = Array.from(blockedGroups.entries()).sort((a, b) => b[1] - a[1]);
+
   const identityLabel =
     session.role === "hr"
       ? `${t(locale, "common.viewingAsHr")}: ${employee.full_name} (${id})`
@@ -197,7 +207,7 @@ export default async function EmployeePage({ params }: { params: Promise<{ id: s
         </section>
 
         {gp ? (
-          <GradePath path={gp} locale={locale} />
+          <GradePath path={gp} locale={locale} skillNames={skillNames} />
         ) : (
           <section aria-labelledby="grade-path-unavailable-heading">
             <h2 id="grade-path-unavailable-heading" className="text-base font-semibold text-[var(--color-ink)]">
@@ -235,22 +245,28 @@ export default async function EmployeePage({ params }: { params: Promise<{ id: s
                   employeeId={id}
                   locale={locale}
                   readOnly={session.role === "hr"}
+                  skillNames={skillNames}
                 />
               ))}
             </ul>
           )}
 
           {recs.blocked.length > 0 && (
-            <div className="mt-4">
-              <h3 className="text-sm font-semibold text-[var(--color-ink)]">{t(locale, "recs.availableLaterTitle")}</h3>
+            <details className="mt-4">
+              <summary className="cursor-pointer text-sm font-semibold text-[var(--color-ink)]">
+                {t(locale, "recs.availableLaterTitle")}
+              </summary>
               <ul className="mt-2 space-y-1 text-sm text-[var(--color-muted)]">
-                {recs.blocked.map((b) => (
-                  <li key={b.event_id}>
-                    {b.title} — {b.detail}
+                {blockedGroupRows.map(([reason, count]) => (
+                  <li key={reason}>
+                    {tf(locale, "recs.blockedCount", {
+                      label: t(locale, `recs.blockedReason.${reason}`),
+                      count,
+                    })}
                   </li>
                 ))}
               </ul>
-            </div>
+            </details>
           )}
         </section>
       </main>

@@ -8,8 +8,27 @@ import type { GradePathResult } from "@/lib/domain/gradePath";
 import type { Locale } from "@/lib/i18n/i18n";
 import { t, tf } from "@/lib/i18n/dict";
 
-export function GradePath({ path, locale }: { path: GradePathResult; locale: Locale }) {
+export function GradePath({
+  path,
+  locale,
+  skillNames,
+}: {
+  path: GradePathResult;
+  locale: Locale;
+  /** skill_id -> display name, so the panel never shows a raw catalogue id. */
+  skillNames: Record<string, string>;
+}) {
   const grade = path.target.grade;
+  const nameOf = (skillId: string) => skillNames[skillId] ?? skillId;
+
+  // Honest split: a gap a step partly closed (projected level rose above the
+  // baseline effective level, even if still short of the requirement) is
+  // "still open after these steps", not "nothing closes this" - the earlier
+  // version conflated the two and misrepresented steps that did help.
+  const stillOpen = path.unresolvedGaps.filter((g) => (path.projectedLevels[g.skill_id] ?? g.effective) > g.effective);
+  const noActivity = path.unresolvedGaps.filter(
+    (g) => (path.projectedLevels[g.skill_id] ?? g.effective) <= g.effective,
+  );
 
   return (
     <section aria-labelledby="grade-path-heading">
@@ -63,7 +82,7 @@ export function GradePath({ path, locale }: { path: GradePathResult; locale: Loc
                 </p>
                 <p className="mt-1 text-[var(--color-muted)]">
                   {t(locale, "gradePath.stepMoves")}:{" "}
-                  {step.closes.map((c) => `${c.skill_id} ${c.from} → ${c.to}`).join(", ")}
+                  {step.closes.map((c) => `${nameOf(c.skill_id)} ${c.from} → ${c.to}`).join(", ")}
                 </p>
               </li>
             ))}
@@ -71,11 +90,35 @@ export function GradePath({ path, locale }: { path: GradePathResult; locale: Loc
         )}
       </div>
 
-      {path.unresolvedGaps.length > 0 && (
+      {stillOpen.length > 0 && (
+        <div className="mt-4 rounded-lg border border-[var(--color-line)] bg-[var(--color-canvas)] p-3">
+          <h3 className="text-sm font-semibold text-[var(--color-ink)]">{t(locale, "gradePath.stillOpenTitle")}</h3>
+          <ul className="mt-2 space-y-1 text-sm text-[var(--color-ink)]">
+            {stillOpen.map((gap) => {
+              const projected = path.projectedLevels[gap.skill_id] ?? gap.effective;
+              return (
+                <li key={gap.skill_id}>
+                  {gap.name}
+                  {gap.critical && (
+                    <span className="ml-2 inline-flex items-center rounded-full bg-[var(--color-accent)]/10 px-2 py-0.5 text-xs font-medium text-[var(--color-accent)]">
+                      {t(locale, "gradePath.critical")}
+                    </span>
+                  )}
+                  <span className="block text-xs text-[var(--color-muted)]">
+                    {tf(locale, "gradePath.stillOpenRow", { projected, required: gap.required })}
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      )}
+
+      {noActivity.length > 0 && (
         <div className="mt-4 rounded-lg border border-[var(--color-line)] bg-[var(--color-canvas)] p-3">
           <h3 className="text-sm font-semibold text-[var(--color-ink)]">{t(locale, "gradePath.unresolvedTitle")}</h3>
           <ul className="mt-2 space-y-1 text-sm text-[var(--color-ink)]">
-            {path.unresolvedGaps.map((gap) => (
+            {noActivity.map((gap) => (
               <li key={gap.skill_id}>
                 {gap.name}
                 {gap.critical && (

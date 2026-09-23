@@ -21,6 +21,7 @@ export function RecCard({
   employeeId,
   locale,
   readOnly = false,
+  skillNames,
 }: {
   rec: Recommendation;
   employeeId: string;
@@ -28,6 +29,8 @@ export function RecCard({
   /** HR viewing another employee's profile: actions are the employee's own
    *  choice to make, not HR's - the server also rejects these with 403. */
   readOnly?: boolean;
+  /** skill_id -> display name, so "Expected skill change" never shows a raw id. */
+  skillNames: Record<string, string>;
 }) {
   const router = useRouter();
   const [traceOpen, setTraceOpen] = useState(false);
@@ -111,7 +114,9 @@ export function RecCard({
         <p className="mt-2 text-sm text-[var(--color-ink)]">
           {t(locale, "recs.expectedTitle")}:{" "}
           {rec.expected
-            .map((e) => tf(locale, "recs.expectedRow", { skill: e.skill_id, from: e.from, to: e.to, max: e.max_level }))
+            .map((e) =>
+              tf(locale, "recs.expectedRow", { skill: skillNames[e.skill_id] ?? e.skill_id, from: e.from, to: e.to, max: e.max_level }),
+            )
             .join("; ")}
         </p>
       )}
