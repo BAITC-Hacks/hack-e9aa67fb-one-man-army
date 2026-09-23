@@ -36,9 +36,38 @@ pnpm eval
 | refusal-no-colleague-comparison | refusal/no-ranking | explanation text never contains ranking/comparison language |
 | trap-f01-not-lowest-skill-heuristic | trap profile | for T9001 (SK_PUBLIC_SPEAKING=0, the numeric minimum), the top real recommendation is not the naive lowest-skill pick (EV_036) |
 
+## Run against a real provider (optional, needs a key)
+
+`eval/run.mjs` is a plain Node script - unlike the Next.js app, it does not
+auto-load `.env`. Load it explicitly with `--env-file`, and never echo the
+key:
+
+```bash
+source ~/.nvm/nvm.sh && nvm use
+MODEL_REF=openai:gpt-4o-mini node --env-file=.env --experimental-transform-types \
+  --experimental-loader ./eval/lib/ts-loader.mjs eval/run.mjs
+```
+
+Use a non-reasoning mini-class chat model (e.g. `gpt-4o-mini`), not a
+reasoning model like `gpt-5-mini` - the latter was observed to exceed the 8s
+`EXPLAIN_TIMEOUT_MS` in `lib/ai/explain.ts` and fall back to the template
+(correct behaviour under the R-10 latency budget, but not a useful live-eval
+run). This does not change the default (`MODEL_REF=mock:demo`, forced above)
+- `MODEL_REF` on the command line only overrides it for that one process, and
+`resolveModel()` fails closed with `MissingCredentialError` if the chosen
+provider's API key env var is unset. See `docs/live-llm-run.md` for the
+latest actual live run and its per-case results.
+
 ## Known gaps (not covered, disclosed rather than silently skipped)
 
 - No correctness/tool-selection cases against a chat-style router (this repo
   has no such router - the model only phrases one already-selected
   recommendation).
-- Real-provider (non-mock) run is untested here - would need an API key.
+- `grounding-mock-passes` asserts `source === "mock"` literally, so it always
+  "fails" against a real provider even when grounding itself passes - a
+  live run should read `docs/live-llm-run.md`'s per-case table, not the raw
+  N/9 count, to tell a real failure from an inherently mock-only assertion.
+- `language-ru`/`language-kk` are keyword regexes tuned to the mock
+  template's exact wording; a live model's correctly-grounded, correctly-
+  localized text can use different words and fail the regex. See
+  `docs/live-llm-run.md` for a worked example.
