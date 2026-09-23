@@ -489,9 +489,13 @@ reusable client component (`components/DataTable.tsx`): a search box
 separate numeric columns, and no-step reasons are short colour-coded labels
 with the full explanation on hover.
 
+Screenshots carry numbered callout labels that point at the main elements.
+
 ![Demo login picker: choose an employee id or HR, no password](docs/assets/login.png)
 
 ![Employee E0137 profile: readiness bar, best-next-step card, trajectory, grounded rationale, and grade-transition path](docs/assets/employee-e0137.png)
+
+![Employee with no catalogue step (E0065): AI suggestion card, labelled as AI-generated, code-written title, caution line, not from the catalogue](docs/assets/employee-ai-suggestions.png)
 
 ![HR dashboard: KPI tiles, lagging skills, no-step list with reason codes, participation by event](docs/assets/hr-dashboard.png)
 
